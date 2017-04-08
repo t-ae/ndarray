@@ -6,7 +6,7 @@ public struct NDArray {
     
     /// strides for each dimensions
     var strides: [Int]
-    /// offset of data
+    /// base offset of data
     var baseOffset: Int
     
     init(shape:[Int], strides: [Int], baseOffset: Int, data: [Float]) {
@@ -37,14 +37,6 @@ public struct NDArray {
     /// - Returns: Number of elements
     public var volume: Int {
         return shape.reduce(1, *)
-    }
-    
-    /// check if
-    /// - offset is 0
-    /// - continuous
-    /// - all data is used
-    var isNormalized: Bool {
-        return baseOffset == 0 && isContinuous && volume == data.count
     }
     
     /// check if elements are aligned continuously

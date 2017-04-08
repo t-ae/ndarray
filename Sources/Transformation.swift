@@ -28,11 +28,7 @@ extension NDArray {
         precondition(shape.map { $0 >= 0 }.all())
         precondition(self.volume == shape.reduce(1, *))
         
-        if isNormalized {
-            return NDArray(shape: shape, elements: data)
-        } else {
-            let elements = gatherElements(self)
-            return NDArray(shape: shape, elements: elements)
-        }
+        let elements = gatherElements(self)
+        return NDArray(shape: shape, elements: elements)
     }
 }

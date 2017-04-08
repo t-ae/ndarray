@@ -87,7 +87,9 @@ class MathematicTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
-            // 3.02ms in numpy
+            // In [12]: a = np.arange(10**6).reshape([10]*6).astype(float)
+            // In [13]: timeit a+a
+            // 100 loops, best of 3: 2.73 ms per loop
             _ = a + a
         }
     }
@@ -97,7 +99,10 @@ class MathematicTests: XCTestCase {
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
         measure {
-            // 12.1 ms in numpy
+            // In [14]: a = np.arange(10**6).reshape([10]*6).astype(float)
+            // In [15]: b = a.transpose()
+            // In [16]: timeit a+b
+            // 100 loops, best of 3: 13.4 ms per loop
             _ = a + b
         }
     }
@@ -106,7 +111,9 @@ class MathematicTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
-            // 2.84 ms in numpy
+            // In [17]: a = np.arange(10**6).reshape([10]*6).astype(float)
+            // In [18]: timeit (-a)
+            // 100 loops, best of 3: 2.83 ms per loop
             _ = -a
         }
     }
@@ -115,7 +122,9 @@ class MathematicTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
         measure {
-            // 2.73 ms in numpy
+            // In [19]: a = np.arange(10**6).reshape([10]*6).astype(float).transpose()
+            // In [20]: timeit (-a)
+            // 100 loops, best of 3: 2.78 ms per loop
             _ = -a
         }
     }

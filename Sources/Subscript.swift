@@ -2,7 +2,7 @@ import Foundation
 import Accelerate
 
 extension NDArray {
-        
+    
     public subscript(index: Int?...) -> NDArray {
         get {
             return get(ndarray: self, indexWithHole: index)
