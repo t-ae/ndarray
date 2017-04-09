@@ -39,6 +39,12 @@ class MathematicTests: XCTestCase {
             XCTAssertEqual(c+d, NDArray(shape: [2, 2, 2], elements: [0,  6,  3,  9,  1,  7,  4, 10]))
             XCTAssertEqual(c[1]+d, NDArray(shape: [2, 2], elements: [1, 7, 4, 10]))
         }
+        do {
+            let a = NDArray(shape: [0, 2, 2], elements: [])
+            let b = NDArray(shape: [2], elements: [1, 2])
+            
+            XCTAssertEqual(a+b, NDArray(shape: [0, 2, 2], elements: []))
+        }
     }
     
     func testNeg() {

@@ -61,7 +61,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
     let volume = arg.volume
     
     if arg.isContinuous {
-        if arg.baseOffset == 0 && volume == arg.data.count{
+        if arg.baseOffset == 0 && volume == arg.data.count {
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
                 defer { dst.deallocate(capacity: arg.data.count) }

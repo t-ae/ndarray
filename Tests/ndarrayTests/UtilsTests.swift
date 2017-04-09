@@ -10,7 +10,18 @@ class UtilsTests: XCTestCase {
             let elements = gatherElements(a)
             XCTAssertEqual(elements, [1,0,0, 0,1,0, 0,0,1])
         }
-        
+        do {
+            let a = NDArray(shape: [0, 2, 3], elements: [])
+            let elements = gatherElements(a)
+            XCTAssertEqual(elements, [])
+            let elements2 = gatherElements(a, forceUniqueReference: true)
+            XCTAssertEqual(elements2, [])
+        }
+        do {
+            let a = NDArray(shape: [0, 2, 3], elements: []).transposed()
+            let elements = gatherElements(a)
+            XCTAssertEqual(elements, [])
+        }
     }
 
     func testBroadcast() {
