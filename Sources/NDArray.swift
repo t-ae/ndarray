@@ -33,7 +33,7 @@ public struct NDArray {
         return shape.count
     }
     
-    /// ndarray volume
+    /// ndarray's volume
     /// - Returns: Number of elements
     public var volume: Int {
         return shape.reduce(1, *)

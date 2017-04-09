@@ -45,12 +45,14 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
         return 0
     }
     for (s, str) in zip(shape.reversed(), strides.reversed()) {
-        if stride == str {
+        if s == 1 {
             stridedDims += 1
+        }else if stride == str {
+            stridedDims += 1
+            stride *= s
         } else {
             break
         }
-        stride *= s
     }
     return stridedDims
 }

@@ -52,7 +52,7 @@ func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     let dstStrides = zip(newStrides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
     
     let strDims = min(stridedDims(shape: dstShape, strides: dstStrides),
-                       stridedDims(shape: newValue.shape, strides: newValue.strides))
+                      stridedDims(shape: newValue.shape, strides: newValue.strides))
     
     let majorShape = [Int](dstShape.dropLast(strDims))
     let minorShape = dstShape.suffix(strDims)

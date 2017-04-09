@@ -4,6 +4,29 @@ import XCTest
 
 class UtilsTests: XCTestCase {
     
+    func testStridedDims() {
+        do {
+            let strDims = stridedDims(shape: [2, 2, 2], strides: [4, 2, 1])
+            XCTAssertEqual(strDims, 3)
+        }
+        do {
+            let strDims = stridedDims(shape: [2, 2], strides: [4, 2])
+            XCTAssertEqual(strDims, 2)
+        }
+        do {
+            let strDims = stridedDims(shape: [2, 2], strides: [2, 4])
+            XCTAssertEqual(strDims, 1)
+        }
+        do {
+            let strDims = stridedDims(shape: [2, 2], strides: [0, 0])
+            XCTAssertEqual(strDims, 2)
+        }
+        do {
+            let strDims = stridedDims(shape: [2, 1, 2, 2], strides: [4, 0, 2, 1])
+            XCTAssertEqual(strDims, 4)
+        }
+    }
+    
     func testGather() {
         do {
             let a = NDArray.eye(3)
@@ -32,22 +55,5 @@ class UtilsTests: XCTestCase {
         
         XCTAssertEqual(lhs.strides, [3, 1, 0])
         XCTAssertEqual(rhs.strides, [0, 0, 1])
-    }
-    
-    func testA() {
-        let a = (0..<1000000).map { $0 }
-        measure {
-            _ = a.map { $0 }
-        }
-    }
-    
-    func testB() {
-        let a = (0..<1000000).map { $0 }
-        measure {
-            let p = UnsafeMutablePointer<Float>.allocate(capacity: a.count)
-            defer { p.deallocate(capacity: a.count) }
-            memcpy(p, a, a.count*MemoryLayout<Float>.size)
-            _ = Array(UnsafeBufferPointer(start: p, count: a.count))
-        }
     }
 }
