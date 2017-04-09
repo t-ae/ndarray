@@ -6,7 +6,7 @@ extension NDArray {
         return transposed(axes: axes)
     }
     
-    /// Get dimensions permutad ndarray
+    /// Get dimensions permuted ndarray
     public func transposed(axes: [Int]) -> NDArray {
         precondition(axes.sorted() == [Int](0..<self.ndim))
         var x = self

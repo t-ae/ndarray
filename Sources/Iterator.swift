@@ -20,7 +20,11 @@ public struct NDIndexIterator: IteratorProtocol {
     
     init(shape: [Int]) {
         self.shape = shape.reversed()
-        ndIndex = [Int](repeating: 0, count: shape.count)
+        if shape.contains(0) {
+            ndIndex = nil
+        } else {
+            ndIndex = [Int](repeating: 0, count: shape.count)
+        }
     }
     
     public mutating func next() -> [Int]? {

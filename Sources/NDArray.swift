@@ -41,7 +41,12 @@ public struct NDArray {
     
     /// check if elements are aligned continuously
     var isContinuous: Bool {
-        return strides == continuousStrides(shape: shape)
+        return isScalar || (strides.last == 1 && isStrided)
+    }
+    
+    /// check if whole elements are strided
+    var isStrided: Bool {
+        return ndim == stridedDims(shape: shape, strides: strides)
     }
     
     // check if elements are densely placed

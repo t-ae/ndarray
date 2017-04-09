@@ -57,8 +57,10 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
 
 /// Gather elements
 func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Float] {
+    
+    let volume = arg.volume
+    
     if arg.isContinuous {
-        let volume = arg.volume
         if arg.baseOffset == 0 && volume == arg.data.count{
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
@@ -74,8 +76,6 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
             return Array(arg.data[start..<end])
         }
     } else {
-        let volume = arg.volume
-        
         let minorDims = stridedDims(shape: arg.shape, strides: arg.strides)
         let majorShape = [Int](arg.shape.dropLast(minorDims))
         let majorStrides = [Int](arg.strides.dropLast(minorDims))
