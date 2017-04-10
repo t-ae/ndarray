@@ -1,6 +1,6 @@
 
 import XCTest
-@testable import ndarray
+@testable import NDArray
 
 class CreationTests: XCTestCase {
 

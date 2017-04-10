@@ -1,8 +1,8 @@
 import XCTest
-@testable import ndarray
+@testable import NDArray
 import Accelerate
 
-class ndarrayTests: XCTestCase {
+class NDArrayTests: XCTestCase {
     func testIsContinuous() {
         do {
             // continuous
