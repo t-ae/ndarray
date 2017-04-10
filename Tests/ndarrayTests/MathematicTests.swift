@@ -10,7 +10,7 @@ class MathematicTests: XCTestCase {
             let a: NDArray = 1
             let b: NDArray = 2
             let c = a + b
-            XCTAssertEqual(c.scalar, 3)
+            XCTAssertEqual(c.asScalar(), 3)
         }
         do {
             let a: NDArray = 1
@@ -113,6 +113,21 @@ class MathematicTests: XCTestCase {
         }
     }
     
+    func testAddPerformance3() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        let b = a.transposed()
+        let c = a.transposed(axes: [1, 2, 3, 4, 5, 0])
+        measure {
+            // In [8]: a = np.arange(10**6).reshape([10]*6).astype(float)
+            // In [9]: b = a.transpose()
+            // In [11]: c = a.transpose([1,2,3,4,5,0])
+            // In [12]: timeit b+c
+            // 100 loops, best of 3: 5.95 ms per loop
+            _ = b + c
+        }
+    }
+    
     func testNegPerformance1() {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
@@ -126,11 +141,11 @@ class MathematicTests: XCTestCase {
     
     func testNegPerformance2() {
         let shape = [10, 10, 10, 10, 10, 10]
-        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()[1]
         measure {
-            // In [19]: a = np.arange(10**6).reshape([10]*6).astype(float).transpose()
-            // In [20]: timeit (-a)
-            // 100 loops, best of 3: 2.78 ms per loop
+            // In [15]: a = np.arange(10**6).reshape([10]*6).astype(float).transpose()[1]
+            // In [16]: timeit (-a)
+            // 1000 loops, best of 3: 573 µs per loop
             _ = -a
         }
     }

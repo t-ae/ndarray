@@ -24,6 +24,7 @@ public struct NDArray {
     }
     
     func getElement(_ ndIndex: [Int]) -> Float {
+        let ndIndex = normalizeIndex(shape: shape, ndIndex: ndIndex)
         let index = indexOffset(strides: strides, ndIndex: ndIndex) + baseOffset
         return data[index]
     }

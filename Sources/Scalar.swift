@@ -10,7 +10,7 @@ extension NDArray {
     }
     
     /// get scalar value
-    var scalar: Float {
+    func asScalar() -> Float {
         precondition(isScalar)
         return data[baseOffset]
     }

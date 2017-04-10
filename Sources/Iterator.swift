@@ -46,6 +46,7 @@ public struct NDIndexIterator: IteratorProtocol {
                 }
             }
         } else if ndIndex?.isEmpty ?? false {
+            // scalar index
             // ndIndex == []
             ndIndex = nil
         }
