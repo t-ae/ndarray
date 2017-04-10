@@ -78,6 +78,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
             return Array(arg.data[start..<end])
         }
     } else {
+        // Separate scattered major shape and strided minor shape
         let minorDims = stridedDims(shape: arg.shape, strides: arg.strides)
         let majorShape = [Int](arg.shape.dropLast(minorDims))
         let majorStrides = [Int](arg.strides.dropLast(minorDims))

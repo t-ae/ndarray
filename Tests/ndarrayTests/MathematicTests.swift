@@ -149,5 +149,27 @@ class MathematicTests: XCTestCase {
             _ = -a
         }
     }
-
+    
+    func testSqrtPerformance1() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        measure {
+            // In [2]: a = np.arange(10**6).reshape([10]*6)
+            // In [3]: timeit np.sqrt(a)
+            // 100 loops, best of 3: 4.86 ms per loop
+            _ = sqrt(a)
+        }
+    }
+    
+    func testSqrtPerformance2() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()[1]
+        measure {
+            // In [4]: a = np.arange(10**6).reshape([10]*6).transpose()[1]
+            // In [5]: timeit np.sqrt(a)
+            // 1000 loops, best of 3: 824 µs per loop
+            _ = sqrt(a)
+        }
+    }
+    
 }
