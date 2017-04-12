@@ -24,8 +24,7 @@ func get(ndarray: NDArray, indexWithHole: [Int?]) -> NDArray {
     let newShape = zip(ndarray.shape, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
     let newStrides = zip(ndarray.strides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
     
-    let startNDIndex = expandedIndex.map { $0 ?? 0 }
-    let startIndex = normalizeIndex(shape: ndarray.shape, ndIndex: startNDIndex)
+    let startIndex = normalizeIndex(shape: ndarray.shape, ndIndex: expandedIndex.map { $0 ?? 0 })
     
     let newOffset = indexOffset(strides: ndarray.strides, ndIndex: startIndex) + ndarray.baseOffset
     return NDArray(shape: newShape, strides: newStrides, baseOffset: newOffset, data: ndarray.data)
