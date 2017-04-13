@@ -1,6 +1,21 @@
 
 import Accelerate
 
+/// check if elements are aligned continuously
+func isContinuous(shape: [Int], strides: [Int]) -> Bool {
+    return shape.isEmpty || (strides.last == 1 && isStrided(shape: shape, strides: strides))
+}
+
+/// check if whole elements are strided
+func isStrided(shape: [Int], strides: [Int]) -> Bool {
+    return shape.count == stridedDims(shape: shape, strides: strides)
+}
+
+// check if elements are densely placed
+func isDense(shape: [Int], strides: [Int]) -> Bool {
+    return Set(strides) == Set(continuousStrides(shape: shape))
+}
+
 /// Get continuous strides
 func continuousStrides(shape: [Int]) -> [Int] {
     guard !shape.isEmpty else {
@@ -19,22 +34,6 @@ func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
     return zip(ndIndex, strides)
         .map(*)
         .reduce(0, +)
-}
-
-/// Calculate how many dims are continuous
-func continuousDims(shape: [Int], strides: [Int]) -> Int {
-    precondition(shape.count == strides.count)
-    var continuousDims = 0
-    var stride = 1
-    for (s, str) in zip(shape.reversed(), strides.reversed()) {
-        if stride == str {
-            continuousDims += 1
-        } else {
-            break
-        }
-        stride *= s
-    }
-    return continuousDims
 }
 
 /// Calculate how many dims are strided
@@ -57,12 +56,30 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
     return stridedDims
 }
 
+func divideStridedBlock(shape: [Int], strides: [Int]) -> (outerShape: [Int], outerStrides: [Int], blockSize: Int){
+    precondition(shape.count == strides.count)
+    
+    for dims in (1...shape.count).reversed() {
+        for x in 0...shape.count-dims {
+            let blockShape = [Int](shape[x..<x+dims])
+            let blockStrides = [Int](shape[x..<x+dims])
+            if isStrided(shape: blockShape, strides: blockStrides) {
+                let outerShape = [Int](shape.prefix(upTo: x) + shape.suffix(from: x+dims))
+                let outerStrides = [Int](strides.prefix(upTo: x) + strides.suffix(from: x+dims))
+                let blockSize = blockShape.reduce(1, *)
+                return (outerShape, outerStrides, blockSize)
+            }
+        }
+    }
+    fatalError()
+}
+
 /// Gather elements
 func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Float] {
     
     let volume = arg.volume
     
-    if arg.isContinuous {
+    if isContinuous(shape: arg.shape, strides: arg.strides) {
         if arg.baseOffset == 0 && volume == arg.data.count {
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)

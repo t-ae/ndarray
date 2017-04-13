@@ -41,7 +41,7 @@ public prefix func -(arg: NDArray) -> NDArray {
 
 func neg(_ arg: NDArray) -> NDArray {
     let volume = arg.volume
-    if arg.isDense {
+    if isDense(shape: arg.shape, strides: arg.strides) {
         let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
         var dst = [Float](repeating: 0, count: volume)
         cblas_saxpy(Int32(volume), -1,
@@ -72,7 +72,7 @@ func _sqrt(_ arg: NDArray) -> NDArray {
     let volume = arg.volume
     var count = Int32(volume)
     
-    if arg.isDense {
+    if isDense(shape: arg.shape, strides: arg.strides) {
         let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }

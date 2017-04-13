@@ -39,21 +39,6 @@ public struct NDArray {
     public var volume: Int {
         return shape.reduce(1, *)
     }
-    
-    /// check if elements are aligned continuously
-    var isContinuous: Bool {
-        return isScalar || (strides.last == 1 && isStrided)
-    }
-    
-    /// check if whole elements are strided
-    var isStrided: Bool {
-        return ndim == stridedDims(shape: shape, strides: strides)
-    }
-    
-    // check if elements are densely placed
-    var isDense: Bool {
-        return Set(strides) == Set(continuousStrides(shape: shape))
-    }
 }
 
 extension NDArray: Equatable {
