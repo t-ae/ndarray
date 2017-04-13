@@ -92,7 +92,7 @@ class MathematicTests: XCTestCase {
     func testAddPerformance1() {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
-        measure {
+        measure { // 0.003sec
             // In [12]: a = np.arange(10**6).reshape([10]*6).astype(float)
             // In [13]: timeit a+a
             // 100 loops, best of 3: 2.73 ms per loop
@@ -104,7 +104,7 @@ class MathematicTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
-        measure {
+        measure { // 0.148sec
             // In [14]: a = np.arange(10**6).reshape([10]*6).astype(float)
             // In [15]: b = a.transpose()
             // In [16]: timeit a+b
@@ -118,7 +118,7 @@ class MathematicTests: XCTestCase {
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
         let c = a.transposed(axes: [1, 2, 3, 4, 5, 0])
-        measure {
+        measure { // 0.284sec
             // In [8]: a = np.arange(10**6).reshape([10]*6).astype(float)
             // In [9]: b = a.transpose()
             // In [11]: c = a.transpose([1,2,3,4,5,0])
@@ -128,7 +128,7 @@ class MathematicTests: XCTestCase {
         }
     }
     
-    func testNegPerformance1() {
+    func testNegPerformance1() { // 0.001sec
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
@@ -139,7 +139,7 @@ class MathematicTests: XCTestCase {
         }
     }
     
-    func testNegPerformance2() {
+    func testNegPerformance2() { // 0.013sec
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()[1]
         measure {
@@ -150,7 +150,7 @@ class MathematicTests: XCTestCase {
         }
     }
     
-    func testSqrtPerformance1() {
+    func testSqrtPerformance1() { // 0.002sec
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
@@ -161,7 +161,7 @@ class MathematicTests: XCTestCase {
         }
     }
     
-    func testSqrtPerformance2() {
+    func testSqrtPerformance2() { // 0.012sec
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()[1]
         measure {
