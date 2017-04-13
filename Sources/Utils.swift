@@ -56,6 +56,8 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
     return stridedDims
 }
 
+/// Find the largest block that elements are ordered and equally spaced.
+/// And return its size with the outer shape/strides to scan.
 func divideStridedBlock(shape: [Int], strides: [Int]) -> (outerShape: [Int], outerStrides: [Int], blockSize: Int){
     precondition(shape.count == strides.count)
     
