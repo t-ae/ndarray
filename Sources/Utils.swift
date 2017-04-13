@@ -56,26 +56,6 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
     return stridedDims
 }
 
-/// Find the largest block that elements are ordered and equally spaced.
-/// And return its size with the outer shape/strides to scan.
-func divideStridedBlock(shape: [Int], strides: [Int]) -> (outerShape: [Int], outerStrides: [Int], blockSize: Int){
-    precondition(shape.count == strides.count)
-    
-    for dims in (1...shape.count).reversed() {
-        for x in 0...shape.count-dims {
-            let blockShape = [Int](shape[x..<x+dims])
-            let blockStrides = [Int](shape[x..<x+dims])
-            if isStrided(shape: blockShape, strides: blockStrides) {
-                let outerShape = [Int](shape.prefix(upTo: x) + shape.suffix(from: x+dims))
-                let outerStrides = [Int](strides.prefix(upTo: x) + strides.suffix(from: x+dims))
-                let blockSize = blockShape.reduce(1, *)
-                return (outerShape, outerStrides, blockSize)
-            }
-        }
-    }
-    fatalError()
-}
-
 /// Gather elements
 func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Float] {
     
