@@ -60,7 +60,7 @@ func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
         .reduce(0, +)
 }
 
-/// get indices in row major order
+/// Get indices in row major order
 func getIndices(shape: [Int]) -> [[Int]] {
     guard !shape.isEmpty else {
         return [[]]
@@ -91,7 +91,7 @@ func getIndices(shape: [Int]) -> [[Int]] {
     return indices
 }
 
-// get offsets in row major order
+/// Gget offsets in row major order
 func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
     precondition(shape.count == strides.count)
     guard !shape.isEmpty else {
@@ -234,6 +234,18 @@ func normalizeIndex(shape: [Int], ndIndex: [Int]) -> [Int] {
     return ndIndex
 }
 
+/// Return normalized axis
+/// - Check axis is in valid range
+/// - Process minus number
+func normalizeAxis(axis: Int, ndim: Int) -> Int {
+    var axis = axis
+    if axis < 0 {
+        axis += ndim
+    }
+    precondition(axis >= 0 && axis < ndim)
+    return axis
+}
+
 extension Array where Element == Bool {
     func all() -> Bool {
         for e in self {
@@ -255,9 +267,15 @@ extension Array where Element == Bool {
 }
 
 extension Array {
-    func removed(at index: Int) -> Array {
+    func removing(at index: Int) -> Array {
         var ret = self
         ret.remove(at: index)
+        return ret
+    }
+    
+    func inserting(_ newElement: Element, at: Int) -> Array {
+        var ret = self
+        ret.insert(newElement, at: at)
         return ret
     }
 }

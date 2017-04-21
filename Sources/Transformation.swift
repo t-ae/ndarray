@@ -22,7 +22,7 @@ extension NDArray {
         
         var shape = shape
         if let arbit = shape.index(of: -1) {
-            shape[arbit] = self.volume / shape.removed(at: arbit).reduce(1, *)
+            shape[arbit] = self.volume / shape.removing(at: arbit).reduce(1, *)
         }
         
         precondition(shape.map { $0 >= 0 }.all())

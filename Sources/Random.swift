@@ -6,7 +6,7 @@ private func _uniform(low: Float = 0, high: Float = 1) -> Float {
 }
 
 extension NDArray {
-    static func uniform(low: Float = 0, high: Float = 1, shape: [Int]) -> NDArray {
+    public static func uniform(low: Float = 0, high: Float = 1, shape: [Int]) -> NDArray {
         let count = shape.reduce(1, *)
         let elements = (0..<count).map { _ in _uniform(low: low, high: high) }
         
