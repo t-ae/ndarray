@@ -3,6 +3,27 @@ import XCTest
 @testable import NDArray
 
 class ArithmeticTests: XCTestCase {
+    
+    func testNeg() {
+        do {
+            // continuous
+            let a = NDArray.range(8).reshaped([2, 2, 2])[1]
+            let b = -a
+            XCTAssertEqual(b, NDArray(shape: [2, 2], elements: [-4, -5, -6, -7]))
+        }
+        do {
+            // dense, uncontinuous
+            let a = NDArray.range(8).reshaped([2, 2, 2]).transposed()
+            let b = -a
+            XCTAssertEqual(b, NDArray(shape: [2, 2, 2], elements: [-0, -4, -2, -6, -1, -5, -3, -7]))
+        }
+        do {
+            // not dense
+            let a = NDArray.range(8).reshaped([2, 2, 2])[nil, 1]
+            let b = -a
+            XCTAssertEqual(b, NDArray(shape: [2, 2], elements: [-2, -3, -6, -7]))
+        }
+    }
 
     func testAdd() {
         do {
@@ -44,27 +65,6 @@ class ArithmeticTests: XCTestCase {
             let b = NDArray(shape: [2], elements: [1, 2])
             
             XCTAssertEqual(a+b, NDArray(shape: [0, 2, 2], elements: []))
-        }
-    }
-    
-    func testNeg() {
-        do {
-            // continuous
-            let a = NDArray.range(8).reshaped([2, 2, 2])[1]
-            let b = -a
-            XCTAssertEqual(b, NDArray(shape: [2, 2], elements: [-4, -5, -6, -7]))
-        }
-        do {
-            // dense, uncontinuous
-            let a = NDArray.range(8).reshaped([2, 2, 2]).transposed()
-            let b = -a
-            XCTAssertEqual(b, NDArray(shape: [2, 2, 2], elements: [-0, -4, -2, -6, -1, -5, -3, -7]))
-        }
-        do {
-            // not dense
-            let a = NDArray.range(8).reshaped([2, 2, 2])[nil, 1]
-            let b = -a
-            XCTAssertEqual(b, NDArray(shape: [2, 2], elements: [-2, -3, -6, -7]))
         }
     }
 }
