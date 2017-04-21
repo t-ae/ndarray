@@ -67,4 +67,13 @@ class ArithmeticTests: XCTestCase {
             XCTAssertEqual(a+b, NDArray(shape: [0, 2, 2], elements: []))
         }
     }
+    
+    func testSubtract() {
+        do {
+            let a = NDArray(shape: [2, 2], elements: [0, 1, 2, 3])
+            let b = NDArray(shape: [2], elements: [1, 4])
+            
+            XCTAssertEqual(a-b, NDArray(shape: [2, 2], elements: [-1, -3, 1, -1]))
+        }
+    }
 }

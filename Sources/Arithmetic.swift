@@ -195,7 +195,7 @@ public func +(lhs: NDArray, rhs: NDArray) -> NDArray {
 }
 
 public func -(lhs: NDArray, rhs: NDArray) -> NDArray {
-    return apply(lhs, rhs, vDSP_vsub)
+    return apply(rhs, lhs, vDSP_vsub)
 }
 
 public func *(lhs: NDArray, rhs: NDArray) -> NDArray {
@@ -203,7 +203,7 @@ public func *(lhs: NDArray, rhs: NDArray) -> NDArray {
 }
 
 public func /(lhs: NDArray, rhs: NDArray) -> NDArray {
-    return apply(lhs, rhs, vDSP_vdiv)
+    return apply(rhs, lhs, vDSP_vdiv)
 }
 
 // MARK: Util
