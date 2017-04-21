@@ -72,5 +72,7 @@ func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
         cblas_scopy(count, src, srcStride, dst, dstStride)
     }
     
-    ndarray = NDArray(shape: ndarray.shape, strides: newStrides, baseOffset: 0, data: newData)
+    ndarray.strides = newStrides
+    ndarray.baseOffset = 0
+    ndarray.data = newData
 }
