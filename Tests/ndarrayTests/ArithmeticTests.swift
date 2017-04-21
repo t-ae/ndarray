@@ -2,7 +2,7 @@
 import XCTest
 @testable import NDArray
 
-class MathematicTests: XCTestCase {
+class ArithmeticTests: XCTestCase {
 
     func testAdd() {
         do {
