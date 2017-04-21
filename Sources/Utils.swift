@@ -12,8 +12,32 @@ func isStrided(shape: [Int], strides: [Int]) -> Bool {
 }
 
 // check if elements are densely placed
+// doesn't permit minus strides
 func isDense(shape: [Int], strides: [Int]) -> Bool {
-    return Set(strides) == Set(continuousStrides(shape: shape))
+    
+    var zeros = strides.filter { $0 == 0 }.count
+    
+    let contStr = continuousStrides(shape: shape)
+    let nonzeroStr: [Int] = strides.filter({ $0 != 0 }).sorted().reversed()
+    
+    var i = 0
+    var j = 0
+    
+    while true {
+        if j == nonzeroStr.count {
+            return i+zeros == contStr.count
+        } else if i == contStr.count {
+            return false
+        } else if contStr[i] == nonzeroStr[j] {
+            i += 1
+            j += 1
+        } else if zeros > 0 {
+            i += 1
+            zeros -= 1
+        } else {
+            return false
+        }
+    }
 }
 
 /// Get continuous strides

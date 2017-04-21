@@ -4,6 +4,34 @@ import XCTest
 
 class UtilsTests: XCTestCase {
     
+    func testIsDense() {
+        do {
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 4, 1]))
+        }
+        do {
+            // permute
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 1, 4]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 4, 12]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 12, 4]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [4, 1, 12]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [4, 12, 1]))
+        }
+        do {
+            // contain 0
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 4, 1]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 4, 0]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 0, 1]))
+            
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 0, 4]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 12, 0]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 12, 4]))
+            
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 0, 4]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 0, 0]))
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 12, 0]))
+        }
+    }
+    
     func testStridedDims() {
         do {
             let strDims = stridedDims(shape: [2, 2, 2], strides: [4, 2, 1])
