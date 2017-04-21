@@ -61,7 +61,9 @@ func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     let srcStride = Int32(newValue.strides.last ?? 0)
     let dstStride = Int32(dstStrides.last ?? 0)
     
-    for majorIndex in NDIndexSequence(shape: majorShape) {
+    let majorIndices = getIndices(shape: majorShape)
+    
+    for majorIndex in majorIndices {
         let ndIndex = majorIndex + minorZeros
         let src = UnsafePointer(newValue.data)
             .advanced(by: indexOffset(strides: newValue.strides, ndIndex: ndIndex) + newValue.baseOffset)
