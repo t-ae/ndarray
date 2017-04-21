@@ -124,6 +124,18 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
     return stridedDims
 }
 
+/// Calculate how many dims are dense
+func denseDims(shape: [Int], strides: [Int]) -> Int {
+    precondition(shape.count == strides.count)
+    
+    for i in 0..<shape.count {
+        if Set(strides.dropFirst(i)) == Set(continuousStrides(shape: [Int](shape.dropFirst(i)))) {
+            return shape.count-i
+        }
+    }
+    return 1
+}
+
 /// Gather elements
 func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Float] {
     
@@ -149,7 +161,6 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let minorDims = stridedDims(shape: arg.shape, strides: arg.strides)
         let majorShape = [Int](arg.shape.dropLast(minorDims))
         let majorStrides = [Int](arg.strides.dropLast(minorDims))
-        let minorZeros = [Int](repeating: 0, count: minorDims)
         
         let stride = Int32(arg.strides.last!)
         let count = arg.shape.suffix(minorDims).reduce(1, *)

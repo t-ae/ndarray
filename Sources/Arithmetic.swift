@@ -1,12 +1,59 @@
 import Foundation
 import Accelerate
 
-// MARK: - add
-public func +(lhs: NDArray, rhs: NDArray) -> NDArray {
-    return add(lhs, rhs)
+// MARK: - negate
+public prefix func -(arg: NDArray) -> NDArray {
+    return neg(arg)
 }
 
-func add(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
+func neg(_ arg: NDArray) -> NDArray {
+    let volume = arg.volume
+    if isDense(shape: arg.shape, strides: arg.strides) {
+        let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
+        var dst = [Float](repeating: 0, count: volume)
+        cblas_saxpy(Int32(volume), -1,
+                    src, 1,
+                    &dst, 1)
+        return NDArray(shape: arg.shape,
+                       strides: arg.strides,
+                       baseOffset: 0,
+                       data: dst)
+    } else {
+        let elements = gatherElements(arg)
+        
+        var dst = [Float](repeating: 0, count: volume)
+        cblas_saxpy(Int32(volume), -1,
+                    elements, 1,
+                    &dst, 1)
+        return NDArray(shape: arg.shape, elements: dst)
+    }
+}
+
+// MARK: - Binary
+public func +(lhs: NDArray, rhs: NDArray) -> NDArray {
+    return apply(lhs, rhs, vDSP_vadd)
+}
+
+public func -(lhs: NDArray, rhs: NDArray) -> NDArray {
+    return apply(lhs, rhs, vDSP_vsub)
+}
+
+public func *(lhs: NDArray, rhs: NDArray) -> NDArray {
+    return apply(lhs, rhs, vDSP_vmul)
+}
+
+public func /(lhs: NDArray, rhs: NDArray) -> NDArray {
+    return apply(lhs, rhs, vDSP_vdiv)
+}
+
+// MARK: Util
+typealias vDSP_binary_func = (UnsafePointer<Float>, vDSP_Stride,
+    UnsafePointer<Float>, vDSP_Stride,
+    UnsafeMutablePointer<Float>, vDSP_Stride, vDSP_Length) -> Void
+
+func apply(_ lhs: NDArray,
+           _ rhs: NDArray,
+           _ vDSPfunc: vDSP_binary_func) -> NDArray {
     let (lhs, rhs) = broadcast(lhs, rhs)
     
     let strDims = min(stridedDims(shape: lhs.shape, strides: lhs.strides),
@@ -43,40 +90,13 @@ func add(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
             let lSrc = UnsafePointer(lhs.data).advanced(by: lOffset)
             let rOffset = rOffsets[oi] + rhs.baseOffset
             let rSrc = UnsafePointer(rhs.data).advanced(by: rOffset)
-            vDSP_vadd(lSrc, vDSP_Stride(lStride),
-                      rSrc, vDSP_Stride(rStride),
-                      dstPtr, 1, vDSP_Length(count))
+            vDSPfunc(lSrc, vDSP_Stride(lStride),
+                     rSrc, vDSP_Stride(rStride),
+                     dstPtr, 1, vDSP_Length(count))
+            
             dstPtr += count
         }
     }
     return NDArray(shape: lhs.shape,
                    elements: [Float](UnsafeBufferPointer(start: dst, count: lhs.volume)))
-}
-
-// MARK: - negate
-public prefix func -(arg: NDArray) -> NDArray {
-    return neg(arg)
-}
-
-func neg(_ arg: NDArray) -> NDArray {
-    let volume = arg.volume
-    if isDense(shape: arg.shape, strides: arg.strides) {
-        let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
-        var dst = [Float](repeating: 0, count: volume)
-        cblas_saxpy(Int32(volume), -1,
-                    src, 1,
-                    &dst, 1)
-        return NDArray(shape: arg.shape,
-                       strides: arg.strides,
-                       baseOffset: 0,
-                       data: dst)
-    } else {
-        let elements = gatherElements(arg)
-        
-        var dst = [Float](repeating: 0, count: volume)
-        cblas_saxpy(Int32(volume), -1,
-                    elements, 1,
-                    &dst, 1)
-        return NDArray(shape: arg.shape, elements: dst)
-    }
 }
