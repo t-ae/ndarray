@@ -36,6 +36,74 @@ func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
         .reduce(0, +)
 }
 
+/// get indices in row major order
+func getIndices(shape: [Int]) -> [[Int]] {
+    guard !shape.isEmpty else {
+        return [[]]
+    }
+    guard !shape.contains(0) else {
+        return []
+    }
+    
+    var index = [Int](repeating: 0, count: shape.count)
+    var indices: [[Int]] = []
+    let last = index.count - 1
+    
+    while true {
+        indices.append(index)
+        index[last] += 1
+        for i in 0..<last {
+            guard index[last-i] >= shape[last-i] else {
+                break
+            }
+            index[last-i] = 0
+            index[last-i-1] += 1
+        }
+        if index[0] == shape[0] {
+            break
+        }
+    }
+    
+    return indices
+}
+
+// get offsets in row major order
+func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
+    precondition(shape.count == strides.count)
+    guard !shape.isEmpty else {
+        return [0]
+    }
+    guard !shape.contains(0) else {
+        return []
+    }
+    
+    var index = [Int](repeating: 0, count: shape.count)
+    var offset = 0
+    var offsets = [Int]()
+    let last = index.count - 1
+    
+    while true {
+        offsets.append(offset)
+        index[last] += 1
+        offset += strides[last]
+        
+        for i in 0..<last {
+            guard index[last-i] >= shape[last-i] else {
+                break
+            }
+            index[last-i] = 0
+            offset -= strides[last-i]*shape[last-i]
+            index[last-i-1] += 1
+            offset += strides[last-i-1]
+        }
+        if index[0] == shape[0] {
+            break
+        }
+    }
+    
+    return offsets
+}
+
 /// Calculate how many dims are strided
 func stridedDims(shape: [Int], strides: [Int]) -> Int {
     precondition(shape.count == strides.count)
@@ -89,14 +157,26 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
-        var dstPtr = dst
-        for majorIndex in NDIndexSequence(shape: majorShape) {
-            let offset = indexOffset(strides: majorStrides, ndIndex: majorIndex) + arg.baseOffset
-            let src = UnsafePointer(arg.data) + offset
+        let offsets = getOffsets(shape: majorShape, strides: majorStrides)
+        let numProc = ProcessInfo.processInfo.activeProcessorCount
+        let blockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+        
+        DispatchQueue.concurrentPerform(iterations: numProc) { i in
+            var dstPtr = dst.advanced(by: i*blockSize*count)
+            let end = i*blockSize + min(blockSize, offsets.count - i*blockSize)
             
-            cblas_scopy(Int32(count), src, stride, dstPtr, 1)
-            dstPtr += count
+            guard i*blockSize < end else { // can be empty
+                return
+            }
+            for oi in i*blockSize..<end {
+                let offset = offsets[oi] + arg.baseOffset
+                let src = UnsafePointer(arg.data).advanced(by: offset)
+                
+                cblas_scopy(Int32(count), src, stride, dstPtr, 1)
+                dstPtr += count
+            }
         }
+        
         return [Float](UnsafeBufferPointer(start: dst, count: volume))
     }
 }
