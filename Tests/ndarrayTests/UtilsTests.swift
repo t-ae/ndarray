@@ -29,6 +29,8 @@ class UtilsTests: XCTestCase {
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 0, 4]))
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 0, 0]))
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 12, 0]))
+            
+            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 0, 0]))
         }
     }
     

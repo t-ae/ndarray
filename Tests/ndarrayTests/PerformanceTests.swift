@@ -5,6 +5,7 @@ import XCTest
 class PerformanceTests: XCTestCase {
 
     func testAddPerformance1() {
+        // two continuous arrays
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure { // 0.003sec
@@ -16,6 +17,7 @@ class PerformanceTests: XCTestCase {
     }
     
     func testAddPerformance2() {
+        // continuous + uncontinuous
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
@@ -29,6 +31,7 @@ class PerformanceTests: XCTestCase {
     }
     
     func testAddPerformance3() {
+        // unconrinuous + uncontinuous
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
@@ -43,7 +46,8 @@ class PerformanceTests: XCTestCase {
         }
     }
     
-    func testNegPerformance1() { // 0.001sec
+    func testNegPerformance1() {
+        // dense
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
@@ -54,7 +58,8 @@ class PerformanceTests: XCTestCase {
         }
     }
     
-    func testNegPerformance2() { // 0.013sec
+    func testNegPerformance2() {
+        // not dense
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()[1]
         measure {
@@ -65,7 +70,8 @@ class PerformanceTests: XCTestCase {
         }
     }
     
-    func testSqrtPerformance1() { // 0.002sec
+    func testSqrtPerformance1() {
+        // dense
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
@@ -76,7 +82,8 @@ class PerformanceTests: XCTestCase {
         }
     }
     
-    func testSqrtPerformance2() { // 0.012sec
+    func testSqrtPerformance2() {
+        // not dense
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()[1]
         measure {
