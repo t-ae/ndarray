@@ -77,19 +77,20 @@ public func tanh(_ arg: NDArray) -> NDArray {
 private typealias vvUnaryFunc = (UnsafeMutablePointer<Float>, UnsafePointer<Float>, UnsafePointer<Int32>) -> Void
 
 private func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
-    let volume = arg.volume
-    var count = Int32(volume)
     
     if isDense(shape: arg.shape, strides: arg.strides) {
+        var count = Int32(arg.data.count)
         let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
-        let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
-        defer { dst.deallocate(capacity: volume) }
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
+        defer { dst.deallocate(capacity: arg.data.count) }
         vvfunc(dst, src, &count)
         return NDArray(shape: arg.shape,
                        strides: arg.strides,
                        baseOffset: 0,
-                       data: [Float](UnsafeBufferPointer(start: dst, count: volume)))
+                       data: [Float](UnsafeBufferPointer(start: dst, count: arg.data.count)))
     } else {
+        let volume = arg.volume
+        var count = Int32(volume)
         let elements = gatherElements(arg)
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
