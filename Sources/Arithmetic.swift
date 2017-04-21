@@ -7,25 +7,49 @@ public prefix func -(arg: NDArray) -> NDArray {
 }
 
 func neg(_ arg: NDArray) -> NDArray {
-    let volume = arg.volume
     if isDense(shape: arg.shape, strides: arg.strides) {
         let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
-        var dst = [Float](repeating: 0, count: volume)
-        cblas_saxpy(Int32(volume), -1,
-                    src, 1,
-                    &dst, 1)
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
+        defer { dst.deallocate(capacity: arg.data.count) }
+        vDSP_vneg(src, 1, dst, 1, vDSP_Length(arg.data.count))
         return NDArray(shape: arg.shape,
                        strides: arg.strides,
                        baseOffset: 0,
-                       data: dst)
+                       data: [Float](UnsafeBufferPointer(start: dst, count: arg.data.count)))
     } else {
-        let elements = gatherElements(arg)
+        // Separate scattered major shape and strided minor shape
+        let volume = arg.volume
+        let minorDims = stridedDims(shape: arg.shape, strides: arg.strides)
+        let majorShape = [Int](arg.shape.dropLast(minorDims))
+        let majorStrides = [Int](arg.strides.dropLast(minorDims))
         
-        var dst = [Float](repeating: 0, count: volume)
-        cblas_saxpy(Int32(volume), -1,
-                    elements, 1,
-                    &dst, 1)
-        return NDArray(shape: arg.shape, elements: dst)
+        let stride = arg.strides.last!
+        let count = arg.shape.suffix(minorDims).reduce(1, *)
+        
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
+        defer { dst.deallocate(capacity: volume) }
+        
+        let offsets = getOffsets(shape: majorShape, strides: majorStrides)
+        let numProc = ProcessInfo.processInfo.activeProcessorCount
+        let blockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+        
+        DispatchQueue.concurrentPerform(iterations: numProc) { i in
+            var dstPtr = dst.advanced(by: i*blockSize*count)
+            let end = i*blockSize + min(blockSize, offsets.count - i*blockSize)
+            
+            guard i*blockSize < end else { // can be empty
+                return
+            }
+            for oi in i*blockSize..<end {
+                let offset = offsets[oi] + arg.baseOffset
+                let src = UnsafePointer(arg.data).advanced(by: offset)
+                
+                vDSP_vneg(src, stride, dstPtr, 1, vDSP_Length(count))
+                dstPtr += count
+            }
+        }
+        
+        return NDArray(shape: arg.shape, elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
     }
 }
 
