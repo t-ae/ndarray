@@ -7,13 +7,13 @@ class ArithmeticTests: XCTestCase {
     func testAdd() {
         do {
             // scalar + scalar
-            let a: NDArray = 1
-            let b: NDArray = 2
+            let a: NDArray = NDArray(scalar: 1)
+            let b: NDArray = NDArray(scalar: 2)
             let c = a + b
             XCTAssertEqual(c.asScalar(), 3)
         }
         do {
-            let a: NDArray = 1
+            let a: NDArray = NDArray(scalar: 1)
             let b = NDArray.range(0..<24).reshaped([2, 3, 4])
             let c = a + b
             XCTAssertEqual(c, NDArray(shape: [2,3,4],

@@ -12,7 +12,7 @@ class SubscriptTests: XCTestCase {
             
             XCTAssertEqual(a[1, 1], NDArray(shape: [3], elements: [12, 13, 14]))
             
-            XCTAssertEqual(a[1, 1, 1], 13)
+            XCTAssertEqual(a[1, 1, 1].asScalar(), 13)
             
             XCTAssertEqual(a[nil, 1], NDArray(shape: [3, 3], elements: [3, 4, 5, 12, 13 ,14, 21, 22, 23]))
         }
@@ -24,7 +24,7 @@ class SubscriptTests: XCTestCase {
             
             XCTAssertEqual(a[1, 1], NDArray(shape: [3], elements: [4, 13, 22]))
             
-            XCTAssertEqual(a[1, 1, 1], 13)
+            XCTAssertEqual(a[1, 1, 1].asScalar(), 13)
             
             XCTAssertEqual(a[nil, 1], NDArray(shape: [3, 3], elements:[3, 12, 21, 4, 13, 22, 5, 14, 23]))
         }
@@ -34,7 +34,7 @@ class SubscriptTests: XCTestCase {
             
             XCTAssertEqual(a[1], NDArray(shape: [3], elements: [4, 13, 22]))
             
-            XCTAssertEqual(a[1, 1], 13)
+            XCTAssertEqual(a[1, 1].asScalar(), 13)
             
             XCTAssertEqual(a[nil, 1], NDArray(shape: [3], elements: [10, 13, 16]))
 
@@ -86,7 +86,7 @@ class SubscriptTests: XCTestCase {
         do {
             // continuous and uncontinuous
             var a = NDArray.range(0..<24).reshaped([2, 3, 4])
-            let zero: NDArray = 0
+            let zero: NDArray = NDArray(scalar: 0)
             a[1, 1, 2] = zero
             XCTAssertEqual(a, NDArray(shape: [2, 3, 4],
                                       elements: [ 0,  1,  2,  3,
@@ -116,7 +116,7 @@ class SubscriptTests: XCTestCase {
     
     func testHoge() {
         var a = NDArray.range(0..<8).reshaped([2,2,2])
-        let zero: NDArray = 0
+        let zero: NDArray = NDArray(scalar: 0)
         a[1] = zero
     }
 }

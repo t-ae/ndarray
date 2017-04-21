@@ -15,15 +15,3 @@ extension NDArray {
         return data[baseOffset]
     }
 }
-
-extension NDArray: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
-    public typealias IntegerLiteralType = Int
-    public init(integerLiteral value: Int) {
-        self.init(shape: [], elements: [Float(value)])
-    }
-    
-    public typealias FloatLiteralType = Float
-    public init(floatLiteral value: Float) {
-        self.init(shape: [], elements: [value])
-    }
-}
