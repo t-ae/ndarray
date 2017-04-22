@@ -38,17 +38,17 @@ extension NDArray {
     
     public static func range(_ range: CountableRange<Int>) -> NDArray {
         let elements = range.map { Float($0) }
-        return NDArray(shape: [elements.count], elements: elements)
+        return NDArray(elements)
     }
     
     public static func stride(from: Float, to: Float, by: Float = 1) -> NDArray {
         let elements = [Float](Swift.stride(from: from, to: to, by: by))
-        return NDArray(shape: [elements.count], elements: elements)
+        return NDArray(elements)
     }
     
     public static func linspace(low: Float, high: Float, count: Int) -> NDArray {
         let elements = (0..<count).map { v -> Float in low + (high-low)*Float(v)/Float(count-1) }
-        return NDArray(shape: [count], elements: elements)
+        return NDArray(elements)
     }
 }
 
