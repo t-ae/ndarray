@@ -1,5 +1,6 @@
 
 import XCTest
+@testable import NDArray
 
 func XCTAssertEqualWithAccuracy(_ expression1: NDArray, _ expression2: NDArray, accuracy: Float) {
     XCTAssertEqual(expression1.shape, expression2.shape)
