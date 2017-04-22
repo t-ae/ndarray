@@ -1,6 +1,6 @@
 
 import XCTest
-@testable import NDArray
+import NDArray
 
 class GradientDescentTests: XCTestCase {
 
@@ -42,7 +42,7 @@ class GradientDescentTests: XCTestCase {
         }
         
         print("\nanswer")
-        print(theta)
+        print("theta: \(theta)")
         let distance = sum(theta * features, along: 1) - ys
         let loss = mean(distance**2, along: 0) / 2
         print("loss: \(loss.asScalar())")

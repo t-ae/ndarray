@@ -5,12 +5,12 @@ extension NDArray {
     }
     
     /// check if this ndarray is scalar
-    var isScalar: Bool {
+    public var isScalar: Bool {
         return self.shape.isEmpty
     }
     
     /// get scalar value
-    func asScalar() -> Float {
+    public func asScalar() -> Float {
         precondition(isScalar)
         return data[baseOffset]
     }
