@@ -24,5 +24,12 @@ class FloatingPointFunctionsTests: XCTestCase {
             XCTAssertEqual(b, NDArray(shape: [2, 2], elements: [2, 3, 6, 7].map(sqrtf)))
         }
     }
+    
+    func testAbs() {
+        do {
+            let a = NDArray([[-1, -2], [-3, 4]])
+            XCTAssertEqual(abs(a), NDArray([[1, 2], [3, 4]]))
+        }
+    }
 
 }

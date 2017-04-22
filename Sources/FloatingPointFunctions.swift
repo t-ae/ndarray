@@ -13,6 +13,10 @@ public func round(_ arg: NDArray) -> NDArray {
     return apply(arg, vvnintf)
 }
 
+public func abs(_ arg: NDArray) -> NDArray {
+    return apply(arg, vvfabsf)
+}
+
 public func sqrt(_ arg: NDArray) -> NDArray {
     return apply(arg, vvsqrtf)
 }
