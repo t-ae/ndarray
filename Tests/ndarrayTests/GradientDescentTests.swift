@@ -6,6 +6,7 @@ class GradientDescentTests: XCTestCase {
 
     func testGradientDescent() {
         // y = 0.3*x^2 + 0.2*x + 0.1
+        let start = Date()
         
         let xs = NDArray.linspace(low: -1, high: 1, count: 300).reshaped([-1, 1])
         
@@ -46,9 +47,8 @@ class GradientDescentTests: XCTestCase {
         let distance = sum(theta * features, along: 1) - ys
         let loss = mean(distance**2, along: 0) / 2
         print("loss: \(loss.asScalar())")
+        print("elapsed time: \(Date().timeIntervalSince(start))sec")
         print("")
-        
     }
-    
     
 }
