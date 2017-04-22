@@ -103,11 +103,17 @@ func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
     
     var index = [Int](repeating: 0, count: shape.count)
     var offset = 0
-    var offsets = [Int]()
+    
+    let volume = shape.prod()
+    let dst = UnsafeMutablePointer<Int>.allocate(capacity: volume)
+    defer { dst.deallocate(capacity: volume) }
+    
     let last = index.count - 1
     
+    var dstPtr = dst
     while true {
-        offsets.append(offset)
+        dstPtr.pointee = offset
+        dstPtr += 1
         index[last] += 1
         offset += strides[last]
         
@@ -125,7 +131,7 @@ func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
         }
     }
     
-    return offsets
+    return [Int](UnsafeBufferPointer(start: dst, count: volume))
 }
 
 /// Calculate how many dims are strided
