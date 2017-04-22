@@ -6,20 +6,19 @@ func testGradientDescent() {
     // y = 0.3*x^2 + 0.2*x + 0.1
     let start = Date()
     
-    let xs = NDArray.linspace(low: -1, high: 1, count: 300).reshaped([-1, 1])
+    let xs = NDArray.linspace(low: -1, high: 1, count: 300)
     
     // data
     var ys = 0.3*xs*xs + 0.2*xs + 0.1
     ys += NDArray.normal(mu: 0, sigma: 0.03, shape: xs.shape)
-    ys = ys.raveled()
     
     print("xs: \(xs.shape), ys: \(ys.shape)")
     
     // x^2, x^1, x^0
-    let features = NDArray.concat([xs*xs, xs, NDArray.ones(xs.shape)], along: 1)
+    let features = NDArray.stack([xs*xs, xs, NDArray.ones(xs.shape)], newAxis: -1)
     print("features: \(features.shape)")
     
-    var theta = NDArray(shape: [3], elements: [1, 1, 1])
+    var theta = NDArray([1, 1, 1])
     
     let alpha: Float = 0.1
     
@@ -54,6 +53,6 @@ func testGradientDescent() {
 }
 ```
 > answer  
-> theta: NDArray(shape: [3], data: [0.296340674, 0.198402062, 0.100122765], strides: [1], baseOffset: 0)  
-> loss: 0.000410759  
-> elapsed time: 1.19255304336548sec  
+> theta: NDArray(shape: [3], data: [0.307677001, 0.192278847, 0.0993897617], strides: [1], baseOffset: 0)  
+> loss: 0.000391224  
+> elapsed time: 0.953428983688354sec  
