@@ -88,6 +88,42 @@ private func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
                        strides: arg.strides,
                        baseOffset: 0,
                        data: [Float](UnsafeBufferPointer(start: dst, count: arg.data.count)))
+    } else if arg.strides.last == 1 {
+        let volume = arg.volume
+        let strDims = stridedDims(shape: arg.shape, strides: arg.strides)
+        
+        let majorShape = [Int](arg.shape.dropLast(strDims))
+        let majorStrides = [Int](arg.strides.dropLast(strDims))
+        let blockSize = arg.shape.suffix(strDims).reduce(1, *)
+        
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
+        defer { dst.deallocate(capacity: volume) }
+        
+        let offsets = getOffsets(shape: majorShape, strides: majorStrides)
+        let numProc = ProcessInfo.processInfo.activeProcessorCount
+        let offsetsBlockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+        
+        var _blockSize = Int32(blockSize)
+        
+        DispatchQueue.concurrentPerform(iterations: numProc) { i in
+            var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
+            let end = i*offsetsBlockSize + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
+            
+            guard i*offsetsBlockSize < end else { // can be empty
+                return
+            }
+            for oi in i*offsetsBlockSize..<end {
+                let offset = offsets[oi] + arg.baseOffset
+                let src = UnsafePointer(arg.data).advanced(by: offset)
+                
+                vvfunc(dstPtr, src, &_blockSize)
+                dstPtr += blockSize
+            }
+        }
+
+        return NDArray(shape: arg.shape,
+                       elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
+        
     } else {
         let volume = arg.volume
         var count = Int32(volume)

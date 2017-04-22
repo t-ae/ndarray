@@ -166,7 +166,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
     let volume = arg.volume
     
     if isContinuous(shape: arg.shape, strides: arg.strides) {
-        if arg.baseOffset == 0 && volume == arg.data.count {
+        if volume == arg.data.count {
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
                 defer { dst.deallocate(capacity: arg.data.count) }
@@ -187,28 +187,30 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let majorStrides = [Int](arg.strides.dropLast(minorDims))
         
         let stride = Int32(arg.strides.last!)
-        let count = arg.shape.suffix(minorDims).reduce(1, *)
+        let blockSize = arg.shape.suffix(minorDims).reduce(1, *)
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
         let numProc = ProcessInfo.processInfo.activeProcessorCount
-        let blockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+        let offsetsBlockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+        
+        let _blockSize = Int32(blockSize)
         
         DispatchQueue.concurrentPerform(iterations: numProc) { i in
-            var dstPtr = dst.advanced(by: i*blockSize*count)
-            let end = i*blockSize + min(blockSize, offsets.count - i*blockSize)
+            var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
+            let end = i*offsetsBlockSize + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
             
-            guard i*blockSize < end else { // can be empty
+            guard i*offsetsBlockSize < end else { // can be empty
                 return
             }
-            for oi in i*blockSize..<end {
+            for oi in i*offsetsBlockSize..<end {
                 let offset = offsets[oi] + arg.baseOffset
                 let src = UnsafePointer(arg.data).advanced(by: offset)
                 
-                cblas_scopy(Int32(count), src, stride, dstPtr, 1)
-                dstPtr += count
+                cblas_scopy(_blockSize, src, stride, dstPtr, 1)
+                dstPtr += blockSize
             }
         }
         
