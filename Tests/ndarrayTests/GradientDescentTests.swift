@@ -26,20 +26,24 @@ class GradientDescentTests: XCTestCase {
         let alpha: Float = 0.1
         
         for i in 0..<10000 {
-            print("\nstep: \(i)")
             
             // calculate loss
             let distance = sum(theta * features, along: 1) - ys
             let loss = mean(distance**2, along: 0) / 2
-            print("loss: \(loss.asScalar())")
             
             // Update parameters
+            
             let grads = distance.reshaped([-1, 1]) * features
-            print("grads: \(grads.shape)")
             let update = alpha * mean(grads, along: 0)
-            print("update: \(update)")
             theta -= update
-            print("theta: \(theta)")
+            
+            if i%100 == 0 {
+                print("\nstep: \(i)")
+                print("loss: \(loss.asScalar())")
+                print("grads: \(grads.shape)")
+                print("update: \(update)")
+                print("theta: \(theta)")
+            }
         }
         
         print("\nanswer")

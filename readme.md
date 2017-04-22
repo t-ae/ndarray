@@ -24,20 +24,24 @@ func testGradientDescent() {
     let alpha: Float = 0.1
     
     for i in 0..<10000 {
-        print("\nstep: \(i)")
         
         // calculate loss
         let distance = sum(theta * features, along: 1) - ys
         let loss = mean(distance**2, along: 0) / 2
-        print("loss: \(loss.asScalar())")
         
         // Update parameters
+        
         let grads = distance.reshaped([-1, 1]) * features
-        print("grads: \(grads.shape)")
         let update = alpha * mean(grads, along: 0)
-        print("update: \(update)")
         theta -= update
-        print("theta: \(theta)")
+        
+        if i%100 == 0 {
+            print("\nstep: \(i)")
+            print("loss: \(loss.asScalar())")
+            print("grads: \(grads.shape)")
+            print("update: \(update)")
+            print("theta: \(theta)")
+        }
     }
     
     print("\nanswer")
@@ -50,6 +54,6 @@ func testGradientDescent() {
 }
 ```
 > answer  
-> theta: NDArray(shape: [3], data: [0.298257172, 0.19960624, 0.0980256796], strides: [1], baseOffset: 0)  
-> loss: 0.000387709  
-> elapsed time: 4.39160799980164
+> theta: NDArray(shape: [3], data: [0.296340674, 0.198402062, 0.100122765], strides: [1], baseOffset: 0)  
+> loss: 0.000410759  
+> elapsed time: 1.19255304336548sec  
