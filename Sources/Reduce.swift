@@ -22,7 +22,7 @@ private typealias vDSP_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeM
 
 private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
     
-    let axis = normalizeAxis(axis: axis, ndim: arg.shape.count)
+    let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
     
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.reduce(1, *)

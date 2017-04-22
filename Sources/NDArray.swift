@@ -2,12 +2,12 @@ public struct NDArray {
     /// shape
     public internal(set) var shape: [Int]
     /// source of elements
-    var data: [Float]
+    public internal(set) var data: [Float]
     
     /// strides for each dimensions
-    var strides: [Int]
+    public internal(set) var strides: [Int]
     /// base offset of data
-    var baseOffset: Int
+    public internal(set) var baseOffset: Int
     
     init(shape:[Int], strides: [Int], baseOffset: Int, data: [Float]) {
         self.shape = shape
@@ -16,6 +16,7 @@ public struct NDArray {
         self.baseOffset = baseOffset
     }
     
+    /// Init with continuous strides
     public init(shape: [Int], elements: [Float]) {
         
         precondition(shape.reduce(1, *) == elements.count)
@@ -23,7 +24,11 @@ public struct NDArray {
         self.init(shape: shape, strides: continuousStrides(shape: shape), baseOffset: 0, data: elements)
     }
     
-    func getElement(_ ndIndex: [Int]) -> Float {
+    public func elements() -> [Float] {
+        return gatherElements(self)
+    }
+    
+    public func element(at ndIndex: [Int]) -> Float {
         let ndIndex = normalizeIndex(shape: shape, ndIndex: ndIndex)
         let index = indexOffset(strides: strides, ndIndex: ndIndex) + baseOffset
         return data[index]

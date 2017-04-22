@@ -93,6 +93,4 @@ class PerformanceTests: XCTestCase {
             _ = sqrt(a)
         }
     }
-
-
 }

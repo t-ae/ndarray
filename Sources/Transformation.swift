@@ -2,13 +2,13 @@ extension NDArray {
     
     /// Get dimensions reversed ndarray
     public func transposed() -> NDArray {
-        let axes = [Int]((0..<shape.count).reversed())
+        let axes = [Int]((0..<ndim).reversed())
         return transposed(axes: axes)
     }
     
     /// Get dimensions permuted ndarray
     public func transposed(axes: [Int]) -> NDArray {
-        precondition(axes.sorted() == [Int](0..<self.ndim))
+        precondition(axes.sorted() == [Int](0..<ndim))
         var x = self
         for (i, ax) in axes.enumerated() {
             x.strides[i] = self.strides[ax]
