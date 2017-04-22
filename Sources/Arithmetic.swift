@@ -24,28 +24,31 @@ func neg(_ arg: NDArray) -> NDArray {
         let majorStrides = [Int](arg.strides.dropLast(minorDims))
         
         let stride = arg.strides.last!
-        let count = arg.shape.suffix(minorDims).reduce(1, *)
+        let blockSize = arg.shape.suffix(minorDims).reduce(1, *)
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
         let numProc = ProcessInfo.processInfo.activeProcessorCount
-        let blockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+        let offsetsBlockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+        
+        let _blockSize = vDSP_Length(blockSize)
         
         DispatchQueue.concurrentPerform(iterations: numProc) { i in
-            var dstPtr = dst.advanced(by: i*blockSize*count)
-            let end = i*blockSize + min(blockSize, offsets.count - i*blockSize)
+            var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
+            let start = i*offsetsBlockSize
+            let end = start + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
             
-            guard i*blockSize < end else { // can be empty
+            guard start < end else { // can be empty
                 return
             }
-            for oi in i*blockSize..<end {
+            for oi in start..<end {
                 let offset = offsets[oi] + arg.baseOffset
                 let src = UnsafePointer(arg.data).advanced(by: offset)
                 
-                vDSP_vneg(src, stride, dstPtr, 1, vDSP_Length(count))
-                dstPtr += count
+                vDSP_vneg(src, stride, dstPtr, 1, _blockSize)
+                dstPtr += blockSize
             }
         }
         
@@ -106,36 +109,37 @@ private func apply(_ lhs: NDArray,
     let majorShape = [Int](lhs.shape.dropLast(strDims))
     let minorShape = lhs.shape.suffix(strDims)
     
-    let count = minorShape.reduce(1, *)
+    let blockSize = minorShape.reduce(1, *)
     
     var dst = UnsafeMutablePointer<Float>.allocate(capacity: lhs.volume)
     defer { dst.deallocate(capacity: lhs.volume) }
     
     let majorStrides = [Int](lhs.strides.dropLast(strDims))
     var offsets = getOffsets(shape: majorShape, strides: majorStrides)
-    let stride = Int32(lhs.strides.last ?? 0)
     
     let numProc = ProcessInfo.processInfo.activeProcessorCount
-    let blockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+    let offsetsBlockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
     
     var rhs = rhs
+    let stride = vDSP_Stride(lhs.strides.last ?? 0)
+    let _blockSize = vDSP_Length(blockSize)
     
     DispatchQueue.concurrentPerform(iterations: numProc) { i in
-        var dstPtr = dst.advanced(by: i*blockSize*count)
-        let end = i*blockSize + min(blockSize, offsets.count - i*blockSize)
+        var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
+        let start = i*offsetsBlockSize
+        let end = start + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
         
-        guard i*blockSize < end else { // can be empty
+        guard start < end else { // can be empty
             return
         }
-        
-        for oi in i*blockSize..<end {
+        for oi in start..<end {
             let offset = offsets[oi] + lhs.baseOffset
             let lSrc = UnsafePointer(lhs.data).advanced(by: offset)
-            vDSPfunc(lSrc, vDSP_Stride(stride),
+            vDSPfunc(lSrc, stride,
                      &rhs,
-                     dstPtr, 1, vDSP_Length(count))
+                     dstPtr, 1, _blockSize)
             
-            dstPtr += count
+            dstPtr += blockSize
         }
     }
     
@@ -152,36 +156,37 @@ private func apply(_ lhs: Float,
     let majorShape = [Int](rhs.shape.dropLast(strDims))
     let minorShape = rhs.shape.suffix(strDims)
     
-    let count = minorShape.reduce(1, *)
+    let blockSize = minorShape.reduce(1, *)
     
     var dst = UnsafeMutablePointer<Float>.allocate(capacity: rhs.volume)
     defer { dst.deallocate(capacity: rhs.volume) }
     
     let majorStrides = [Int](rhs.strides.dropLast(strDims))
     var offsets = getOffsets(shape: majorShape, strides: majorStrides)
-    let stride = Int32(rhs.strides.last ?? 0)
     
     let numProc = ProcessInfo.processInfo.activeProcessorCount
-    let blockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
+    let offsetsBlockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
     
     var lhs = lhs
+    let stride = vDSP_Stride(rhs.strides.last ?? 0)
+    let _blockSize = vDSP_Length(blockSize)
     
     DispatchQueue.concurrentPerform(iterations: numProc) { i in
-        var dstPtr = dst.advanced(by: i*blockSize*count)
-        let end = i*blockSize + min(blockSize, offsets.count - i*blockSize)
+        var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
+        let start = i * offsetsBlockSize
+        let end = start + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
         
-        guard i*blockSize < end else { // can be empty
+        guard start < end else { // can be empty
             return
         }
-        
-        for oi in i*blockSize..<end {
+        for oi in i*offsetsBlockSize..<end {
             let offset = offsets[oi] + rhs.baseOffset
             let src = UnsafePointer(rhs.data).advanced(by: offset)
             vDSPfunc(&lhs,
-                     src, vDSP_Stride(stride),
-                     dstPtr, 1, vDSP_Length(count))
+                     src, stride,
+                     dstPtr, 1, _blockSize)
             
-            dstPtr += count
+            dstPtr += start
         }
     }
     
@@ -222,7 +227,7 @@ private func apply(_ lhs: NDArray,
     let majorShape = [Int](lhs.shape.dropLast(strDims))
     let minorShape = lhs.shape.suffix(strDims)
     
-    let count = minorShape.reduce(1, *)
+    let blockSize = minorShape.reduce(1, *)
     
     var dst = UnsafeMutablePointer<Float>.allocate(capacity: lhs.volume)
     defer { dst.deallocate(capacity: lhs.volume) }
@@ -231,30 +236,31 @@ private func apply(_ lhs: NDArray,
     let rMajorStrides = [Int](rhs.strides.dropLast(strDims))
     var lOffsets = getOffsets(shape: majorShape, strides: lMajorStrides)
     var rOffsets = getOffsets(shape: majorShape, strides: rMajorStrides)
-    let lStride = Int32(lhs.strides.last ?? 0)
-    let rStride = Int32(rhs.strides.last ?? 0)
+    let lStride = vDSP_Stride(lhs.strides.last ?? 0)
+    let rStride = vDSP_Stride(rhs.strides.last ?? 0)
+    let _blockSize = vDSP_Length(blockSize)
     
     let numProc = ProcessInfo.processInfo.activeProcessorCount
-    let blockSize = Int(ceil(Float(lOffsets.count) / Float(numProc)))
+    let offsetsBlockSize = Int(ceil(Float(lOffsets.count) / Float(numProc)))
     
     DispatchQueue.concurrentPerform(iterations: numProc) { i in
-        var dstPtr = dst.advanced(by: i*blockSize*count)
-        let end = i*blockSize + min(blockSize, lOffsets.count - i*blockSize)
+        var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
+        let start = i * offsetsBlockSize
+        let end = start + min(offsetsBlockSize, lOffsets.count - i*offsetsBlockSize)
         
-        guard i*blockSize < end else { // can be empty
+        guard start < end else { // can be empty
             return
         }
-        
-        for oi in i*blockSize..<end {
+        for oi in start..<end {
             let lOffset = lOffsets[oi] + lhs.baseOffset
             let lSrc = UnsafePointer(lhs.data).advanced(by: lOffset)
             let rOffset = rOffsets[oi] + rhs.baseOffset
             let rSrc = UnsafePointer(rhs.data).advanced(by: rOffset)
-            vDSPfunc(lSrc, vDSP_Stride(lStride),
-                     rSrc, vDSP_Stride(rStride),
-                     dstPtr, 1, vDSP_Length(count))
+            vDSPfunc(lSrc, lStride,
+                     rSrc, rStride,
+                     dstPtr, 1, _blockSize)
             
-            dstPtr += count
+            dstPtr += blockSize
         }
     }
     return NDArray(shape: lhs.shape,

@@ -107,12 +107,13 @@ private func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         
         DispatchQueue.concurrentPerform(iterations: numProc) { i in
             var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
-            let end = i*offsetsBlockSize + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
+            let start = i * offsetsBlockSize
+            let end = start + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
             
-            guard i*offsetsBlockSize < end else { // can be empty
+            guard start < end else { // can be empty
                 return
             }
-            for oi in i*offsetsBlockSize..<end {
+            for oi in start..<end {
                 let offset = offsets[oi] + arg.baseOffset
                 let src = UnsafePointer(arg.data).advanced(by: offset)
                 
