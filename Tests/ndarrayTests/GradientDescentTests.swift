@@ -29,7 +29,7 @@ class GradientDescentTests: XCTestCase {
             
             // calculate loss
             let distance = sum(theta * features, along: 1) - ys
-            let loss = mean(distance*distance, along: 0) / 2
+            let loss = mean(distance**2, along: 0) / 2
             print("loss: \(loss.asScalar())")
             
             // Update parameters
@@ -44,7 +44,7 @@ class GradientDescentTests: XCTestCase {
         print("\nanswer")
         print(theta)
         let distance = sum(theta * features, along: 1) - ys
-        let loss = mean(distance*distance, along: 0) / 2
+        let loss = mean(distance**2, along: 0) / 2
         print("loss: \(loss.asScalar())")
         print("")
         

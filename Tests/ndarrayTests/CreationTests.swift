@@ -6,7 +6,7 @@ class CreationTests: XCTestCase {
 
     func testZeros() {
         let a = NDArray.zeros([2, 2, 2])
-        XCTAssertEqual(a, NDArray(shape: [2, 2, 2], elements: [0, 0, 0, 0, 0, 0, 0, 0]))
+        XCTAssertEqual(a, NDArray([[[0, 0], [0, 0]], [[0, 0], [0, 0]]]))
     }
     
     func testEye() {
