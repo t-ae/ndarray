@@ -21,7 +21,7 @@ class GradientDescentTests: XCTestCase {
         let features = NDArray.concat([xs*xs, xs, NDArray.ones(xs.shape)], along: 1)
         print("features: \(features.shape)")
         
-        var theta = NDArray(shape: [3], elements: [1, 1, 1])
+        var theta = NDArray([1, 1, 1])
         
         let alpha: Float = 0.1
         
