@@ -19,7 +19,7 @@ public struct NDArray {
     /// Init with continuous strides
     public init(shape: [Int], elements: [Float]) {
         
-        precondition(shape.reduce(1, *) == elements.count)
+        precondition(shape.prod() == elements.count)
         
         self.init(shape: shape, strides: continuousStrides(shape: shape), baseOffset: 0, data: elements)
     }
@@ -42,7 +42,7 @@ public struct NDArray {
     /// ndarray's volume
     /// - Returns: Number of elements
     public var volume: Int {
-        return shape.reduce(1, *)
+        return shape.prod()
     }
 }
 

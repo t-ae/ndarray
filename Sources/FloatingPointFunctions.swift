@@ -94,7 +94,7 @@ private func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         
         let majorShape = [Int](arg.shape.dropLast(strDims))
         let majorStrides = [Int](arg.strides.dropLast(strDims))
-        let blockSize = arg.shape.suffix(strDims).reduce(1, *)
+        let blockSize = arg.shape.suffix(strDims).prod()
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }

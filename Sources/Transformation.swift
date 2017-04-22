@@ -22,11 +22,11 @@ extension NDArray {
         
         var shape = shape
         if let arbit = shape.index(of: -1) {
-            shape[arbit] = self.volume / shape.removing(at: arbit).reduce(1, *)
+            shape[arbit] = self.volume / shape.removing(at: arbit).prod()
         }
         
         precondition(shape.map { $0 >= 0 }.all())
-        precondition(self.volume == shape.reduce(1, *))
+        precondition(self.volume == shape.prod())
         
         let elements = gatherElements(self)
         return NDArray(shape: shape, elements: elements)

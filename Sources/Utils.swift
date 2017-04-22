@@ -57,7 +57,7 @@ func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
     precondition(strides.count == ndIndex.count)
     return zip(ndIndex, strides)
         .map(*)
-        .reduce(0, +)
+        .sum()
 }
 
 /// Get indices in row major order
@@ -187,7 +187,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let majorStrides = [Int](arg.strides.dropLast(minorDims))
         
         let stride = Int32(arg.strides.last!)
-        let blockSize = arg.shape.suffix(minorDims).reduce(1, *)
+        let blockSize = arg.shape.suffix(minorDims).prod()
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
@@ -279,6 +279,24 @@ extension Array {
     func inserting(_ newElement: Element, at: Int) -> Array {
         var ret = self
         ret.insert(newElement, at: at)
+        return ret
+    }
+}
+
+extension Sequence where Iterator.Element == Int {
+    func sum() -> Int {
+        var ret = 0
+        for e in self {
+            ret += e
+        }
+        return ret
+    }
+    
+    func prod() -> Int {
+        var ret = 1
+        for e in self {
+            ret *= e
+        }
         return ret
     }
 }

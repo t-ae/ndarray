@@ -23,11 +23,11 @@ extension NDArray {
         let elementsList = arrays.map { gatherElements($0) }
         let majorShape = [Int](shape.prefix(axis))
         let minorShape = [Int](shape.dropFirst(axis))
-        let blockSize = minorShape.reduce(1, *)
+        let blockSize = minorShape.prod()
         
         let sizes = arrays.map { $0.shape[axis] }
-        let newShape = shape.inserting(sizes.reduce(0, +), at: axis)
-        let volume = newShape.reduce(1, *)
+        let newShape = shape.inserting(sizes.sum(), at: axis)
+        let volume = newShape.prod()
         
         var srcs = elementsList.map { UnsafePointer($0) }
         
@@ -35,7 +35,7 @@ extension NDArray {
         defer { dst.deallocate(capacity: volume) }
         
         var dstPtr = dst
-        for _ in 0..<majorShape.reduce(1, *) {
+        for _ in 0..<majorShape.prod() {
             for i in 0..<srcs.count {
                 let size = blockSize*sizes[i]
                 cblas_scopy(Int32(size), srcs[i], 1, dstPtr, 1)

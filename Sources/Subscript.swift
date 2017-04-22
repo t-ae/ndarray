@@ -57,7 +57,7 @@ func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     let minorShape = dstShape.suffix(strDims)
     let minorZeros = [Int](repeating: 0, count: minorShape.count)
     
-    let count = Int32(minorShape.reduce(1, *))
+    let count = Int32(minorShape.prod())
     let srcStride = Int32(newValue.strides.last ?? 0)
     let dstStride = Int32(dstStrides.last ?? 0)
     

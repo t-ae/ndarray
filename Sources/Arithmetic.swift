@@ -24,7 +24,7 @@ func neg(_ arg: NDArray) -> NDArray {
         let majorStrides = [Int](arg.strides.dropLast(minorDims))
         
         let stride = arg.strides.last!
-        let blockSize = arg.shape.suffix(minorDims).reduce(1, *)
+        let blockSize = arg.shape.suffix(minorDims).prod()
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
@@ -109,7 +109,7 @@ private func apply(_ lhs: NDArray,
     let majorShape = [Int](lhs.shape.dropLast(strDims))
     let minorShape = lhs.shape.suffix(strDims)
     
-    let blockSize = minorShape.reduce(1, *)
+    let blockSize = minorShape.prod()
     
     var dst = UnsafeMutablePointer<Float>.allocate(capacity: lhs.volume)
     defer { dst.deallocate(capacity: lhs.volume) }
@@ -156,7 +156,7 @@ private func apply(_ lhs: Float,
     let majorShape = [Int](rhs.shape.dropLast(strDims))
     let minorShape = rhs.shape.suffix(strDims)
     
-    let blockSize = minorShape.reduce(1, *)
+    let blockSize = minorShape.prod()
     
     var dst = UnsafeMutablePointer<Float>.allocate(capacity: rhs.volume)
     defer { dst.deallocate(capacity: rhs.volume) }
@@ -227,7 +227,7 @@ private func apply(_ lhs: NDArray,
     let majorShape = [Int](lhs.shape.dropLast(strDims))
     let minorShape = lhs.shape.suffix(strDims)
     
-    let blockSize = minorShape.reduce(1, *)
+    let blockSize = minorShape.prod()
     
     var dst = UnsafeMutablePointer<Float>.allocate(capacity: lhs.volume)
     defer { dst.deallocate(capacity: lhs.volume) }

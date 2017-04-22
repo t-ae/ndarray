@@ -25,7 +25,7 @@ private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_fun
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
     
     let newShape = arg.shape.removing(at: axis)
-    let volume = newShape.reduce(1, *)
+    let volume = newShape.prod()
     
     let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
     defer { dst.deallocate(capacity: volume) }
