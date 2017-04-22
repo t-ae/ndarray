@@ -47,7 +47,9 @@ extension NDArray {
     }
     
     public static func linspace(low: Float, high: Float, count: Int) -> NDArray {
-        let elements = (0..<count).map { v -> Float in low + (high-low)*Float(v)/Float(count-1) }
+        let elements = (0..<count).map { v -> Float in
+            low + (high-low)*Float(v)/Float(count-1)
+        }
         return NDArray(elements)
     }
 }
