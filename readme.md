@@ -1,4 +1,6 @@
 # NDArray
+Float NDArray library accelerated with Accelerate Framework
+
 ```swift
 func testGradientDescent() {
     // y = 0.3*x^2 + 0.2*x + 0.1
@@ -47,7 +49,7 @@ func testGradientDescent() {
     print("")
 }
 ```
-> answer
-> theta: NDArray(shape: [3], data: [0.298257172, 0.19960624, 0.0980256796], strides: [1], baseOffset: 0)
-> loss: 0.000387709
+> answer  
+> theta: NDArray(shape: [3], data: [0.298257172, 0.19960624, 0.0980256796], strides: [1], baseOffset: 0)  
+> loss: 0.000387709  
 > elapsed time: 4.39160799980164
