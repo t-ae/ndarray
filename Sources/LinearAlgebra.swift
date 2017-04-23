@@ -7,6 +7,7 @@ public func norm(_ arg: NDArray) -> Float {
     return sqrtf(sum(arg*arg).asScalar())
 }
 
+/// Calculate matrix inverse
 public func inv(_ arg: NDArray) throws -> NDArray {
     precondition(arg.ndim > 1)
     let size = arg.shape[arg.ndim-1]
@@ -50,7 +51,7 @@ public func inv(_ arg: NDArray) throws -> NDArray {
     return NDArray(shape: arg.shape, elements: elements)
 }
 
-enum NDArrayInvError: Error {
+public enum NDArrayInvError: Error {
     case IrregalValue
     case SingularMatrix
 }

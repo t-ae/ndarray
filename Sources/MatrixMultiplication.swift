@@ -39,17 +39,19 @@ public func _matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
 
 infix operator <*>: MultiplicationPrecedence
 
-public func <*>(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
+/// Matlix multiplication
+public func <*>(lhs: NDArray, rhs: NDArray) -> NDArray {
     return _matmul(lhs, rhs)
 }
 
 extension NDArray {
+    /// Matlix multiplication
     func matmul(_ rhs: NDArray) -> NDArray {
         return _matmul(self, rhs)
     }
 }
 
-func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
+private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
     
     let lElements = gatherElements(lhs)
     let rElements = gatherElements(rhs)
