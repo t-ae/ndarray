@@ -1,6 +1,22 @@
 
 import Accelerate
 
+public func min(_ arg: NDArray) -> NDArray {
+    return reduce(arg, vDSP_minv)
+}
+
+public func max(_ arg: NDArray) -> NDArray {
+    return reduce(arg, vDSP_maxv)
+}
+
+public func sum(_ arg: NDArray) -> NDArray {
+    return reduce(arg, vDSP_sve)
+}
+
+public func mean(_ arg: NDArray) -> NDArray {
+    return reduce(arg, vDSP_meanv)
+}
+
 public func min(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_minv)
 }
@@ -19,6 +35,13 @@ public func mean(_ arg: NDArray, along axis: Int) -> NDArray {
 
 // MARK: Util
 private typealias vDSP_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, vDSP_Length) -> Void
+
+private func reduce(_ arg: NDArray, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
+    let elements = gatherElements(arg)
+    var result: Float = 0
+    vDSPfunc(UnsafePointer(elements), 1, &result, vDSP_Length(elements.count))
+    return NDArray(scalar: result)
+}
 
 private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
     
