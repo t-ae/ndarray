@@ -11,7 +11,7 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
     if d < 0 {
         lShape = [Int](repeating: 1, count: -d) + lShape
         lStrides = [Int](repeating: 0, count: -d) + lStrides
-    } else if(d > 0) {
+    } else if d > 0 {
         rShape = [Int](repeating: 1, count: d) + rShape
         rStrides = [Int](repeating: 0, count: d) + rStrides
     }

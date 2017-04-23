@@ -35,7 +35,7 @@ class PerformanceTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
-        let c = a.transposed(axes: [1, 2, 3, 4, 5, 0])
+        let c = a.transposed([1, 2, 3, 4, 5, 0])
         measure { // 0.284sec
             // In [8]: a = np.arange(10**6).reshape([10]*6).astype(float)
             // In [9]: b = a.transpose()

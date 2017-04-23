@@ -54,4 +54,28 @@ class GradientDescentTests: XCTestCase {
         print("")
     }
     
+    func testNormalEquasion() {
+        // y = 0.3*x^2 + 0.2*x + 0.1
+        let start = Date()
+        
+        let xs = NDArray.linspace(low: -1, high: 1, count: 300)
+        
+        // data
+        var ys = 0.3*xs*xs + 0.2*xs + 0.1
+        ys += NDArray.normal(mu: 0, sigma: 0.03, shape: xs.shape)
+        
+        print("xs: \(xs.shape), ys: \(ys.shape)")
+        
+        // x^2, x^1, x^0
+        let features = NDArray.stack([xs*xs, xs, NDArray.ones(xs.shape)], newAxis: -1)
+        print("features: \(features.shape)")
+
+        let theta = try! inv(features.transposed() <*> features) <*> features.transposed() <*> ys.reshaped([-1,1])
+        print("\nanswer")
+        print("theta: \(theta)")
+        print("elapsed time: \(Date().timeIntervalSince(start))sec")
+        print("")
+        
+    }
+    
 }

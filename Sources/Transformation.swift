@@ -3,11 +3,11 @@ extension NDArray {
     /// Get dimensions reversed ndarray
     public func transposed() -> NDArray {
         let axes = [Int]((0..<ndim).reversed())
-        return transposed(axes: axes)
+        return transposed(axes)
     }
     
     /// Get dimensions permuted ndarray
-    public func transposed(axes: [Int]) -> NDArray {
+    public func transposed(_ axes: [Int]) -> NDArray {
         precondition(axes.sorted() == [Int](0..<ndim))
         var x = self
         for (i, ax) in axes.enumerated() {
