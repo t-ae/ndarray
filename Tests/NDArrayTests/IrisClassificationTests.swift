@@ -25,8 +25,8 @@ class IrisClassificationTests: XCTestCase {
             let h1 = sigmoid(x <*> W1 + b1)
             let h2 = sigmoid(h1 <*> W2 + b2)
             let out = softmax(h2)
-            let losses = sum(y * log(y - out), along: 1)
-            let loss = -mean(losses)
+            let losses = -y * log(max(y - out, 1e-10))
+            let loss = mean(losses)
             
             print(losses)
         }

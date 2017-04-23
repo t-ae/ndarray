@@ -25,6 +25,14 @@ public func max(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_maxv)
 }
 
+public func argmin(_ arg: NDArray, along axis: Int) -> NDArray {
+    return reduce(arg, along: axis, vDSP_minvi)
+}
+
+public func argmax(_ arg: NDArray, along axis: Int) -> NDArray {
+    return reduce(arg, along: axis, vDSP_maxvi)
+}
+
 public func sum(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_sve)
 }
@@ -35,6 +43,7 @@ public func mean(_ arg: NDArray, along axis: Int) -> NDArray {
 
 // MARK: Util
 private typealias vDSP_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, vDSP_Length) -> Void
+private typealias vDSP_index_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, UnsafeMutablePointer<vDSP_Length>, vDSP_Length) -> Void
 
 private func reduce(_ arg: NDArray, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
     let elements = gatherElements(arg)
@@ -66,4 +75,30 @@ private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_fun
     
     return NDArray(shape: newShape,
                    elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
+}
+
+private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func) -> NDArray {
+    let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
+    
+    let newShape = arg.shape.removing(at: axis)
+    let volume = newShape.prod()
+    
+    let dst = UnsafeMutablePointer<vDSP_Length>.allocate(capacity: volume)
+    defer { dst.deallocate(capacity: volume) }
+    var e: Float = 0
+    
+    let offsets = getOffsets(shape: newShape, strides: arg.strides.removing(at: axis))
+    let count = vDSP_Length(arg.shape[axis])
+    let stride = arg.strides[axis]
+    
+    var dstPtr = dst
+    for offset in offsets {
+        let src = UnsafePointer(arg.data).advanced(by: offset + arg.baseOffset)
+        vDSPfunc(src, stride, &e, dstPtr, count)
+        dstPtr += 1
+    }
+    
+    let indices = UnsafeBufferPointer<vDSP_Length>(start: dst, count: volume)
+    return NDArray(shape: newShape,
+                   elements: indices.map { Float(Int($0)/stride) })
 }
