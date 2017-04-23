@@ -98,6 +98,7 @@ private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_redu
         dstPtr += 1
     }
     
+    // all indices are multiplied with stride.
     let indices = UnsafeBufferPointer<vDSP_Length>(start: dst, count: volume)
     return NDArray(shape: newShape,
                    elements: indices.map { Float(Int($0)/stride) })

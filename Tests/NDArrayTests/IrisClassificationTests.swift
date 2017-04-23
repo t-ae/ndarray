@@ -5,6 +5,9 @@ import NDArray
 class IrisClassificationTests: XCTestCase {
 
     func testLogisticRegression() {
+        
+        // TODO: Not completed yet
+        
         let x = Iris.x_train
         let y = toOneHot(Iris.y_train)
         
