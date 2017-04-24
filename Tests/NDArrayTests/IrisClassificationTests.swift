@@ -137,8 +137,7 @@ func relu(_ x: NDArray) -> NDArray {
 }
 
 func d_relu(_ x: NDArray) -> NDArray {
-    let d: [Float] = x.elements().map { $0 > 0 ? 1 : 0 }
-    return NDArray(shape: x.shape, elements: d)
+    return relu(x) / abs(x)
 }
 
 func softmax(_ x: NDArray) -> NDArray {
