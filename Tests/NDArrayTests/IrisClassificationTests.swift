@@ -16,7 +16,7 @@ class IrisClassificationTests: XCTestCase {
         let y = toOneHot(labels)
         
         let numFeatures = x.shape[1]
-        let numTrainSamples = x.shape[0] // = M
+        let numTrainSamples = x.shape[0]
         let numOutput = y.shape[1]
         
         let labelsCount = sum(y, along: 0)
