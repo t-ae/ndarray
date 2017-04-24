@@ -41,6 +41,10 @@ func sigmoid(_ x: NDArray) -> NDArray {
     return 1 / (1 + exp(-x))
 }
 
+func relu(_ x: NDArray) -> NDArray {
+    return max(x, 0)
+}
+
 func softmax(_ x: NDArray) -> NDArray {
     var ret: [NDArray] = []
 
