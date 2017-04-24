@@ -54,7 +54,7 @@ class IrisClassificationTests: XCTestCase {
             let d_h2_h2_1 = NDArray.ones(h2_1.shape)    // [90, 3]
             
             let d_h2_1_W2 = h1 // [90, 5]
-            let d_h2_1_h1 = W2 // [90, 5]
+            let d_h2_1_h1 = W2 // [90, 5, 3]
             
             let d_h1_h1_2 = d_relu(h1_2) // [90, 5]
             
