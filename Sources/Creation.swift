@@ -31,6 +31,17 @@ extension NDArray {
         return NDArray(shape: [size, size], strides: [-1, 1], baseOffset: size-1, data: data)
     }
     
+    public static func diagonal(_ diag: [Float]) -> NDArray {
+        return NDArray.eye(diag.count) * NDArray(diag)
+    }
+    
+    public static func diagonal(_ diag: NDArray) -> NDArray {
+        guard let size = diag.shape.last else {
+            return diag
+        }
+        return NDArray.eye(size) <*> diag.reshaped(diag.shape + [1])
+    }
+    
     public static func range(_ count: Int) -> NDArray {
         precondition(count >= 0)
         return NDArray.range(0..<count)

@@ -84,7 +84,7 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
         }
     }
     
-    return (NDArray(shape: lhs.shape, strides: lStrides, baseOffset: 0, data: lElements),
-            NDArray(shape: rhs.shape, strides: rStrides, baseOffset: 0, data: rElements))
+    return (NDArray(shape: lShape, strides: lStrides, baseOffset: 0, data: lElements),
+            NDArray(shape: rShape, strides: rStrides, baseOffset: 0, data: rElements))
     
 }

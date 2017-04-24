@@ -38,6 +38,12 @@ class MatrixMultiplicationTests: XCTestCase {
                                      [ 45,  97],
                                      [ 57, 125]]]))
         }
+        do {
+            let a = NDArray.eye(3)
+            let b = NDArray.ones([3, 3, 3])
+            let ans = a <*> b
+            XCTAssertEqual(ans, b)
+        }
     }
 
 }
