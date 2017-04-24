@@ -32,7 +32,7 @@ class IrisClassificationTests: XCTestCase {
         var W2 = NDArray.uniform(low: -W2_limit, high: W2_limit, shape: [numHiddenUnits1, numOutput]) // [5, 3]
         var b2 = NDArray.zeros([numOutput])
         
-        let alpha: Float = 1e-3
+        let alpha: Float = 1e-2
         
         for i in 0...3000 {
             let h1_1 = x <*> W1     // [M, 5]
@@ -53,7 +53,7 @@ class IrisClassificationTests: XCTestCase {
             let d_h2_1_W2 = NDArray.stack([NDArray](repeating: h1, count: numOutput), newAxis: -1) // [90, 5, 4]
             let d_h2_1_h1 = W2
             
-            let d_h1_h1_2 = relu(h1_2)
+            let d_h1_h1_2 = d_relu(h1_2)
             
             let d_h1_2_b1 = NDArray.ones(b1.shape) // [90, 5]
             let d_h1_2_h1_1 = NDArray.ones(h1_1.shape) // [90, 5]
@@ -126,6 +126,11 @@ class IrisClassificationTests: XCTestCase {
 
 func relu(_ x: NDArray) -> NDArray {
     return max(x, 0)
+}
+
+func d_relu(_ x: NDArray) -> NDArray {
+    let d: [Float] = x.elements().map { $0 > 0 ? 1 : 0 }
+    return NDArray(shape: x.shape, elements: d)
 }
 
 func softmax(_ x: NDArray) -> NDArray {
