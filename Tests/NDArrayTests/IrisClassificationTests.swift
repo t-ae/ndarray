@@ -141,14 +141,11 @@ func d_relu(_ x: NDArray) -> NDArray {
 }
 
 func softmax(_ x: NDArray) -> NDArray {
-    var ret: [NDArray] = []
-
-    for i in 0..<x.shape[0] {
-        let row = exp(x[i])
-        ret.append(row / sum(row))
-    }
     
-    return NDArray.stack(ret)
+    let e = exp(x)
+    let eSum = sum(e, along: 1).reshaped([-1 ,1])
+
+    return e / eSum
 }
 
 func toOneHot(_ y: NDArray) -> NDArray {
