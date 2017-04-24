@@ -6,6 +6,8 @@ class IrisClassificationTests: XCTestCase {
 
     func testLogisticRegression() {
         
+        let start = Date()
+        
         let normalize_mu = mean(Iris.x_train, along: 0)
         let normalize_sigma = mean(Iris.x_train**2, along: 0) - normalize_mu**2
         
@@ -20,40 +22,41 @@ class IrisClassificationTests: XCTestCase {
         let labelsCount = sum(y, along: 0)
         
         // Two layer neural network
+        // Input(4) -> Dense(5) -> ReLU -> Dense(3) -> Softmax
         
         let numHiddenUnits1 = 5
         
         // init with glorot uniform
         let W1_limit = sqrtf(6 / Float(numFeatures + numHiddenUnits1))
         var W1 = NDArray.uniform(low: -W1_limit, high: W1_limit, shape: [numFeatures, numHiddenUnits1]) // [4, 5]
-        var b1 = NDArray.zeros([numHiddenUnits1])
+        var b1 = NDArray.zeros([numHiddenUnits1]) // [5]
         
         let W2_limit = sqrtf(2 / Float(numHiddenUnits1 + numOutput))
         var W2 = NDArray.uniform(low: -W2_limit, high: W2_limit, shape: [numHiddenUnits1, numOutput]) // [5, 3]
-        var b2 = NDArray.zeros([numOutput])
+        var b2 = NDArray.zeros([numOutput]) // [5]
         
         let alpha: Float = 1e-2
         
         for i in 0...3000 {
-            let h1_1 = x <*> W1     // [M, 5]
-            let h1_2 = h1_1 + b1    // [M, 5]
-            let h1 = relu(h1_2)     // [M, 5]
+            let h1_1 = x <*> W1     // [90, 5]
+            let h1_2 = h1_1 + b1    // [90, 5]
+            let h1 = relu(h1_2)     // [90, 5]
             
-            let h2_1 = h1 <*> W2    // [M, 3]
-            let h2 = h2_1 + b2      // [M, 3]
+            let h2_1 = h1 <*> W2    // [90, 3]
+            let h2 = h2_1 + b2      // [90, 3]
             
-            let out = softmax(h2)   // [M, 3]
+            let out = softmax(h2)   // [90, 3]
             
             // back propagation
-            let d_out_h2 = out - y  // [M, 3]
+            let d_out_h2 = out - y  // [90, 3]
             
-            let d_h2_b2 = NDArray.ones(b2.shape)        // [M, 3]
-            let d_h2_h2_1 = NDArray.ones(h2_1.shape)    // [M, 3]
+            let d_h2_b2 = NDArray.ones(b2.shape)        // [90, 3]
+            let d_h2_h2_1 = NDArray.ones(h2_1.shape)    // [90, 3]
             
-            let d_h2_1_W2 = h1 // [M, 5]
-            let d_h2_1_h1 = W2 // [M, 5]
+            let d_h2_1_W2 = h1 // [90, 5]
+            let d_h2_1_h1 = W2 // [90, 5]
             
-            let d_h1_h1_2 = d_relu(h1_2)
+            let d_h1_h1_2 = d_relu(h1_2) // [90, 5]
             
             let d_h1_2_b1 = NDArray.ones(b1.shape) // [90, 5]
             let d_h1_2_h1_1 = NDArray.ones(h1_1.shape) // [90, 5]
@@ -63,12 +66,15 @@ class IrisClassificationTests: XCTestCase {
             // chain
             let d_out_b2 = d_h2_b2 * d_out_h2           // [90, 3]
             let d_out_h2_1 = d_h2_h2_1 * d_out_h2       // [90, 3]
-            let d_out_W2 = d_h2_1_W2.reshaped([90, 5, 1]) <*> d_out_h2_1.reshaped([90, 1, 3])
-            let d_out_h1 = (d_h2_1_h1 <*> d_out_h2_1.reshaped(d_out_h2_1.shape + [1])).reshaped([90, 5])
+            let d_out_W2 = d_h2_1_W2.reshaped([numTrainSamples, numHiddenUnits1, 1])
+                <*> d_out_h2_1.reshaped([numTrainSamples, 1, numOutput]) // [90, 5, 3]
+            let d_out_h1 = (d_h2_1_h1 <*> d_out_h2_1.reshaped(d_out_h2_1.shape + [1]))
+                .reshaped([numTrainSamples, numHiddenUnits1]) // [90, 5]
             let d_out_h1_2 = d_h1_h1_2 * d_out_h1       // [90, 5]
             let d_out_b1 = d_out_h1_2 * d_h1_2_b1       // [90, 5]
             let d_out_h1_1 = d_h1_2_h1_1 * d_out_h1_2   // [90, 5]
-            let d_out_W1 = d_h1_1_W1.reshaped([90, 4, 1]) <*> d_out_h1_1.reshaped([90, 1, 5])
+            let d_out_W1 = d_h1_1_W1.reshaped([numTrainSamples, numFeatures, 1])
+                <*> d_out_h1_1.reshaped([numTrainSamples, 1, numHiddenUnits1]) // [90, 4, 5]
             
             // update
             b2 -= alpha * mean(d_out_b2, along: 0)
@@ -99,14 +105,14 @@ class IrisClassificationTests: XCTestCase {
             let y = toOneHot(labels)
             let labelsCount = sum(y, along: 0)
             
-            let h1_1 = x <*> W1     // [M, 5]
-            let h1_2 = h1_1 + b1    // [M, 5]
-            let h1 = relu(h1_2)     // [M, 5]
+            let h1_1 = x <*> W1     // [90, 5]
+            let h1_2 = h1_1 + b1    // [90, 5]
+            let h1 = relu(h1_2)     // [90, 5]
             
-            let h2_1 = h1 <*> W2    // [M, 3]
-            let h2 = h2_1 + b2      // [M, 3]
+            let h2_1 = h1 <*> W2    // [90, 3]
+            let h2 = h2_1 + b2      // [90, 3]
             
-            let out = softmax(h2)   // [M, 3]
+            let out = softmax(h2)   // [90, 3]
             
             print("\ntest result:")
             let losses = -y * log(max(out, 1e-10))
@@ -120,6 +126,8 @@ class IrisClassificationTests: XCTestCase {
             print("accuracy: \(accuracy)")
             print("")
         }
+        
+        print("elapsed time: \(Date().timeIntervalSince(start))sec\n")
     }
 
 }
