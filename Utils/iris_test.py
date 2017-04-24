@@ -30,7 +30,8 @@ model = Sequential([
 
 model.compile("sgd", "categorical_crossentropy", ["accuracy"])
 
-model.fit(x_train, y_train, batch_size=len(x_train), epochs=3000, verbose=0)
+for i in range(3001):
+    model.train_on_batch(x_train, y_train)
 
 print(model.evaluate(x_test, y_test))
 print(f"elapsed time: {time.time()-start}sec")
