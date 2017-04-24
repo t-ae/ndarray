@@ -33,5 +33,5 @@ model.compile("sgd", "categorical_crossentropy", ["accuracy"])
 for i in range(3001):
     model.train_on_batch(x_train, y_train)
 
-print(model.evaluate(x_test, y_test))
+print(model.evaluate(x_test, y_test, batch_size=len(x_test)))
 print(f"elapsed time: {time.time()-start}sec")
