@@ -6,7 +6,10 @@ class IrisClassificationTests: XCTestCase {
 
     func testLogisticRegression() {
         
-        let x = Iris.x_train
+        let normalize_mu = mean(Iris.x_train, along: 0)
+        let normalize_sigma = mean(Iris.x_train**2, along: 0) - normalize_mu**2
+        
+        let x = (Iris.x_train - normalize_mu) / normalize_sigma
         let labels = Iris.y_train
         let y = toOneHot(labels)
         
@@ -20,15 +23,16 @@ class IrisClassificationTests: XCTestCase {
         
         let numHiddenUnits1 = 5
         
-        let W1_sigma = sqrtf(2 / Float(numFeatures + numHiddenUnits1))
-        var W1 = NDArray.normal(mu: 0, sigma: W1_sigma, shape: [numFeatures, numHiddenUnits1]) //[4, 5]
+        // init with glorot uniform
+        let W1_limit = sqrtf(6 / Float(numFeatures + numHiddenUnits1))
+        var W1 = NDArray.uniform(low: -W1_limit, high: W1_limit, shape: [numFeatures, numHiddenUnits1]) // [4, 5]
         var b1 = NDArray.zeros([numHiddenUnits1])
         
-        let W2_sigma = sqrtf(2 / Float(numHiddenUnits1 + numOutput))
-        var W2 = NDArray.normal(mu: 0, sigma: W2_sigma, shape: [numHiddenUnits1, numOutput]) // [5, 3]
+        let W2_limit = sqrtf(2 / Float(numHiddenUnits1 + numOutput))
+        var W2 = NDArray.uniform(low: -W2_limit, high: W2_limit, shape: [numHiddenUnits1, numOutput]) // [5, 3]
         var b2 = NDArray.zeros([numOutput])
         
-        let alpha: Float = 1e-2
+        let alpha: Float = 1e-3
         
         for i in 0...3000 {
             let h1_1 = x <*> W1     // [M, 5]
@@ -90,7 +94,7 @@ class IrisClassificationTests: XCTestCase {
         
         // test
         do {
-            let x = Iris.x_test
+            let x = (Iris.x_test - normalize_mu) / normalize_sigma
             let labels = Iris.y_test
             let y = toOneHot(labels)
             let labelsCount = sum(y, along: 0)
