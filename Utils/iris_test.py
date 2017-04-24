@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import time
 import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
@@ -8,6 +9,8 @@ from keras.layers import Dense, InputLayer
 from keras.utils.np_utils import to_categorical
 
 iris = datasets.load_iris()
+
+start = time.time()
 
 x_train, x_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.4, random_state=0)
 
@@ -27,6 +30,7 @@ model = Sequential([
 
 model.compile("sgd", "categorical_crossentropy", ["accuracy"])
 
-model.fit(x_train, y_train, batch_size=len(x_train), epochs=3000)
+model.fit(x_train, y_train, batch_size=len(x_train), epochs=3000, verbose=0)
 
 print(model.evaluate(x_test, y_test))
+print(f"elapsed time: {time.time()-start}sec")
