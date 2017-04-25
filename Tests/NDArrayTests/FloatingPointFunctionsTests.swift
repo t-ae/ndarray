@@ -3,6 +3,34 @@ import XCTest
 import NDArray
 
 class FloatingPointFunctionsTests: XCTestCase {
+    
+    func testFloor() {
+        do {
+            let a = NDArray([[1, 1.3], [1.7, 2.2]])
+            XCTAssertEqual(floor(a), NDArray([[1, 1], [1, 2]]))
+        }
+    }
+    
+    func testCeil() {
+        do {
+            let a = NDArray([[1, 1.3], [1.7, 2.2]])
+            XCTAssertEqual(ceil(a), NDArray([[1, 2], [2, 3]]))
+        }
+    }
+    
+    func testRound() {
+        do {
+            let a = NDArray([[1, 1.49], [1.5, 1.51]])
+            XCTAssertEqual(round(a), NDArray([[1, 1], [2, 2]]))
+        }
+    }
+    
+    func testAbs() {
+        do {
+            let a = NDArray([[-1, -2], [-3, 4]])
+            XCTAssertEqual(abs(a), NDArray([[1, 2], [3, 4]]))
+        }
+    }
 
     func testSqrt() {
         do {
@@ -31,11 +59,6 @@ class FloatingPointFunctionsTests: XCTestCase {
         }
     }
     
-    func testAbs() {
-        do {
-            let a = NDArray([[-1, -2], [-3, 4]])
-            XCTAssertEqual(abs(a), NDArray([[1, 2], [3, 4]]))
-        }
-    }
+    
 
 }
