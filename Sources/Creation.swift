@@ -28,7 +28,10 @@ extension NDArray {
         precondition(size > 0)
         let zeros = [Float](repeating: 0, count: size-1)
         let data = zeros + [1] + zeros
-        return NDArray(shape: [size, size], strides: [-1, 1], baseOffset: size-1, data: data)
+        return NDArray(shape: [size, size],
+                       strides: [-1, 1],
+                       baseOffset: size-1,
+                       data: data)
     }
     
     /// Create diagonal matrix.

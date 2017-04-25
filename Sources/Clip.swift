@@ -28,7 +28,7 @@ extension NDArray {
     }
 }
 
-
+// MARK: Util
 private typealias vDSP_func = (UnsafePointer<Float>, vDSP_Stride, UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, vDSP_Stride, vDSP_Length) -> Void
 
 private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> NDArray {
