@@ -200,26 +200,15 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         defer { dst.deallocate(capacity: volume) }
         
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
-        let numProc = ProcessInfo.processInfo.activeProcessorCount
-        let offsetsBlockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
-        
         let _blockSize = Int32(blockSize)
         
-        DispatchQueue.concurrentPerform(iterations: numProc) { i in
-            var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
-            let start = i * offsetsBlockSize
-            let end = start + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
+        let src = UnsafePointer(arg.data) + arg.baseOffset
+        var dstPtr = dst
+        for offset in offsets {
+            let srcPtr = src + offset
             
-            guard start < end else { // can be empty
-                return
-            }
-            for oi in start..<end {
-                let offset = offsets[oi] + arg.baseOffset
-                let src = UnsafePointer(arg.data).advanced(by: offset)
-                
-                cblas_scopy(_blockSize, src, stride, dstPtr, 1)
-                dstPtr += blockSize
-            }
+            cblas_scopy(_blockSize, srcPtr, stride, dstPtr, 1)
+            dstPtr += blockSize
         }
         
         return [Float](UnsafeBufferPointer(start: dst, count: volume))

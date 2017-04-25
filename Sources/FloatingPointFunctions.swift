@@ -104,26 +104,15 @@ private func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         defer { dst.deallocate(capacity: volume) }
         
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
-        let numProc = ProcessInfo.processInfo.activeProcessorCount
-        let offsetsBlockSize = Int(ceil(Float(offsets.count) / Float(numProc)))
-        
         var _blockSize = Int32(blockSize)
         
-        DispatchQueue.concurrentPerform(iterations: numProc) { i in
-            var dstPtr = dst.advanced(by: i*offsetsBlockSize*blockSize)
-            let start = i * offsetsBlockSize
-            let end = start + min(offsetsBlockSize, offsets.count - i*offsetsBlockSize)
+        let src = UnsafePointer(arg.data) + arg.baseOffset
+        var dstPtr = dst
+        for offset in offsets {
+            let srcPtr = src + offset
             
-            guard start < end else { // can be empty
-                return
-            }
-            for oi in start..<end {
-                let offset = offsets[oi] + arg.baseOffset
-                let src = UnsafePointer(arg.data).advanced(by: offset)
-                
-                vvfunc(dstPtr, src, &_blockSize)
-                dstPtr += blockSize
-            }
+            vvfunc(dstPtr, srcPtr, &_blockSize)
+            dstPtr += blockSize
         }
 
         return NDArray(shape: arg.shape,
