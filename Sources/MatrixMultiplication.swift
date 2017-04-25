@@ -24,8 +24,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let dst = UnsafeMutablePointer<Float>.allocate(capacity: majorSize*matrixSize)
     defer { dst.deallocate(capacity: majorSize*matrixSize) }
     
-    let lPtr = UnsafePointer(lhs.data)
-    let rPtr = UnsafePointer(rhs.data)
+    let lPtr = UnsafePointer(lhs.data) // `lhs.baseOffset` always 0
+    let rPtr = UnsafePointer(rhs.data) // `rhs.baseOffset` always 0
     let lOffsets = getOffsets(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
     let rOffsets = getOffsets(shape: majorShape, strides: [Int](rhs.strides.dropLast(2)))
     var dstPtr = dst
