@@ -1,10 +1,12 @@
 
 import Accelerate
 
+/// Get minimums for each pair elements
 public func minimum(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     return apply(lhs, rhs, vDSP_vmin)
 }
 
+/// Get maximums for each pair elements
 public func maximum(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     return apply(lhs, rhs, vDSP_vmax)
 }
