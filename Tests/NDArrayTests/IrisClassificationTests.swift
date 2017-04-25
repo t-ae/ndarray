@@ -9,7 +9,7 @@ class IrisClassificationTests: XCTestCase {
         let start = Date()
         
         let normalize_mu = mean(Iris.x_train, along: 0)
-        let normalize_sigma = mean(Iris.x_train**2, along: 0) - normalize_mu**2
+        let normalize_sigma = std(Iris.x_train, along: 0)
         
         let x = (Iris.x_train - normalize_mu) / normalize_sigma
         let labels = Iris.y_train
