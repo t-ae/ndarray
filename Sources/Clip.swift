@@ -1,6 +1,14 @@
 
 import Accelerate
 
+public func minimum(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
+    return apply(lhs, rhs, vDSP_vmin)
+}
+
+public func maximum(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
+    return apply(lhs, rhs, vDSP_vmax)
+}
+
 extension NDArray {
     /// Clip lower values.
     public func clip(low: Float) -> NDArray {
@@ -62,4 +70,41 @@ private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> 
         return NDArray(shape: array.shape,
                        elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
     }
+}
+
+private func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_func) -> NDArray {
+    let (lhs, rhs) = broadcast(lhs, rhs)
+    
+    let volume = lhs.volume
+    let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
+    defer { dst.deallocate(capacity: volume) }
+    
+    let strDims = min(stridedDims(shape: lhs.shape, strides: lhs.strides),
+                      stridedDims(shape: rhs.shape, strides: rhs.strides))
+    
+    let majorShape = [Int](lhs.shape.dropLast(strDims))
+    let lMajorStrides = [Int](lhs.strides.dropLast(strDims))
+    let rMajorStrides = [Int](rhs.strides.dropLast(strDims))
+    
+    let lStride = vDSP_Stride(lhs.strides.last!)
+    let rStride = vDSP_Stride(rhs.strides.last!)
+    let blockSize = lhs.shape.suffix(strDims).prod()
+    let _blockSize = vDSP_Length(blockSize)
+    
+    let lOffsets = getOffsets(shape: majorShape, strides: lMajorStrides)
+    let rOffsets = getOffsets(shape: majorShape, strides: rMajorStrides)
+    
+    
+    let lSrc = UnsafePointer(lhs.data) + lhs.baseOffset
+    let rSrc = UnsafePointer(rhs.data) + rhs.baseOffset
+    var dstPtr = dst
+    for (lo, ro) in zip(lOffsets, rOffsets) {
+        vDSPfunc(lSrc + lo, lStride,
+                 rSrc + ro, rStride,
+                 dstPtr, 1, _blockSize)
+        dstPtr += blockSize
+    }
+    
+    return NDArray(shape: lhs.shape,
+                   elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
 }
