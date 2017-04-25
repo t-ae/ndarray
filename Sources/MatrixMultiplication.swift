@@ -1,6 +1,6 @@
 import Accelerate
 
-public func _matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
+public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     
     precondition(lhs.ndim > 1 && rhs.ndim > 1)
     
@@ -41,14 +41,7 @@ infix operator <*>: MultiplicationPrecedence
 
 /// Matlix multiplication
 public func <*>(lhs: NDArray, rhs: NDArray) -> NDArray {
-    return _matmul(lhs, rhs)
-}
-
-extension NDArray {
-    /// Matlix multiplication
-    func matmul(_ rhs: NDArray) -> NDArray {
-        return _matmul(self, rhs)
-    }
+    return matmul(lhs, rhs)
 }
 
 private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
