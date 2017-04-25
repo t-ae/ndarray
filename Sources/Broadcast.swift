@@ -30,8 +30,14 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
         }
     }
     
-    let lArray = NDArray(shape: lShape, strides: lStrides, baseOffset: lhs.baseOffset, data: lhs.data)
-    let rArray = NDArray(shape: rShape, strides: rStrides, baseOffset: rhs.baseOffset, data: rhs.data)
+    let lArray = NDArray(shape: lShape,
+                         strides: lStrides,
+                         baseOffset: lhs.baseOffset,
+                         data: lhs.data)
+    let rArray = NDArray(shape: rShape,
+                         strides: rStrides,
+                         baseOffset: rhs.baseOffset,
+                         data: rhs.data)
     
     return (lArray, rArray)
 }
@@ -58,6 +64,9 @@ func broadcast(_ arg: NDArray, to shape: [Int]) -> NDArray {
         }
     }
     
-    return NDArray(shape: newShape, strides: newStrides, baseOffset: arg.baseOffset, data: arg.data)
+    return NDArray(shape: newShape,
+                   strides: newStrides,
+                   baseOffset: arg.baseOffset,
+                   data: arg.data)
     
 }

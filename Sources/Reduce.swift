@@ -162,8 +162,10 @@ private func _std(_ arg: NDArray, along axis: Int) -> NDArray {
         dst2Ptr += 1
     }
     
-    let sum = NDArray(shape: newShape, elements: [Float](UnsafeBufferPointer(start: dst1, count: volume)))
-    let sum2 = NDArray(shape: newShape, elements: [Float](UnsafeBufferPointer(start: dst2, count: volume)))
+    let sum = NDArray(shape: newShape,
+                      elements: [Float](UnsafeBufferPointer(start: dst1, count: volume)))
+    let sum2 = NDArray(shape: newShape,
+                       elements: [Float](UnsafeBufferPointer(start: dst2, count: volume)))
     
     let mean = sum / Float(count)
     let mean2 = sum2 / Float(count)

@@ -59,6 +59,7 @@ private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> 
             dstPtr += blockSize
         }
         
-        return NDArray(shape: array.shape, elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
+        return NDArray(shape: array.shape,
+                       elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
     }
 }

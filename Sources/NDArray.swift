@@ -21,7 +21,10 @@ public struct NDArray {
         
         precondition(shape.prod() == elements.count)
         
-        self.init(shape: shape, strides: continuousStrides(shape: shape), baseOffset: 0, data: elements)
+        self.init(shape: shape,
+                  strides: continuousStrides(shape: shape),
+                  baseOffset: 0,
+                  data: elements)
     }
     
     /// Get all elements.

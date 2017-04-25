@@ -50,6 +50,7 @@ extension NDArray {
             }
         }
         
-        return NDArray(shape: newShape, elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
+        return NDArray(shape: newShape,
+                       elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
     }
 }

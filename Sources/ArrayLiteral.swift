@@ -2,7 +2,8 @@
 extension NDArray {
     /// Create 1-D array.
     public init(_ array: [Float]) {
-        self.init(shape: [array.count], elements: array)
+        self.init(shape: [array.count],
+                  elements: array)
     }
     
     /// Create 2-D array.
@@ -12,7 +13,8 @@ extension NDArray {
         let size2 = array.first!.count
         precondition(array.all { $0.count == size2 })
         
-        self.init(shape: [size1, size2], elements: array.flatMap { $0 })
+        self.init(shape: [size1, size2],
+                  elements: array.flatMap { $0 })
     }
     
     /// Create 3-D array.
@@ -26,6 +28,7 @@ extension NDArray {
         let size3 = flat1.first!.count
         precondition(flat1.all { $0.count == size3 })
         
-        self.init(shape: [size1, size2, size3], elements: flat1.flatMap { $0 })
+        self.init(shape: [size1, size2, size3],
+                  elements: flat1.flatMap { $0 })
     }
 }

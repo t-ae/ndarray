@@ -54,28 +54,34 @@ public func <*>(lhs: NDArray, rhs: NDArray) -> NDArray {
 
 private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
     
-    let lData: [Float]
     var lShape = lhs.shape
     var lStrides: [Int]
+    let lBaseOffset: Int
+    let lData: [Float]
     if lhs.strides == [lhs.shape[lhs.ndim-1], 1] {
         // submatrices are continuous
         lData = lhs.data
         lStrides = lhs.strides
+        lBaseOffset = lhs.baseOffset
     } else {
         lData = gatherElements(lhs)
         lStrides = continuousStrides(shape: lShape)
+        lBaseOffset = 0
     }
     
-    let rData: [Float]
     var rShape = rhs.shape
     var rStrides: [Int]
+    let rBaseOffset: Int
+    let rData: [Float]
     if rhs.strides == [rhs.shape[rhs.ndim-1], 1] {
         // submatrices are continuous
         rData = rhs.data
         rStrides = rhs.strides
+        rBaseOffset = rhs.baseOffset
     } else {
         rData = gatherElements(rhs)
         rStrides = continuousStrides(shape: rShape)
+        rBaseOffset = 0
     }
     
     let d = lShape.count - rShape.count
@@ -101,7 +107,15 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
         }
     }
     
-    return (NDArray(shape: lShape, strides: lStrides, baseOffset: 0, data: lData),
-            NDArray(shape: rShape, strides: rStrides, baseOffset: 0, data: rData))
+    let lhs = NDArray(shape: lShape,
+                      strides: lStrides,
+                      baseOffset: lBaseOffset,
+                      data: lData)
+    let rhs = NDArray(shape: rShape,
+                      strides: rStrides,
+                      baseOffset: rBaseOffset,
+                      data: rData)
+    
+    return (lhs, rhs)
     
 }

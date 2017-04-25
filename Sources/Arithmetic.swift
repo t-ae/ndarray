@@ -43,7 +43,8 @@ func neg(_ arg: NDArray) -> NDArray {
             dstPtr += blockSize
         }
         
-        return NDArray(shape: arg.shape, elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
+        return NDArray(shape: arg.shape,
+                       elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
     }
 }
 
