@@ -24,8 +24,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let dst = UnsafeMutablePointer<Float>.allocate(capacity: majorSize*matrixSize)
     defer { dst.deallocate(capacity: majorSize*matrixSize) }
     
-    let lPtr = UnsafePointer(lhs.data) // `lhs.baseOffset` always 0
-    let rPtr = UnsafePointer(rhs.data) // `rhs.baseOffset` always 0
+    let lPtr = UnsafePointer(lhs.data) + lhs.baseOffset
+    let rPtr = UnsafePointer(rhs.data) + rhs.baseOffset
     let lOffsets = getOffsets(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
     let rOffsets = getOffsets(shape: majorShape, strides: [Int](rhs.strides.dropLast(2)))
     var dstPtr = dst
@@ -54,13 +54,29 @@ public func <*>(lhs: NDArray, rhs: NDArray) -> NDArray {
 
 private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
     
-    let lElements = gatherElements(lhs)
-    let rElements = gatherElements(rhs)
-    
+    let lData: [Float]
     var lShape = lhs.shape
+    var lStrides: [Int]
+    if lhs.strides == [lhs.shape[lhs.ndim-1], 1] {
+        // submatrices are continuous
+        lData = lhs.data
+        lStrides = lhs.strides
+    } else {
+        lData = gatherElements(lhs)
+        lStrides = continuousStrides(shape: lShape)
+    }
+    
+    let rData: [Float]
     var rShape = rhs.shape
-    var lStrides = continuousStrides(shape: lhs.shape)
-    var rStrides = continuousStrides(shape: rhs.shape)
+    var rStrides: [Int]
+    if rhs.strides == [rhs.shape[rhs.ndim-1], 1] {
+        // submatrices are continuous
+        rData = rhs.data
+        rStrides = rhs.strides
+    } else {
+        rData = gatherElements(rhs)
+        rStrides = continuousStrides(shape: rShape)
+    }
     
     let d = lShape.count - rShape.count
     if d < 0 {
@@ -85,7 +101,7 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
         }
     }
     
-    return (NDArray(shape: lShape, strides: lStrides, baseOffset: 0, data: lElements),
-            NDArray(shape: rShape, strides: rStrides, baseOffset: 0, data: rElements))
+    return (NDArray(shape: lShape, strides: lStrides, baseOffset: 0, data: lData),
+            NDArray(shape: rShape, strides: rStrides, baseOffset: 0, data: rData))
     
 }
