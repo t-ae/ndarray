@@ -4,42 +4,34 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
         return (lhs, rhs)
     }
     
-    var (lShape, rShape) = (lhs.shape, rhs.shape)
-    var (lStrides, rStrides) = (lhs.strides, rhs.strides)
+//    var (lShape, rShape) = (lhs.shape, rhs.shape)
+//    var (lStrides, rStrides) = (lhs.strides, rhs.strides)
+    var (lhs, rhs) = (lhs, rhs)
     
-    let d = lShape.count - rShape.count
+    let d = lhs.shape.count - rhs.shape.count
     if d < 0 {
-        lShape = [Int](repeating: 1, count: -d) + lShape
-        lStrides = [Int](repeating: 0, count: -d) + lStrides
+        lhs.shape = [Int](repeating: 1, count: -d) + lhs.shape
+        lhs.strides = [Int](repeating: 0, count: -d) + lhs.strides
     } else if d > 0 {
-        rShape = [Int](repeating: 1, count: d) + rShape
-        rStrides = [Int](repeating: 0, count: d) + rStrides
+        rhs.shape = [Int](repeating: 1, count: d) + rhs.shape
+        rhs.strides = [Int](repeating: 0, count: d) + rhs.strides
     }
     
-    for i in 0..<lShape.count {
-        if lShape[i] == rShape[i] {
+    for i in 0..<lhs.ndim {
+        if lhs.shape[i] == rhs.shape[i] {
             continue
-        } else if(lShape[i] == 1) {
-            lShape[i] = rShape[i]
-            lStrides[i] = 0
-        } else if(rShape[i] == 1) {
-            rShape[i] = lShape[i]
-            rStrides[i] = 0
+        } else if(lhs.shape[i] == 1) {
+            lhs.shape[i] = rhs.shape[i]
+            lhs.strides[i] = 0
+        } else if(rhs.shape[i] == 1) {
+            rhs.shape[i] = lhs.shape[i]
+            rhs.strides[i] = 0
         } else {
             preconditionFailure()
         }
     }
     
-    let lArray = NDArray(shape: lShape,
-                         strides: lStrides,
-                         baseOffset: lhs.baseOffset,
-                         data: lhs.data)
-    let rArray = NDArray(shape: rShape,
-                         strides: rStrides,
-                         baseOffset: rhs.baseOffset,
-                         data: rhs.data)
-    
-    return (lArray, rArray)
+    return (lhs, rhs)
 }
 
 /// Broadcast arg to shape.
@@ -49,24 +41,22 @@ func broadcast(_ arg: NDArray, to shape: [Int]) -> NDArray {
         return arg
     }
     
-    let d = shape.count - arg.shape.count
-    var newShape = [Int](repeating: 1, count: d) + arg.shape
-    var newStrides = [Int](repeating: 0, count: d) + arg.strides
+    var arg = arg
     
-    for i in 0..<newShape.count {
-        if newShape[i] == shape[i] {
+    let d = shape.count - arg.shape.count
+    arg.shape = [Int](repeating: 1, count: d) + arg.shape
+    arg.strides = [Int](repeating: 0, count: d) + arg.strides
+    
+    for i in 0..<arg.ndim {
+        if arg.shape[i] == shape[i] {
             continue
-        } else if newShape[i] == 1 {
-            newShape[i] = shape[i]
-            newStrides[i] = 0
+        } else if arg.shape[i] == 1 {
+            arg.shape[i] = shape[i]
+            arg.strides[i] = 0
         } else {
             preconditionFailure()
         }
     }
     
-    return NDArray(shape: newShape,
-                   strides: newStrides,
-                   baseOffset: arg.baseOffset,
-                   data: arg.data)
-    
+    return arg
 }

@@ -54,68 +54,41 @@ public func <*>(lhs: NDArray, rhs: NDArray) -> NDArray {
 
 private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
     
-    var lShape = lhs.shape
-    var lStrides: [Int]
-    let lBaseOffset: Int
-    let lData: [Float]
-    if lhs.strides == [lhs.shape[lhs.ndim-1], 1] {
-        // submatrices are continuous
-        lData = lhs.data
-        lStrides = lhs.strides
-        lBaseOffset = lhs.baseOffset
-    } else {
-        lData = gatherElements(lhs)
-        lStrides = continuousStrides(shape: lShape)
-        lBaseOffset = 0
+    var (lhs, rhs) = (lhs, rhs)
+    
+    if lhs.strides != [lhs.shape[lhs.ndim-1], 1] {
+        lhs.data = gatherElements(lhs)
+        lhs.strides = continuousStrides(shape: lhs.shape)
+        lhs.baseOffset = 0
+    }
+    if rhs.strides != [rhs.shape[rhs.ndim-1], 1] {
+        rhs.data = gatherElements(rhs)
+        rhs.strides = continuousStrides(shape: rhs.shape)
+        rhs.baseOffset = 0
     }
     
-    var rShape = rhs.shape
-    var rStrides: [Int]
-    let rBaseOffset: Int
-    let rData: [Float]
-    if rhs.strides == [rhs.shape[rhs.ndim-1], 1] {
-        // submatrices are continuous
-        rData = rhs.data
-        rStrides = rhs.strides
-        rBaseOffset = rhs.baseOffset
-    } else {
-        rData = gatherElements(rhs)
-        rStrides = continuousStrides(shape: rShape)
-        rBaseOffset = 0
-    }
-    
-    let d = lShape.count - rShape.count
+    let d = lhs.shape.count - rhs.shape.count
     if d < 0 {
-        lShape = [Int](repeating: 1, count: -d) + lShape
-        lStrides = [Int](repeating: 0, count: -d) + lStrides
+        lhs.shape = [Int](repeating: 1, count: -d) + lhs.shape
+        lhs.strides = [Int](repeating: 0, count: -d) + lhs.strides
     } else if d > 0 {
-        rShape = [Int](repeating: 1, count: d) + rShape
-        rStrides = [Int](repeating: 0, count: d) + rStrides
+        rhs.shape = [Int](repeating: 1, count: d) + rhs.shape
+        rhs.strides = [Int](repeating: 0, count: d) + rhs.strides
     }
     
-    for i in (0..<lShape.count-2).reversed() {
-        if lShape[i] == rShape[i] {
+    for i in (0..<lhs.shape.count-2).reversed() {
+        if lhs.shape[i] == rhs.shape[i] {
             continue
-        } else if lShape[i] == 1 {
-            lShape[i] = rShape[i]
-            lStrides[i] = 0
-        } else if rShape[i] == 1 {
-            rShape[i] = lShape[i]
-            rStrides[i] = 0
+        } else if lhs.shape[i] == 1 {
+            lhs.shape[i] = rhs.shape[i]
+            lhs.strides[i] = 0
+        } else if rhs.shape[i] == 1 {
+            rhs.shape[i] = lhs.shape[i]
+            rhs.strides[i] = 0
         } else {
             preconditionFailure()
         }
     }
     
-    let lhs = NDArray(shape: lShape,
-                      strides: lStrides,
-                      baseOffset: lBaseOffset,
-                      data: lData)
-    let rhs = NDArray(shape: rShape,
-                      strides: rStrides,
-                      baseOffset: rBaseOffset,
-                      data: rData)
-    
     return (lhs, rhs)
-    
 }
