@@ -10,9 +10,7 @@ extension NDArray {
         let shape = arrays.first!.shape
         precondition(arrays.all { $0.shape == shape })
         
-        let newAxis = normalizeAxis(axis: newAxis, ndim: shape.count+1)
-        
-        let reshaped = arrays.map { $0.reshaped($0.shape.inserting(1, at: newAxis)) }
+        let reshaped = arrays.map { $0.expandDims(newAxis) }
         return concat(reshaped, along: newAxis)
     }
     
