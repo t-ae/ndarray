@@ -2,7 +2,8 @@ import Accelerate
 
 /// Matrix multiplication
 ///
-/// If either argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two indexes and broadcast accordingly.
+/// If either argument is N-D, N > 2, it is treated as a stack of matrices residing 
+/// in the last two indexes and broadcast accordingly.
 ///
 /// 1-D or 0-D arrays are not allowed.
 public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
