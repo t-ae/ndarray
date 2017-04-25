@@ -6,6 +6,7 @@ extension NDArray {
     public func clip(low: Float) -> NDArray {
         return apply(self, low, vDSP_vmax)
     }
+    
     /// Clip higher values.
     public func clip(high: Float) -> NDArray {
         return apply(self, high, vDSP_vmin)

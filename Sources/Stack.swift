@@ -8,7 +8,7 @@ extension NDArray {
     /// All arrays must have same shape.
     public static func stack(_ arrays: [NDArray], newAxis: Int = 0) -> NDArray {
         let shape = arrays.first!.shape
-        precondition(arrays.map { $0.shape == shape }.all())
+        precondition(arrays.all { $0.shape == shape })
         
         let newAxis = normalizeAxis(axis: newAxis, ndim: shape.count+1)
         
@@ -24,7 +24,7 @@ extension NDArray {
         
         let shapes = arrays.map { $0.shape.removing(at: axis) }
         let shape = shapes.first!
-        precondition(shapes.map { $0 == shape }.all())
+        precondition(shapes.all { $0 == shape })
         
         let elementsList = arrays.map { gatherElements($0) }
         let majorShape = [Int](shape.prefix(axis))

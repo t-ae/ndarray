@@ -4,7 +4,7 @@ extension NDArray {
     
     /// Create ndarray filled with specified values.
     public static func filled(_ value: Float, shape: [Int]) -> NDArray {
-        precondition(shape.map { $0 >= 0 }.all())
+        precondition(shape.all { $0 >= 0 })
         return NDArray(shape: shape,
                        strides: [Int](repeating: 0, count: shape.count),
                        baseOffset: 0,
@@ -13,13 +13,13 @@ extension NDArray {
     
     /// Create ndarray filled with 0s.
     public static func zeros(_ shape: [Int]) -> NDArray {
-        precondition(shape.map { $0 >= 0 }.all())
+        precondition(shape.all { $0 >= 0 })
         return filled(0, shape: shape)
     }
     
     /// Create ndarray filled with 1s.
     public static func ones(_ shape: [Int]) -> NDArray {
-        precondition(shape.map { $0 >= 0 }.all())
+        precondition(shape.all { $0 >= 0 })
         return filled(1, shape: shape)
     }
     

@@ -256,27 +256,16 @@ func normalizeAxis(axis: Int, ndim: Int) -> Int {
     return axis
 }
 
-extension Array where Element == Bool {
-    func all() -> Bool {
+extension Array {
+    func all(cond: (Element)->Bool) -> Bool {
         for e in self {
-            if !e {
+            if !cond(e) {
                 return false
             }
         }
         return true
     }
     
-    func some() -> Bool {
-        for e in self {
-            if e {
-                return true
-            }
-        }
-        return false
-    }
-}
-
-extension Array {
     func removing(at index: Int) -> Array {
         var ret = self
         ret.remove(at: index)

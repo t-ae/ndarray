@@ -25,7 +25,7 @@ extension NDArray {
             shape[arbit] = self.volume / shape.removing(at: arbit).prod()
         }
         
-        precondition(shape.map { $0 >= 0 }.all())
+        precondition(shape.all { $0 >= 0 })
         precondition(self.volume == shape.prod())
         
         let elements = gatherElements(self)
