@@ -74,7 +74,7 @@ func getIndices(shape: [Int]) -> [[Int]] {
     var indices: [[Int]] = []
     let last = index.count - 1
     
-    while true {
+    repeat {
         indices.append(index)
         index[last] += 1
         for i in 0..<last {
@@ -84,10 +84,7 @@ func getIndices(shape: [Int]) -> [[Int]] {
             index[last-i] = 0
             index[last-i-1] += 1
         }
-        if index[0] == shape[0] {
-            break
-        }
-    }
+    } while index[0] != shape[0]
     
     return indices
 }
