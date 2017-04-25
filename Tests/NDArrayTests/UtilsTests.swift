@@ -57,7 +57,7 @@ class UtilsTests: XCTestCase {
         }
     }
     
-    func testGather() {
+    func testGatherElements() {
         do {
             let a = NDArray.eye(3)
             let elements = gatherElements(a)

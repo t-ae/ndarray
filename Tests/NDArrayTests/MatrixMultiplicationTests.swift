@@ -8,14 +8,16 @@ class MatrixMultiplicationTests: XCTestCase {
         do {
             let a = NDArray([[1, 2], [3, 4]])
             let b = NDArray.eye(2)
-            let ans = a <*> b
-            XCTAssertEqual(ans, a)
+            let c = a <*> b
+            let d = b <*> a
+            XCTAssertEqual(c, a)
+            XCTAssertEqual(d, a)
         }
         do {
             let a = NDArray.range(24).reshaped([2, 3, 4]).transposed([0, 2, 1])
             let b = NDArray.eye(3)
-            let ans = a <*> b
-            XCTAssertEqual(ans, a)
+            let c = a <*> b
+            XCTAssertEqual(c, a)
         }
         do {
             let a = NDArray.range(24).reshaped([2, 3, 4]).transposed()
