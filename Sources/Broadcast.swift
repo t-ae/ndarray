@@ -4,8 +4,6 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
         return (lhs, rhs)
     }
     
-//    var (lShape, rShape) = (lhs.shape, rhs.shape)
-//    var (lStrides, rStrides) = (lhs.strides, rhs.strides)
     var (lhs, rhs) = (lhs, rhs)
     
     let d = lhs.shape.count - rhs.shape.count
