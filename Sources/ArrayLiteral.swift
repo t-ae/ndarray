@@ -1,9 +1,11 @@
 
 extension NDArray {
+    /// Create 1-D array.
     public init(_ array: [Float]) {
         self.init(shape: [array.count], elements: array)
     }
     
+    /// Create 2-D array.
     public init(_ array: [[Float]]) {
         
         let size1 = array.count
@@ -13,6 +15,7 @@ extension NDArray {
         self.init(shape: [size1, size2], elements: array.flatMap { $0 })
     }
     
+    /// Create 3-D array.
     public init(_ array: [[[Float]]]) {
         
         let size1 = array.count

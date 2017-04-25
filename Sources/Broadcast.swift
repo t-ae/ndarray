@@ -1,4 +1,4 @@
-/// Broadcast two arrays
+/// Broadcast two arrays.
 func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
     if lhs.shape == rhs.shape {
         return (lhs, rhs)
@@ -36,7 +36,7 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
     return (lArray, rArray)
 }
 
-/// Broadcast arg to shape
+/// Broadcast arg to shape.
 func broadcast(_ arg: NDArray, to shape: [Int]) -> NDArray {
     precondition(arg.shape.count <= shape.count)
     if arg.shape == shape {

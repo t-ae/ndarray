@@ -1,12 +1,12 @@
 extension NDArray {
     
-    /// Get dimensions reversed ndarray
+    /// Get dimensions reversed NDArray.
     public func transposed() -> NDArray {
         let axes = [Int]((0..<ndim).reversed())
         return transposed(axes)
     }
     
-    /// Get dimensions permuted ndarray
+    /// Get dimensions permuted NDArray.
     public func transposed(_ axes: [Int]) -> NDArray {
         precondition(axes.sorted() == [Int](0..<ndim))
         var x = self
@@ -17,7 +17,7 @@ extension NDArray {
         return x
     }
     
-    /// Get reshaped ndarray
+    /// Get reshaped NDArray.
     public func reshaped(_ shape: [Int]) -> NDArray {
         
         var shape = shape
@@ -32,6 +32,7 @@ extension NDArray {
         return NDArray(shape: shape, elements: elements)
     }
     
+    /// Get raveled NDArray.
     public func raveled() -> NDArray {
         return reshaped([-1])
     }

@@ -3,6 +3,9 @@ import Accelerate
 
 extension NDArray {
     
+    /// Concatenate NDArrays.
+    ///
+    /// All arrays must have same shape.
     public static func stack(_ arrays: [NDArray], newAxis: Int = 0) -> NDArray {
         let shape = arrays.first!.shape
         precondition(arrays.map { $0.shape == shape }.all())
@@ -13,6 +16,9 @@ extension NDArray {
         return concat(reshaped, along: newAxis)
     }
     
+    /// Concatenate NDArrays along a given axis.
+    ///
+    /// All arrays must have same shape without specified axis.
     public static func concat(_ arrays: [NDArray], along axis: Int) -> NDArray {
         let axis = normalizeAxis(axis: axis, ndim: arrays.first!.shape.count)
         

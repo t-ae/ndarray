@@ -2,14 +2,16 @@
 import Accelerate
 
 extension NDArray {
+    /// Clip lower values.
     public func clip(low: Float) -> NDArray {
         return apply(self, low, vDSP_vmax)
     }
-    
+    /// Clip higher values.
     public func clip(high: Float) -> NDArray {
         return apply(self, high, vDSP_vmin)
     }
     
+    /// Clip lower and higher values.
     public func clip(low: Float, high: Float) -> NDArray {
         return self.clip(low: low).clip(high: high)
     }

@@ -1,42 +1,52 @@
 
 import Accelerate
 
+/// Get minimum element.
 public func min(_ arg: NDArray) -> NDArray {
     return reduce(arg, vDSP_minv)
 }
 
+/// Get maximum element.
 public func max(_ arg: NDArray) -> NDArray {
     return reduce(arg, vDSP_maxv)
 }
 
+/// Caluclate sum of all elements.
 public func sum(_ arg: NDArray) -> NDArray {
     return reduce(arg, vDSP_sve)
 }
 
+/// Caluclate mean of all elements.
 public func mean(_ arg: NDArray) -> NDArray {
     return reduce(arg, vDSP_meanv)
 }
 
+/// Get minimal elements along a given axis.
 public func min(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_minv)
 }
 
+/// Get maximum elements along a given axis.
 public func max(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_maxv)
 }
 
+/// Get minimal elements' indices along a given axis.
 public func argmin(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_minvi)
 }
 
+/// Get maximum elements' indices along a given axis.
 public func argmax(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_maxvi)
 }
 
+/// Calculate sum of elements along a given axis.
 public func sum(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_sve)
 }
 
+/// Calculate mean of elements along a given axis.
 public func mean(_ arg: NDArray, along axis: Int) -> NDArray {
     return reduce(arg, along: axis, vDSP_meanv)
 }

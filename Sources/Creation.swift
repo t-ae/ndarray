@@ -2,7 +2,7 @@ import Foundation
 
 extension NDArray {
     
-    /// Create ndarray filled with specified values
+    /// Create ndarray filled with specified values.
     public static func filled(_ value: Float, shape: [Int]) -> NDArray {
         precondition(shape.map { $0 >= 0 }.all())
         return NDArray(shape: shape,
@@ -11,19 +11,19 @@ extension NDArray {
                        data: [value])
     }
     
-    /// Create ndarray filled with 0s
+    /// Create ndarray filled with 0s.
     public static func zeros(_ shape: [Int]) -> NDArray {
         precondition(shape.map { $0 >= 0 }.all())
         return filled(0, shape: shape)
     }
     
-    /// Create ndarray filled with 1s
+    /// Create ndarray filled with 1s.
     public static func ones(_ shape: [Int]) -> NDArray {
         precondition(shape.map { $0 >= 0 }.all())
         return filled(1, shape: shape)
     }
     
-    /// Create identity matrix
+    /// Create identity matrix.
     public static func eye(_ size: Int) -> NDArray {
         precondition(size > 0)
         let zeros = [Float](repeating: 0, count: size-1)
@@ -31,10 +31,15 @@ extension NDArray {
         return NDArray(shape: [size, size], strides: [-1, 1], baseOffset: size-1, data: data)
     }
     
+    /// Create diagonal matrix.
     public static func diagonal(_ diag: [Float]) -> NDArray {
         return NDArray.eye(diag.count) * NDArray(diag)
     }
     
+    /// Create diagonal matrix.
+    ///
+    /// If the argument is N-D, N > 1, it treated as stack of vectors
+    /// and result is (N+1)-D array.
     public static func diagonal(_ diag: NDArray) -> NDArray {
         guard let size = diag.shape.last else {
             return diag
@@ -42,21 +47,27 @@ extension NDArray {
         return NDArray.eye(size) <*> diag.reshaped(diag.shape + [1])
     }
     
+    /// Create continuous NDArray 0..<count.
     public static func range(_ count: Int) -> NDArray {
         precondition(count >= 0)
         return NDArray.range(0..<count)
     }
     
+    /// Create continuous NDArray.
     public static func range(_ range: CountableRange<Int>) -> NDArray {
         let elements = range.map { Float($0) }
         return NDArray(elements)
     }
     
+    /// Create evenly spaced NDArray.
     public static func stride(from: Float, to: Float, by: Float = 1) -> NDArray {
         let elements = [Float](Swift.stride(from: from, to: to, by: by))
         return NDArray(elements)
     }
     
+    /// Create evenly spaced NDArray.
+    ///
+    /// `count` elements are in the interval [low, high].
     public static func linspace(low: Float, high: Float, count: Int) -> NDArray {
         let elements = (0..<count).map { v -> Float in
             low + (high-low)*Float(v)/Float(count-1)

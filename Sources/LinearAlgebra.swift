@@ -8,6 +8,8 @@ public func norm(_ arg: NDArray) -> Float {
 }
 
 /// Calculate matrix inverse
+///
+/// If argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two indexes
 public func inv(_ arg: NDArray) throws -> NDArray {
     precondition(arg.ndim > 1)
     let size = arg.shape[arg.ndim-1]

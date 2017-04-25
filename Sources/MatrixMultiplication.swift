@@ -1,5 +1,10 @@
 import Accelerate
 
+/// Matrix multiplication
+///
+/// If either argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two indexes and broadcast accordingly.
+///
+/// 1-D or 0-D arrays are not allowed.
 public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     
     precondition(lhs.ndim > 1 && rhs.ndim > 1)
@@ -40,6 +45,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
 infix operator <*>: MultiplicationPrecedence
 
 /// Matlix multiplication
+///
+/// See `matmul`
 public func <*>(lhs: NDArray, rhs: NDArray) -> NDArray {
     return matmul(lhs, rhs)
 }
