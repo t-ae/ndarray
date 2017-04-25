@@ -36,4 +36,21 @@ extension NDArray {
     public func raveled() -> NDArray {
         return reshaped([-1])
     }
+    
+    /// Remove size 1 dimensions.
+    public func squeeze() -> NDArray {
+        let newShape = shape.filter { $0 != 1 }
+        let newStrides = zip(strides, shape).flatMap { stride, size in
+            size == 1 ? nil : stride
+        }
+        return NDArray(shape: newShape, strides: newStrides, baseOffset: baseOffset, data: data)
+    }
+    
+    /// Insert a new axis, corresponding to a given position in the array shape.
+    public func expandDims(_ newAxis: Int) -> NDArray {
+        let newAxis = normalizeAxis(axis: newAxis, ndim: ndim+1)
+        let newShape = shape.inserting(1, at: newAxis)
+        let newStrides = strides.inserting(0, at: newAxis)
+        return NDArray(shape: newShape, strides: newStrides, baseOffset: baseOffset, data: data)
+    }
 }

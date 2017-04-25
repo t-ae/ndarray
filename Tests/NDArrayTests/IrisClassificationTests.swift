@@ -66,15 +66,15 @@ class IrisClassificationTests: XCTestCase {
             // chain
             let d_out_b2 = d_h2_b2 * d_out_h2           // [90, 3]
             let d_out_h2_1 = d_h2_h2_1 * d_out_h2       // [90, 3]
-            let d_out_W2 = d_h2_1_W2.reshaped([numTrainSamples, numHiddenUnits1, 1])
-                <*> d_out_h2_1.reshaped([numTrainSamples, 1, numOutput]) // [90, 5, 3]
-            let d_out_h1 = (d_h2_1_h1 <*> d_out_h2_1.reshaped(d_out_h2_1.shape + [1]))
-                .reshaped([numTrainSamples, numHiddenUnits1]) // [90, 5]
+            let d_out_W2 = d_h2_1_W2.expandDims(-1)
+                <*> d_out_h2_1.expandDims(1) // [90, 5, 3]
+            let d_out_h1 = (d_h2_1_h1 <*> d_out_h2_1.expandDims(-1))
+                .squeeze()                              // [90, 5]
             let d_out_h1_2 = d_h1_h1_2 * d_out_h1       // [90, 5]
             let d_out_b1 = d_out_h1_2 * d_h1_2_b1       // [90, 5]
             let d_out_h1_1 = d_h1_2_h1_1 * d_out_h1_2   // [90, 5]
-            let d_out_W1 = d_h1_1_W1.reshaped([numTrainSamples, numFeatures, 1])
-                <*> d_out_h1_1.reshaped([numTrainSamples, 1, numHiddenUnits1]) // [90, 4, 5]
+            let d_out_W1 = d_h1_1_W1.expandDims(-1)
+                <*> d_out_h1_1.expandDims(1) // [90, 4, 5]
             
             // update
             b2 -= alpha * mean(d_out_b2, along: 0)
