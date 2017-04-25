@@ -156,10 +156,14 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
 func denseDims(shape: [Int], strides: [Int]) -> Int {
     precondition(shape.count == strides.count)
     
+    var contStr = continuousStrides(shape: shape)[0..<strides.count]
+    var strides = strides[0..<strides.count]
     for i in 0..<shape.count {
-        if Set(strides.dropFirst(i)) == Set(continuousStrides(shape: [Int](shape.dropFirst(i)))) {
+        if Set(strides) == Set(contStr) {
             return shape.count-i
         }
+        strides = strides.dropFirst()
+        contStr = contStr.dropFirst()
     }
     return 1
 }
@@ -174,15 +178,16 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
                 defer { dst.deallocate(capacity: arg.data.count) }
-                memcpy(dst, arg.data, arg.data.count*MemoryLayout<Float>.size)
-                return Array(UnsafeBufferPointer(start: dst, count: arg.data.count))
+                cblas_scopy(Int32(arg.data.count), arg.data, 1, dst, 1)
+                // memcpy(dst, arg.data, arg.data.count*MemoryLayout<Float>.size)
+                return [Float](UnsafeBufferPointer(start: dst, count: arg.data.count))
             } else {
                 return arg.data
             }
         } else {
             let start = arg.baseOffset
             let end = start + volume
-            return Array(arg.data[start..<end])
+            return [Float](arg.data[start..<end])
         }
     } else {
         // Separate scattered major shape and strided minor shape
@@ -202,9 +207,9 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let src = UnsafePointer(arg.data) + arg.baseOffset
         var dstPtr = dst
         for offset in offsets {
-            let srcPtr = src + offset
+            let src = src + offset
             
-            cblas_scopy(_blockSize, srcPtr, stride, dstPtr, 1)
+            cblas_scopy(_blockSize, src, stride, dstPtr, 1)
             dstPtr += blockSize
         }
         

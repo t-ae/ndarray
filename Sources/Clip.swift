@@ -26,7 +26,7 @@ private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> 
     var scalar = scalar
     
     if isDense(shape: array.shape, strides: array.strides) {
-        let src = UnsafePointer(array.data).advanced(by: array.baseOffset)
+        let src = UnsafePointer(array.data) + array.baseOffset
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: array.data.count)
         defer { dst.deallocate(capacity: array.data.count) }
         vDSPfunc(src, 1, &scalar, 0, dst, 1, vDSP_Length(array.data.count))
@@ -53,9 +53,9 @@ private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> 
         let src = UnsafePointer(array.data) + array.baseOffset
         var dstPtr = dst
         for offset in offsets {
-            let srcPtr = src + offset
+            let src = src + offset
             
-            vDSPfunc(srcPtr, stride, &scalar, 0, dstPtr, 1, _blockSize)
+            vDSPfunc(src, stride, &scalar, 0, dstPtr, 1, _blockSize)
             dstPtr += blockSize
         }
         

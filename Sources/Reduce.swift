@@ -97,8 +97,8 @@ private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_fun
     let src = UnsafePointer(arg.data) + arg.baseOffset
     var dstPtr = dst
     for offset in offsets {
-        let srcPtr = src + offset
-        vDSPfunc(srcPtr, stride, dstPtr, count)
+        let src = src + offset
+        vDSPfunc(src, stride, dstPtr, count)
         dstPtr += 1
     }
     
@@ -124,8 +124,8 @@ private func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_redu
     var dstPtr = dst
     let src = UnsafePointer(arg.data) + arg.baseOffset
     for offset in offsets {
-        let srcPtr = src + offset
-        vDSPfunc(srcPtr, stride, &e, dstPtr, count)
+        let src = src + offset
+        vDSPfunc(src, stride, &e, dstPtr, count)
         dstPtr += 1
     }
     
@@ -156,8 +156,8 @@ private func _std(_ arg: NDArray, along axis: Int) -> NDArray {
     var dst1Ptr = dst1
     var dst2Ptr = dst2
     for offset in offsets {
-        let srcPtr = src + offset
-        vDSP_sve_svesq(srcPtr, stride, dst1Ptr, dst2Ptr, count)
+        let src = src + offset
+        vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
         dst1Ptr += 1
         dst2Ptr += 1
     }

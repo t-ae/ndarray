@@ -33,8 +33,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
         cblas_sgemm(CblasRowMajor,
                     CblasNoTrans, CblasNoTrans,
                     M, N, K,
-                    1, lPtr.advanced(by: lo), K,
-                    rPtr.advanced(by: ro), N,
+                    1, lPtr + lo, K,
+                    rPtr + ro, N,
                     0, dstPtr, N)
         dstPtr += matrixSize
     }

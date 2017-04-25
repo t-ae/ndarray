@@ -84,7 +84,7 @@ private func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
     
     if isDense(shape: arg.shape, strides: arg.strides) {
         var count = Int32(arg.data.count)
-        let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
+        let src = UnsafePointer(arg.data) + arg.baseOffset
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
         defer { dst.deallocate(capacity: arg.data.count) }
         vvfunc(dst, src, &count)
@@ -109,9 +109,9 @@ private func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         let src = UnsafePointer(arg.data) + arg.baseOffset
         var dstPtr = dst
         for offset in offsets {
-            let srcPtr = src + offset
+            let src = src + offset
             
-            vvfunc(dstPtr, srcPtr, &_blockSize)
+            vvfunc(dstPtr, src, &_blockSize)
             dstPtr += blockSize
         }
 

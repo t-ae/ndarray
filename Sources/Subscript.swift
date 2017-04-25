@@ -63,12 +63,12 @@ func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     
     let majorIndices = getIndices(shape: majorShape)
     
+    let src = UnsafePointer(newValue.data) + newValue.baseOffset
+    let dst = UnsafeMutablePointer(mutating: newData) + dstOffset
     for majorIndex in majorIndices {
         let ndIndex = majorIndex + minorZeros
-        let src = UnsafePointer(newValue.data)
-            .advanced(by: indexOffset(strides: newValue.strides, ndIndex: ndIndex) + newValue.baseOffset)
-        let dst = UnsafeMutablePointer(mutating: newData)
-            .advanced(by: dstOffset + indexOffset(strides: dstStrides, ndIndex: ndIndex))
+        let src = src + indexOffset(strides: newValue.strides, ndIndex: ndIndex)
+        let dst = dst + indexOffset(strides: dstStrides, ndIndex: ndIndex)
         cblas_scopy(count, src, srcStride, dst, dstStride)
     }
     

@@ -8,10 +8,12 @@ public prefix func -(arg: NDArray) -> NDArray {
 
 func neg(_ arg: NDArray) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
-        let src = UnsafePointer(arg.data).advanced(by: arg.baseOffset)
+        let src = UnsafePointer(arg.data) + arg.baseOffset
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
         defer { dst.deallocate(capacity: arg.data.count) }
+        
         vDSP_vneg(src, 1, dst, 1, vDSP_Length(arg.data.count))
+        
         return NDArray(shape: arg.shape,
                        strides: arg.strides,
                        baseOffset: 0,
@@ -35,9 +37,9 @@ func neg(_ arg: NDArray) -> NDArray {
         let src = UnsafePointer(arg.data) + arg.baseOffset
         var dstPtr = dst
         for offset in offsets {
-            let srcPtr = src + offset
+            let src = src + offset
             
-            vDSP_vneg(srcPtr, stride, dstPtr, 1, _blockSize)
+            vDSP_vneg(src, stride, dstPtr, 1, _blockSize)
             dstPtr += blockSize
         }
         
@@ -113,8 +115,8 @@ private func apply(_ lhs: NDArray,
     let src = UnsafePointer(lhs.data) + lhs.baseOffset
     var dstPtr = dst
     for offset in offsets {
-        let srcPtr = src + offset
-        vDSPfunc(srcPtr, stride,
+        let src = src + offset
+        vDSPfunc(src, stride,
                  &rhs,
                  dstPtr, 1, _blockSize)
         
@@ -149,9 +151,9 @@ private func apply(_ lhs: Float,
     let src = UnsafePointer(rhs.data) + rhs.baseOffset
     var dstPtr = dst
     for offset in offsets {
-        let srcPtr = src + offset
+        let src = src + offset
         vDSPfunc(&lhs,
-                 srcPtr, stride,
+                 src, stride,
                  dstPtr, 1, _blockSize)
         
         dstPtr += blockSize
@@ -211,10 +213,10 @@ private func apply(_ lhs: NDArray,
     let rSrc = UnsafePointer(rhs.data) + rhs.baseOffset
     var dstPtr = dst
     for (lOffset, rOffset) in zip(lOffsets, rOffsets) {
-        let lSrcPtr = lSrc + lOffset
-        let rSrcPtr = rSrc + rOffset
-        vDSPfunc(lSrcPtr, lStride,
-                 rSrcPtr, rStride,
+        let lSrc = lSrc + lOffset
+        let rSrc = rSrc + rOffset
+        vDSPfunc(lSrc, lStride,
+                 rSrc, rStride,
                  dstPtr, 1, _blockSize)
         
         dstPtr += blockSize
