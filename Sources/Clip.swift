@@ -1,24 +1,18 @@
 
 import Accelerate
 
-public func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
-    return min(max(array, low), high)
-}
-
-public func min(_ lhs: NDArray, _ rhs: Float) -> NDArray {
-    return apply(lhs, rhs, vDSP_vmin)
-}
-
-public func min(_ lhs: Float, _ rhs: NDArray) -> NDArray {
-    return apply(rhs, lhs, vDSP_vmin)
-}
-
-public func max(_ lhs: NDArray, _ rhs: Float) -> NDArray {
-    return apply(lhs, rhs, vDSP_vmax)
-}
-
-public func max(_ lhs: Float, _ rhs: NDArray) -> NDArray {
-    return apply(rhs, lhs, vDSP_vmax)
+extension NDArray {
+    public func clip(low: Float) -> NDArray {
+        return apply(self, low, vDSP_vmax)
+    }
+    
+    public func clip(high: Float) -> NDArray {
+        return apply(self, high, vDSP_vmin)
+    }
+    
+    public func clip(low: Float, high: Float) -> NDArray {
+        return self.clip(low: low).clip(high: high)
+    }
 }
 
 
