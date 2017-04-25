@@ -112,7 +112,7 @@ func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
     let last = index.count - 1
     
     var dstPtr = dst
-    while true {
+    repeat {
         dstPtr.pointee = offset
         dstPtr += 1
         index[last] += 1
@@ -127,10 +127,7 @@ func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
             index[last-i-1] += 1
             offset += strides[last-i-1]
         }
-        if index[0] == shape[0] {
-            break
-        }
-    }
+    } while index[0] != shape[0]
     
     return [Int](UnsafeBufferPointer(start: dst, count: volume))
 }
