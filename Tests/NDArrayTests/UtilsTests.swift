@@ -7,28 +7,29 @@ class UtilsTests: XCTestCase {
     func testIsDense() {
         do {
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 4, 1]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [6, 4, 1]))
         }
         do {
             // permute
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 1, 4]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 4, 12]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 12, 4]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [4, 1, 12]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [4, 12, 1]))
+            XCTAssertTrue(isDense(shape: [2, 4, 3], strides: [12, 1, 4]))
+            XCTAssertTrue(isDense(shape: [4, 3, 2], strides: [1, 4, 12]))
+            XCTAssertTrue(isDense(shape: [4, 2, 3], strides: [1, 12, 4]))
+            XCTAssertTrue(isDense(shape: [3, 4, 2], strides: [4, 1, 12]))
+            XCTAssertTrue(isDense(shape: [3, 2, 4], strides: [4, 12, 1]))
         }
         do {
             // contain 0
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 4, 1]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 4, 0]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [12, 0, 1]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [12, 4, 0]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [12, 0, 1]))
             
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 0, 4]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 12, 0]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 12, 4]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [1, 0, 4]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [1, 12, 0]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [0, 12, 4]))
             
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 0, 4]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [0, 0, 4]))
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [1, 0, 0]))
-            XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 12, 0]))
+            XCTAssertFalse(isDense(shape: [2, 3, 4], strides: [0, 12, 0]))
             
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 0, 0]))
         }

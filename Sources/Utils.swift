@@ -16,27 +16,21 @@ func isStrided(shape: [Int], strides: [Int]) -> Bool {
 /// Doesn't permit minus strides.
 func isDense(shape: [Int], strides: [Int]) -> Bool {
     
-    var zeros = strides.filter { $0 == 0 }.count
+    if shape.count == 0 {
+        return true
+    }
     
-    let contStr = continuousStrides(shape: shape)
-    let nonzeroStr: [Int] = strides.filter({ $0 != 0 }).sorted().reversed()
+    let nonZeros = strides.filter { $0 != 0 }
+    let numZeros = strides.count - nonZeros.count
     
-    var i = 0
-    var j = 0
-    
+    var strideCount = 0
+    var stride = 1
     while true {
-        if j == nonzeroStr.count {
-            return i+zeros == contStr.count
-        } else if i == contStr.count {
-            return false
-        } else if contStr[i] == nonzeroStr[j] {
-            i += 1
-            j += 1
-        } else if zeros > 0 {
-            i += 1
-            zeros -= 1
+        if let index = strides.index(of: stride) {
+            stride *= shape[index]
+            strideCount += 1
         } else {
-            return false
+            return strideCount + numZeros == shape.count
         }
     }
 }
