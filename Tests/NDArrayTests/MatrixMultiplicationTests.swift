@@ -39,6 +39,12 @@ class MatrixMultiplicationTests: XCTestCase {
                                     [[ 33,  69],
                                      [ 45,  97],
                                      [ 57, 125]]]))
+            
+            let ans2 = a[0] <*> b
+            XCTAssertEqual(ans2,
+                           NDArray([[ 24,  48],
+                                    [ 36,  76],
+                                    [ 48, 104]]))
         }
         do {
             let a = NDArray.eye(3)
