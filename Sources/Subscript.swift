@@ -42,8 +42,8 @@ func set(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     // broadcast
     let newValue = broadcast(newValue, to: dstShape)
     
-    let startNDIndex = expandedIndex.map { $0 ?? 0 }
-    let startIndex = normalizeIndex(shape: array.shape, ndIndex: startNDIndex)
+    let startIndex = normalizeIndex(shape: array.shape,
+                                    ndIndex: expandedIndex.map { $0 ?? 0 })
     
     array.data = gatherElements(array, forceUniqueReference: true)
     array.strides = continuousStrides(shape: array.shape)
