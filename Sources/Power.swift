@@ -36,8 +36,8 @@ public func **(lhs: NDArray, rhs: NDArray) -> NDArray {
         let rOffsets = getOffsets(shape: majorShape, strides: rMajorStrides)
         var _blockSize = Int32(blockSize)
         
-        let lSrc = UnsafePointer(lhs.data) + lhs.baseOffset
-        let rSrc = UnsafePointer(rhs.data) + rhs.baseOffset
+        let lSrc = lhs.startPointer
+        let rSrc = rhs.startPointer
         var dstPtr = dst
         for (lo, ro) in zip(lOffsets, rOffsets) {
             vvpowf(dstPtr, rSrc + ro, lSrc + lo, &_blockSize)

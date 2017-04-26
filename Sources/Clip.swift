@@ -36,7 +36,7 @@ private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> 
     var scalar = scalar
     
     if isDense(shape: array.shape, strides: array.strides) {
-        let src = UnsafePointer(array.data) + array.baseOffset
+        let src = array.startPointer
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: array.data.count)
         defer { dst.deallocate(capacity: array.data.count) }
         vDSPfunc(src, 1, &scalar, 0, dst, 1, vDSP_Length(array.data.count))
@@ -60,7 +60,7 @@ private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> 
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
         let _blockSize = vDSP_Length(blockSize)
         
-        let src = UnsafePointer(array.data) + array.baseOffset
+        let src = array.startPointer
         var dstPtr = dst
         for offset in offsets {
             let src = src + offset
@@ -97,8 +97,8 @@ private func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_func) -> NDA
     let rOffsets = getOffsets(shape: majorShape, strides: rMajorStrides)
     
     
-    let lSrc = UnsafePointer(lhs.data) + lhs.baseOffset
-    let rSrc = UnsafePointer(rhs.data) + rhs.baseOffset
+    let lSrc = lhs.startPointer
+    let rSrc = rhs.startPointer
     var dstPtr = dst
     for (lo, ro) in zip(lOffsets, rOffsets) {
         vDSPfunc(lSrc + lo, lStride,

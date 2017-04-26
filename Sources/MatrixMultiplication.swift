@@ -27,8 +27,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let lda = Int32(lhs.strides[lhs.ndim-2])
     let ldb = Int32(rhs.strides[rhs.ndim-2])
     
-    let lPtr = UnsafePointer(lhs.data) + lhs.baseOffset
-    let rPtr = UnsafePointer(rhs.data) + rhs.baseOffset
+    let lPtr = lhs.startPointer
+    let rPtr = rhs.startPointer
     let lOffsets = getOffsets(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
     let rOffsets = getOffsets(shape: majorShape, strides: [Int](rhs.strides.dropLast(2)))
     var dstPtr = dst

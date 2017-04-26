@@ -63,7 +63,7 @@ func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     
     let majorIndices = getIndices(shape: majorShape)
     
-    let src = UnsafePointer(newValue.data) + newValue.baseOffset
+    let src = newValue.startPointer
     let dst = UnsafeMutablePointer(mutating: newData) + dstOffset
     for majorIndex in majorIndices {
         let ndIndex = majorIndex + minorZeros

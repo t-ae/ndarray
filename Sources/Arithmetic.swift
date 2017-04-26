@@ -8,7 +8,7 @@ public prefix func -(arg: NDArray) -> NDArray {
 
 func neg(_ arg: NDArray) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
-        let src = UnsafePointer(arg.data) + arg.baseOffset
+        let src = arg.startPointer
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
         defer { dst.deallocate(capacity: arg.data.count) }
         
@@ -34,7 +34,7 @@ func neg(_ arg: NDArray) -> NDArray {
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
         let _blockSize = vDSP_Length(blockSize)
         
-        let src = UnsafePointer(arg.data) + arg.baseOffset
+        let src = arg.startPointer
         var dstPtr = dst
         for offset in offsets {
             let src = src + offset
@@ -113,7 +113,7 @@ private func apply(_ lhs: NDArray,
     let stride = vDSP_Stride(lhs.strides.last ?? 0)
     let _blockSize = vDSP_Length(blockSize)
     
-    let src = UnsafePointer(lhs.data) + lhs.baseOffset
+    let src = lhs.startPointer
     var dstPtr = dst
     for offset in offsets {
         let src = src + offset
@@ -149,7 +149,7 @@ private func apply(_ lhs: Float,
     let stride = vDSP_Stride(rhs.strides.last ?? 0)
     let _blockSize = vDSP_Length(blockSize)
     
-    let src = UnsafePointer(rhs.data) + rhs.baseOffset
+    let src = rhs.startPointer
     var dstPtr = dst
     for offset in offsets {
         let src = src + offset
@@ -210,8 +210,8 @@ private func apply(_ lhs: NDArray,
     let rStride = vDSP_Stride(rhs.strides.last ?? 0)
     let _blockSize = vDSP_Length(blockSize)
     
-    let lSrc = UnsafePointer(lhs.data) + lhs.baseOffset
-    let rSrc = UnsafePointer(rhs.data) + rhs.baseOffset
+    let lSrc = lhs.startPointer
+    let rSrc = rhs.startPointer
     var dstPtr = dst
     for (lOffset, rOffset) in zip(lOffsets, rOffsets) {
         let lSrc = lSrc + lOffset

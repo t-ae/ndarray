@@ -195,7 +195,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
         let _blockSize = Int32(blockSize)
         
-        let src = UnsafePointer(arg.data) + arg.baseOffset
+        let src = arg.startPointer
         var dstPtr = dst
         for offset in offsets {
             let src = src + offset
@@ -236,6 +236,12 @@ func normalizeAxis(axis: Int, ndim: Int) -> Int {
     }
     precondition(axis >= 0 && axis < ndim)
     return axis
+}
+
+extension NDArray {
+    var startPointer: UnsafePointer<Float> {
+        return UnsafePointer(data) + baseOffset
+    }
 }
 
 extension Array {
