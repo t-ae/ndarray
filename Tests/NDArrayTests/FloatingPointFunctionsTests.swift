@@ -57,6 +57,14 @@ class FloatingPointFunctionsTests: XCTestCase {
             let b = sqrt(a)
             XCTAssertEqual(b, NDArray(shape: [2, 2], elements: [1, 3, 5, 7].map(sqrtf)))
         }
+        do {
+            // flipped
+            let a = NDArray.range(4).reshaped([2, 2])
+            let b = sqrt(a.flipped(0))
+            XCTAssertEqual(b, NDArray(shape: [2, 2], elements: [2, 3, 0, 1].map(sqrtf)))
+            let c = sqrt(a.flipped(1))
+            XCTAssertEqual(c, NDArray(shape: [2, 2], elements: [1, 0, 3, 2].map(sqrtf)))
+        }
     }
     
     

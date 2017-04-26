@@ -55,4 +55,16 @@ extension NDArray {
         x.strides = strides.inserting(0, at: newAxis)
         return x
     }
+    
+    /// Flip axis
+    public func flipped(_ axis: Int) -> NDArray {
+        
+        let axis = normalizeAxis(axis: axis, ndim: ndim)
+        
+        var x = self
+        x.baseOffset += x.strides[axis] * (x.shape[axis] - 1)
+        x.strides[axis] = -x.strides[axis]
+        
+        return x
+    }
 }

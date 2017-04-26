@@ -28,6 +28,14 @@ class ArithmeticTests: XCTestCase {
             XCTAssertEqual(b, NDArray([[-2, -3],
                                        [-6, -7]]))
         }
+        do {
+            // flipped
+            let a = NDArray.range(4).reshaped([2, 2])
+            XCTAssertEqual(-a.flipped(0), NDArray([[-2, -3],
+                                                   [ 0, -1]]))
+            XCTAssertEqual(-a.flipped(1), NDArray([[-1,  0],
+                                                   [-3, -2]]))
+        }
     }
 
     func testAdd() {

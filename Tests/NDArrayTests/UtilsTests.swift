@@ -76,6 +76,14 @@ class UtilsTests: XCTestCase {
             let elements = gatherElements(a)
             XCTAssertEqual(elements, [])
         }
+        do {
+            let a = NDArray(shape: [3, 3],
+                            strides: [3, -1],
+                            baseOffset: 2,
+                            data: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
+            let elements = gatherElements(a)
+            XCTAssertEqual(elements, [2, 1, 0, 5, 4, 3, 8, 7, 6])
+        }
     }
 
     func testBroadcast() {
