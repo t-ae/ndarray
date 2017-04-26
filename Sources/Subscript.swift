@@ -5,16 +5,21 @@ extension NDArray {
     
     public subscript(index: Int?...) -> NDArray {
         get {
-            return get(array: self, indexWithHole: index)
+            return getSubarray(array: self, indexWithHole: index)
         }
         set {
-            set(array: &self, indexWithHole: index, newValue: newValue)
+            setSubarray(array: &self, indexWithHole: index, newValue: newValue)
         }
+    }
+    
+    /// Substitute for scalar setting
+    public mutating func set(_ value: Float, for index: [Int?]) {
+        setSubarray(array: &self, indexWithHole: index, newValue: NDArray(scalar: value))
     }
     
 }
 
-func get(array: NDArray, indexWithHole: [Int?]) -> NDArray {
+func getSubarray(array: NDArray, indexWithHole: [Int?]) -> NDArray {
     
     precondition(indexWithHole.count <= array.ndim)
     
@@ -30,7 +35,7 @@ func get(array: NDArray, indexWithHole: [Int?]) -> NDArray {
     return NDArray(shape: newShape, strides: newStrides, baseOffset: newOffset, data: array.data)
 }
 
-func set(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
+func setSubarray(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     
     precondition(indexWithHole.count <= array.ndim)
     

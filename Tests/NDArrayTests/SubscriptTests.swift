@@ -129,4 +129,18 @@ class SubscriptTests: XCTestCase {
                                        [5, 5]]))
         }
     }
+    
+    func testSet() {
+        do {
+            var a = NDArray.zeros([3, 3])
+            a.set(1, for: [1])
+            XCTAssertEqual(a, NDArray([[0, 0, 0],
+                                       [1, 1, 1],
+                                       [0, 0, 0]]))
+            a.set(1, for: [nil, 1])
+            XCTAssertEqual(a, NDArray([[0, 1, 0],
+                                       [1, 1, 1],
+                                       [0, 1, 0]]))
+        }
+    }
 }
