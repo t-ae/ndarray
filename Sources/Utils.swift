@@ -85,7 +85,7 @@ func getIndices(shape: [Int]) -> [[Int]] {
 
 /// Get offsets in row major order.
 func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
-    precondition(shape.count == strides.count)
+    assert(shape.count == strides.count)
     guard !shape.isEmpty else {
         return [0]
     }
@@ -125,7 +125,7 @@ func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
 
 /// Calculate how many dims are strided.
 func stridedDims(shape: [Int], strides: [Int]) -> Int {
-    precondition(shape.count == strides.count)
+    assert(shape.count == strides.count)
     var stridedDims = 0
     guard var stride = strides.last else {
         return 0
@@ -145,7 +145,7 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
 
 /// Calculate how many dims are dense.
 func denseDims(shape: [Int], strides: [Int]) -> Int {
-    precondition(shape.count == strides.count)
+    assert(shape.count == strides.count)
     
     var contStr = continuousStrides(shape: shape)[0..<strides.count]
     var strides = strides[0..<strides.count]
