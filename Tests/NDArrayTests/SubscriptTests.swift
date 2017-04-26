@@ -121,10 +121,4 @@ class SubscriptTests: XCTestCase {
             
         }
     }
-    
-    func testHoge() {
-        var a = NDArray.range(0..<8).reshaped([2,2,2])
-        let zero: NDArray = NDArray(scalar: 0)
-        a[1] = zero
-    }
 }

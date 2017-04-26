@@ -5,50 +5,51 @@ extension NDArray {
     
     public subscript(index: Int?...) -> NDArray {
         get {
-            return get(ndarray: self, indexWithHole: index)
+            return get(array: self, indexWithHole: index)
         }
         set {
-            set(ndarray: &self, indexWithHole: index, newValue: newValue)
+            set(array: &self, indexWithHole: index, newValue: newValue)
         }
     }
     
 }
 
-func get(ndarray: NDArray, indexWithHole: [Int?]) -> NDArray {
+func get(array: NDArray, indexWithHole: [Int?]) -> NDArray {
     
-    precondition(indexWithHole.count <= ndarray.ndim)
+    precondition(indexWithHole.count <= array.ndim)
     
     // fill rest dimensions
-    let expandedIndex = indexWithHole + [Int?](repeating: nil, count: ndarray.ndim - indexWithHole.count)
+    let expandedIndex = indexWithHole + [Int?](repeating: nil, count: array.ndim - indexWithHole.count)
     
-    let newShape = zip(ndarray.shape, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
-    let newStrides = zip(ndarray.strides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
+    let newShape = zip(array.shape, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
+    let newStrides = zip(array.strides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
     
-    let startIndex = normalizeIndex(shape: ndarray.shape, ndIndex: expandedIndex.map { $0 ?? 0 })
+    let startIndex = normalizeIndex(shape: array.shape, ndIndex: expandedIndex.map { $0 ?? 0 })
     
-    let newOffset = indexOffset(strides: ndarray.strides, ndIndex: startIndex) + ndarray.baseOffset
-    return NDArray(shape: newShape, strides: newStrides, baseOffset: newOffset, data: ndarray.data)
+    let newOffset = indexOffset(strides: array.strides, ndIndex: startIndex) + array.baseOffset
+    return NDArray(shape: newShape, strides: newStrides, baseOffset: newOffset, data: array.data)
 }
 
-func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
+func set(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     
-    precondition(indexWithHole.count <= ndarray.ndim)
+    precondition(indexWithHole.count <= array.ndim)
     
     // fill rest dimensions
-    let expandedIndex = indexWithHole + [Int?](repeating: nil, count: ndarray.ndim - indexWithHole.count)
+    let expandedIndex = indexWithHole + [Int?](repeating: nil, count: array.ndim - indexWithHole.count)
 
-    let dstShape = zip(ndarray.shape, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
+    let dstShape = zip(array.shape, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
     
     // broadcast
     let newValue = broadcast(newValue, to: dstShape)
     
     let startNDIndex = expandedIndex.map { $0 ?? 0 }
-    let startIndex = normalizeIndex(shape: ndarray.shape, ndIndex: startNDIndex)
+    let startIndex = normalizeIndex(shape: array.shape, ndIndex: startNDIndex)
     
-    let newData = gatherElements(ndarray, forceUniqueReference: true)
-    let newStrides = continuousStrides(shape: ndarray.shape)
-    let dstOffset = indexOffset(strides: newStrides, ndIndex: startIndex)
-    let dstStrides = zip(newStrides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
+    array.data = gatherElements(array, forceUniqueReference: true)
+    array.strides = continuousStrides(shape: array.shape)
+    array.baseOffset = 0
+    let dstOffset = indexOffset(strides: array.strides, ndIndex: startIndex)
+    let dstStrides = zip(array.strides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
     
     let strDims = min(stridedDims(shape: dstShape, strides: dstStrides),
                       stridedDims(shape: newValue.shape, strides: newValue.strides))
@@ -64,15 +65,11 @@ func set(ndarray: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     let majorIndices = getIndices(shape: majorShape)
     
     let src = newValue.startPointer
-    let dst = UnsafeMutablePointer(mutating: newData) + dstOffset
+    let dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset
     for majorIndex in majorIndices {
         let ndIndex = majorIndex + minorZeros
         let src = src + indexOffset(strides: newValue.strides, ndIndex: ndIndex)
         let dst = dst + indexOffset(strides: dstStrides, ndIndex: ndIndex)
         cblas_scopy(count, src, srcStride, dst, dstStride)
     }
-    
-    ndarray.strides = newStrides
-    ndarray.baseOffset = 0
-    ndarray.data = newData
 }
