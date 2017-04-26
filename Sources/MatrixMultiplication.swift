@@ -24,6 +24,9 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let dst = UnsafeMutablePointer<Float>.allocate(capacity: majorSize*matrixSize)
     defer { dst.deallocate(capacity: majorSize*matrixSize) }
     
+    let lda = Int32(lhs.strides[lhs.ndim-2])
+    let ldb = Int32(rhs.strides[rhs.ndim-2])
+    
     let lPtr = UnsafePointer(lhs.data) + lhs.baseOffset
     let rPtr = UnsafePointer(rhs.data) + rhs.baseOffset
     let lOffsets = getOffsets(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
@@ -33,8 +36,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
         cblas_sgemm(CblasRowMajor,
                     CblasNoTrans, CblasNoTrans,
                     M, N, K,
-                    1, lPtr + lo, K,
-                    rPtr + ro, N,
+                    1, lPtr + lo, lda,
+                    rPtr + ro, ldb,
                     0, dstPtr, N)
         dstPtr += matrixSize
     }
@@ -56,12 +59,14 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
     
     var (lhs, rhs) = (lhs, rhs)
     
-    if lhs.strides != [lhs.shape[lhs.ndim-1], 1] {
+    // lda >= N
+    if lhs.strides.last != 1 || lhs.strides[lhs.ndim-2] < lhs.shape.last! {
         lhs.data = gatherElements(lhs)
         lhs.strides = continuousStrides(shape: lhs.shape)
         lhs.baseOffset = 0
     }
-    if rhs.strides != [rhs.shape[rhs.ndim-1], 1] {
+    // ldb >= M
+    if rhs.strides.last != 1 || rhs.strides[rhs.ndim-2] < rhs.shape.last! {
         rhs.data = gatherElements(rhs)
         rhs.strides = continuousStrides(shape: rhs.shape)
         rhs.baseOffset = 0
