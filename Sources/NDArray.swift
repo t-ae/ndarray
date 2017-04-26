@@ -11,6 +11,7 @@ public struct NDArray {
     
     init(shape:[Int], strides: [Int], baseOffset: Int, data: [Float]) {
         precondition(shape.all { $0 >= 0 })
+        assert(shape.count == strides.count)
         self.shape = shape
         self.strides = strides
         self.data = data
