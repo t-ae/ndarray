@@ -10,6 +10,7 @@ public struct NDArray {
     public internal(set) var baseOffset: Int
     
     init(shape:[Int], strides: [Int], baseOffset: Int, data: [Float]) {
+        precondition(shape.all { $0 >= 0 })
         self.shape = shape
         self.strides = strides
         self.data = data
