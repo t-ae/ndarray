@@ -48,6 +48,7 @@ func set(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     array.data = gatherElements(array, forceUniqueReference: true)
     array.strides = continuousStrides(shape: array.shape)
     array.baseOffset = 0
+    
     let dstOffset = indexOffset(strides: array.strides, ndIndex: startIndex)
     let dstStrides = zip(array.strides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
     
@@ -58,18 +59,25 @@ func set(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
     let minorShape = dstShape.suffix(strDims)
     let minorZeros = [Int](repeating: 0, count: minorShape.count)
     
-    let count = Int32(minorShape.prod())
+    let blockSize = minorShape.prod()
     let srcStride = Int32(newValue.strides.last ?? 0)
     let dstStride = Int32(dstStrides.last ?? 0)
     
     let majorIndices = getIndices(shape: majorShape)
     
-    let src = newValue.startPointer
+    let _blockSize = Int32(blockSize)
+    
+    let src: UnsafePointer<Float>
+    if srcStride < 0 {
+        src = newValue.startPointer - (blockSize-1)
+    } else {
+        src = newValue.startPointer
+    }
     let dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset
     for majorIndex in majorIndices {
         let ndIndex = majorIndex + minorZeros
         let src = src + indexOffset(strides: newValue.strides, ndIndex: ndIndex)
         let dst = dst + indexOffset(strides: dstStrides, ndIndex: ndIndex)
-        cblas_scopy(count, src, srcStride, dst, dstStride)
+        cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
     }
 }

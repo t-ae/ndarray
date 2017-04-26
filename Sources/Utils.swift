@@ -195,9 +195,11 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let offsets = getOffsets(shape: majorShape, strides: majorStrides)
         let _blockSize = Int32(blockSize)
         
-        var src = arg.startPointer
+        let src: UnsafePointer<Float>
         if stride < 0 {
-            src += -(blockSize - 1)
+            src = arg.startPointer - (blockSize - 1)
+        } else {
+            src = arg.startPointer
         }
         var dstPtr = dst
         for offset in offsets {

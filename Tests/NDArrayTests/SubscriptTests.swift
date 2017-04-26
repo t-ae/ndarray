@@ -115,10 +115,18 @@ class SubscriptTests: XCTestCase {
             // a = shape:[2, 2], elements = [1, 5, 3, 7]
             let b = NDArray.range(0..<4).reshaped([2, 2]).transposed()[1]
             // b = shape: [2], elements = [1, 3]
-            a[nil] = b
+            a[] = b
             XCTAssertEqual(a, NDArray([[1, 3],
                                        [1, 3]]))
-            
+        }
+        do {
+            var a = NDArray.range(4).reshaped([2, 2])
+            a[] = NDArray([5, 6]).flipped(0)
+            XCTAssertEqual(a, NDArray([[6, 5],
+                                       [6, 5]]))
+            a[] = NDArray([[5], [6]]).flipped(0)
+            XCTAssertEqual(a, NDArray([[6, 6],
+                                       [5, 5]]))
         }
     }
 }
