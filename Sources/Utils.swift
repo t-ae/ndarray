@@ -130,6 +130,11 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
     guard var stride = strides.last else {
         return 0
     }
+    var strides = strides
+    if stride < 0 {
+        stride = -stride
+        strides = strides.map { -$0 }
+    }
     for (s, str) in zip(shape.reversed(), strides.reversed()) {
         if s == 1 {
             stridedDims += 1

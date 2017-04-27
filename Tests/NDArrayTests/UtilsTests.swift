@@ -56,6 +56,18 @@ class UtilsTests: XCTestCase {
             let strDims = stridedDims(shape: [2, 1, 2, 2], strides: [4, 0, 2, 1])
             XCTAssertEqual(strDims, 4)
         }
+        do {
+            let strDims = stridedDims(shape: [3, 3], strides: [-3, -1])
+            XCTAssertEqual(strDims, 2)
+        }
+        do {
+            let strDims = stridedDims(shape: [3, 3], strides: [3, -1])
+            XCTAssertEqual(strDims, 1)
+        }
+        do {
+            let strDims = stridedDims(shape: [3, 3], strides: [-6, -2])
+            XCTAssertEqual(strDims, 2)
+        }
     }
     
     func testGatherElements() {
