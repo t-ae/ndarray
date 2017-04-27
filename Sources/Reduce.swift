@@ -33,38 +33,51 @@ public func std(_ arg: NDArray) -> NDArray {
 }
 
 /// Get minimal elements along a given axis.
-public func min(_ arg: NDArray, along axis: Int) -> NDArray {
-    return reduce(arg, along: axis, vDSP_minv)
+public func min(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = reduce(arg, along: axis, vDSP_minv)
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 /// Get maximum elements along a given axis.
-public func max(_ arg: NDArray, along axis: Int) -> NDArray {
-    return reduce(arg, along: axis, vDSP_maxv)
+public func max(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = reduce(arg, along: axis, vDSP_maxv)
+    
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 /// Get minimal elements' indices along a given axis.
-public func argmin(_ arg: NDArray, along axis: Int) -> NDArray {
-    return reduce(arg, along: axis, vDSP_minvi)
+public func argmin(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = reduce(arg, along: axis, vDSP_minvi)
+    
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 /// Get maximum elements' indices along a given axis.
-public func argmax(_ arg: NDArray, along axis: Int) -> NDArray {
-    return reduce(arg, along: axis, vDSP_maxvi)
+public func argmax(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = reduce(arg, along: axis, vDSP_maxvi)
+    
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 /// Calculate sum of elements along a given axis.
-public func sum(_ arg: NDArray, along axis: Int) -> NDArray {
-    return reduce(arg, along: axis, vDSP_sve)
+public func sum(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = reduce(arg, along: axis, vDSP_sve)
+    
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 /// Calculate mean of elements along a given axis.
-public func mean(_ arg: NDArray, along axis: Int) -> NDArray {
-    return reduce(arg, along: axis, vDSP_meanv)
+public func mean(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = reduce(arg, along: axis, vDSP_meanv)
+    
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 /// Calculate standard deviations of elements along a given axis.
-public func std(_ arg: NDArray, along axis: Int) -> NDArray {
-    return _std(arg, along: axis)
+public func std(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = _std(arg, along: axis)
+    
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 // MARK: Util

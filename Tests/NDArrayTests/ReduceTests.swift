@@ -9,7 +9,9 @@ class ReduceTests: XCTestCase {
             let a = NDArray([[3, 2],
                              [1, 0]])
             XCTAssertEqual(max(a, along: 0), NDArray([3, 2]))
+            XCTAssertEqual(max(a, along: 0, keepDims: true), NDArray([[3, 2]]))
             XCTAssertEqual(max(a, along: 1), NDArray([3, 1]))
+            XCTAssertEqual(max(a, along: 1, keepDims: true), NDArray([[3], [1]]))
         }
     }
     
