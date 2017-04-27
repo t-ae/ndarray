@@ -7,6 +7,7 @@ class SubscriptTests: XCTestCase {
     func testSubscriptGet() {
         do {
             let a = NDArray.range(0..<27).reshaped([3, 3, 3])
+            XCTAssertEqual(a[], a)
             
             XCTAssertEqual(a[1], NDArray([[ 9, 10, 11],
                                           [12, 13, 14],
@@ -20,8 +21,15 @@ class SubscriptTests: XCTestCase {
                                                [12, 13 ,14],
                                                [21, 22, 23]]))
             
+            XCTAssertEqual(a[][nil, 1], NDArray([[ 3,  4,  5],
+                                                 [12, 13 ,14],
+                                                 [21, 22, 23]]))
+            
             XCTAssertEqual(a[1..<2, 1..<3], NDArray([[[12, 13, 14],
                                                       [15, 16, 17]]]))
+            
+            XCTAssertEqual(a[1..<2][nil, 1..<3], NDArray([[[12, 13, 14],
+                                                           [15, 16, 17]]]))
             
             XCTAssertEqual(a[0..<0], NDArray.empty([0, 3, 3]))
         }
@@ -66,6 +74,14 @@ class SubscriptTests: XCTestCase {
                                        [[50, 51, 52, 53],
                                         [54, 55, 56, 57],
                                         [58, 59, 60, 61]]]))
+            
+            a[1][1..<3, 1..<3] = NDArray([-1, -2])
+            XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
+                                        [ 4,  5,  6,  7],
+                                        [ 8,  9, 10, 11]],
+                                       [[50, 51, 52, 53],
+                                        [54, -1, -2, 57],
+                                        [58, -1, -2, 61]]]))
         }
         do {
             // uncontinuous and continuous
