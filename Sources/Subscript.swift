@@ -5,7 +5,8 @@ extension NDArray {
     
     public subscript(index: Int?...) -> NDArray {
         get {
-            return getSubarray(array: self, indexWithHole: index)
+            let ies = index.map { $0.map { NDArrayIndexElement(single: $0) } }
+            return getSubarray(array: self, indices: ies)
         }
         set {
             setSubarray(array: &self, indexWithHole: index, newValue: newValue)
@@ -17,22 +18,6 @@ extension NDArray {
         setSubarray(array: &self, indexWithHole: index, newValue: NDArray(scalar: value))
     }
     
-}
-
-func getSubarray(array: NDArray, indexWithHole: [Int?]) -> NDArray {
-    
-    precondition(indexWithHole.count <= array.ndim)
-    
-    // fill rest dimensions
-    let expandedIndex = indexWithHole + [Int?](repeating: nil, count: array.ndim - indexWithHole.count)
-    
-    let newShape = zip(array.shape, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
-    let newStrides = zip(array.strides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
-    
-    let startIndex = normalizeIndex(shape: array.shape, ndIndex: expandedIndex.map { $0 ?? 0 })
-    
-    let newOffset = indexOffset(strides: array.strides, ndIndex: startIndex) + array.baseOffset
-    return NDArray(shape: newShape, strides: newStrides, baseOffset: newOffset, data: array.data)
 }
 
 func setSubarray(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
