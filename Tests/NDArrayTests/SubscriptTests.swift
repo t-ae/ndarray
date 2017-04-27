@@ -163,9 +163,15 @@ class SubscriptTests: XCTestCase {
             
             let d = getSubarray(array: c, indices: [NDArrayIndexElement(single: 1),
                                                     nil,
-                                                    NDArrayIndexElement(start: 1, end: 4, stride: 2)])
-            XCTAssertEqual(d, NDArray([[17, 19],
-                                       [21, 23]]))
+                                                    NDArrayIndexElement(start: nil, end: 3, stride: -2)])
+            XCTAssertEqual(d, NDArray([[18, 16],
+                                       [22, 20]]))
+            
+            let e = getSubarray(array: c, indices: [NDArrayIndexElement(single: 1),
+                                                    nil,
+                                                    NDArrayIndexElement(start: 1, end: 4, stride: -2)])
+            XCTAssertEqual(e, NDArray([[19, 17],
+                                       [23, 21]]))
         }
         do {
             let a = NDArray.range(24).reshaped([2, 3, 4]).flipped(0).flipped(1).flipped(2)
@@ -192,6 +198,66 @@ class SubscriptTests: XCTestCase {
             let e = getSubarray(array: d, indices: [NDArrayIndexElement(single: 1)])
             XCTAssertEqual(e, NDArray([[ 8,  9, 10],
                                        [ 0,  1,  2]]))
+        }
+    }
+    
+    func testSetSubarray() {
+        do {
+            var a = NDArray.range(24).reshaped([2, 3, 4])
+            XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
+                                        [ 4,  5,  6,  7],
+                                        [ 8,  9, 10, 11]],
+                                       [[12, 13, 14, 15],
+                                        [16, 17, 18, 19],
+                                        [20, 21, 22, 23]]]))
+            
+            setSubarray(array: &a, indices: [NDArrayIndexElement(single: 1)], newValue: NDArray(scalar: 0))
+            XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
+                                        [ 4,  5,  6,  7],
+                                        [ 8,  9, 10, 11]],
+                                       [[ 0,  0,  0,  0],
+                                        [ 0,  0,  0,  0],
+                                        [ 0,  0,  0,  0]]]))
+            
+            setSubarray(array: &a,
+                        indices: [NDArrayIndexElement(single: 1),
+                                  NDArrayIndexElement(start: nil, end: nil, stride: 2),
+                                  NDArrayIndexElement(start: 1, end: nil, stride: 2)],
+                        newValue: NDArray([1, 2]))
+            XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
+                                        [ 4,  5,  6,  7],
+                                        [ 8,  9, 10, 11]],
+                                       [[ 0,  1,  0,  2],
+                                        [ 0,  0,  0,  0],
+                                        [ 0,  1,  0,  2]]]))
+            
+            setSubarray(array: &a,
+                        indices: [NDArrayIndexElement(single: 1),
+                                  NDArrayIndexElement(single: 1),
+                                  NDArrayIndexElement(start: 0, end: nil, stride: -2)],
+                        newValue: NDArray([1, 2]))
+            XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
+                                        [ 4,  5,  6,  7],
+                                        [ 8,  9, 10, 11]],
+                                       [[ 0,  1,  0,  2],
+                                        [ 2,  0,  1,  0],
+                                        [ 0,  1,  0,  2]]]))
+        }
+        do {
+            var a = NDArray.range(24).reshaped([2, 3, 4]).flipped(0).flipped(1).flipped(2)
+            XCTAssertEqual(a, NDArray([[[23, 22, 21, 20],
+                                        [19, 18, 17, 16],
+                                        [15, 14, 13, 12]],
+                                       [[11, 10,  9,  8],
+                                        [ 7,  6,  5,  4],
+                                        [ 3,  2,  1,  0]]]))
+            setSubarray(array: &a, indices: [NDArrayIndexElement(single: 1)], newValue: NDArray([1, 2, 3, 4]))
+            XCTAssertEqual(a, NDArray([[[23, 22, 21, 20],
+                                        [19, 18, 17, 16],
+                                        [15, 14, 13, 12]],
+                                       [[ 1,  2,  3,  4],
+                                        [ 1,  2,  3,  4],
+                                        [ 1,  2,  3,  4]]]))
         }
     }
 }

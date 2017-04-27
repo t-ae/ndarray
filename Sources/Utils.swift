@@ -202,7 +202,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         
         let src: UnsafePointer<Float>
         if stride < 0 {
-            src = arg.startPointer - (blockSize - 1)
+            src = arg.startPointer + (blockSize-1)*Int(stride)
         } else {
             src = arg.startPointer
         }
