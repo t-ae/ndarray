@@ -86,3 +86,59 @@ func setSubarray(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray)
         cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
     }
 }
+
+// MARK: - For strided subscript
+struct NDArrayIndexElement {
+    var start: Int?
+    var end: Int?
+    var stride: Int?
+    
+    // strided range index
+    init(start: Int?, end: Int?, stride: Int?) {
+        assert(stride != 0)
+        self.start = start
+        self.end = end
+        self.stride = stride ?? 1
+    }
+    
+    // Single index
+    init(single: Int) {
+        self.start = single
+        self.end = nil
+        self.stride = nil
+    }
+}
+
+func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
+    precondition(indices.count <= array.ndim)
+    
+    var x = array
+    
+    var indices = indices
+    indices += [NDArrayIndexElement?](repeating: nil, count: array.ndim - indices.count)
+    
+    x.shape = []
+    x.strides = []
+    for i in 0..<array.ndim {
+        guard let ie = indices[i] else {
+            x.shape.append(array.shape[i])
+            x.strides.append(array.strides[i])
+            continue
+        }
+        guard let stride = ie.stride else {
+            x.baseOffset += ie.start! * array.strides[i]
+            continue
+        }
+        let start = ie.start ?? 0
+        let end = ie.end ?? array.shape[i]
+        let size = Int(ceil(abs(Float(end - start) / Float(stride))))
+        x.shape.append(size)
+        x.strides.append(stride * array.strides[i])
+        if stride > 0 {
+            x.baseOffset += start * array.strides[i]
+        } else {
+            x.baseOffset += (end-1) * array.strides[i]
+        }
+    }
+    return x
+}
