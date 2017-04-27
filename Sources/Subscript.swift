@@ -9,70 +9,19 @@ extension NDArray {
             return getSubarray(array: self, indices: ies)
         }
         set {
-            setSubarray(array: &self, indexWithHole: index, newValue: newValue)
+            let ies = index.map { $0.map { NDArrayIndexElement(single: $0) } }
+            setSubarray(array: &self, indices: ies, newValue: newValue)
         }
     }
     
     /// Substitute for scalar setting
     public mutating func set(_ value: Float, for index: [Int?]) {
-        setSubarray(array: &self, indexWithHole: index, newValue: NDArray(scalar: value))
+        let ies = index.map { $0.map { NDArrayIndexElement(single: $0) } }
+        setSubarray(array: &self, indices: ies, newValue: NDArray(scalar: value))
     }
     
 }
 
-func setSubarray(array: inout NDArray, indexWithHole: [Int?], newValue: NDArray) {
-    
-    precondition(indexWithHole.count <= array.ndim)
-    
-    // fill rest dimensions
-    let expandedIndex = indexWithHole + [Int?](repeating: nil, count: array.ndim - indexWithHole.count)
-
-    let dstShape = zip(array.shape, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
-    
-    // broadcast
-    let newValue = broadcast(newValue, to: dstShape)
-    
-    let startIndex = normalizeIndex(shape: array.shape,
-                                    ndIndex: expandedIndex.map { $0 ?? 0 })
-    
-    array.data = gatherElements(array, forceUniqueReference: true)
-    array.strides = continuousStrides(shape: array.shape)
-    array.baseOffset = 0
-    
-    let dstOffset = indexOffset(strides: array.strides, ndIndex: startIndex)
-    let dstStrides = zip(array.strides, expandedIndex).filter { $0.1 == nil }.map { $0.0 }
-    
-    let strDims = min(stridedDims(shape: dstShape, strides: dstStrides),
-                      stridedDims(shape: newValue.shape, strides: newValue.strides))
-    
-    let majorShape = [Int](dstShape.dropLast(strDims))
-    let minorShape = dstShape.suffix(strDims)
-    let minorZeros = [Int](repeating: 0, count: minorShape.count)
-    
-    let blockSize = minorShape.prod()
-    let srcStride = Int32(newValue.strides.last ?? 0)
-    let dstStride = Int32(dstStrides.last ?? 0)
-    
-    let majorIndices = getIndices(shape: majorShape)
-    
-    let _blockSize = Int32(blockSize)
-    
-    let src: UnsafePointer<Float>
-    if srcStride < 0 {
-        src = newValue.startPointer - (blockSize-1)
-    } else {
-        src = newValue.startPointer
-    }
-    let dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset
-    for majorIndex in majorIndices {
-        let ndIndex = majorIndex + minorZeros
-        let src = src + indexOffset(strides: newValue.strides, ndIndex: ndIndex)
-        let dst = dst + indexOffset(strides: dstStrides, ndIndex: ndIndex)
-        cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
-    }
-}
-
-// MARK: - For strided subscript
 struct NDArrayIndexElement {
     var start: Int?
     var end: Int?
@@ -150,8 +99,8 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue
             continue
         }
         guard let stride = ie.stride else {
-            dstShape.append(1)
-            dstStrides.append(0)
+//            dstShape.append(1)
+//            dstStrides.append(0)
             dstOffset += ie.start! * array.strides[i]
             continue
         }
@@ -180,8 +129,8 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue
     let minorZeros = [Int](repeating: 0, count: minorShape.count)
     
     let blockSize = minorShape.prod()
-    let srcStride = Int32(newValue.strides.last ?? 0)
-    let dstStride = Int32(dstStrides.last!)
+    let srcStride = Int32(newValue.strides.last ?? 1)
+    let dstStride = Int32(dstStrides.last ?? 1)
     
     let majorIndices = getIndices(shape: majorShape)
     
