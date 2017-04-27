@@ -96,6 +96,7 @@ struct NDArrayIndexElement {
     // strided range index
     init(start: Int?, end: Int?, stride: Int?) {
         assert(stride != 0)
+        assert(start.flatMap { s in end.map { s <= $0 } } ?? true)
         self.start = start
         self.end = end
         self.stride = stride ?? 1
@@ -202,13 +203,13 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue
     let _blockSize = Int32(blockSize)
     let src: UnsafePointer<Float>
     if srcStride < 0 {
-        src = newValue.startPointer - (blockSize-1)
+        src = newValue.startPointer + (blockSize-1)*Int(srcStride)
     } else {
         src = newValue.startPointer
     }
     let dst: UnsafeMutablePointer<Float>
     if dstStride < 0 {
-        dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset - (-1)
+        dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset + (blockSize-1)*Int(dstStride)
     } else {
         dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset
     }
