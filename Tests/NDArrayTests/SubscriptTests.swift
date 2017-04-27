@@ -19,6 +19,9 @@ class SubscriptTests: XCTestCase {
             XCTAssertEqual(a[nil, 1], NDArray([[ 3,  4,  5],
                                                [12, 13 ,14],
                                                [21, 22, 23]]))
+            
+            XCTAssertEqual(a[1..<2, 1..<3], NDArray([[[12, 13, 14],
+                                                      [15, 16, 17]]]))
         }
         do {
             // uncontinuous

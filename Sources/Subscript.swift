@@ -3,6 +3,15 @@ import Accelerate
 
 extension NDArray {
     
+    public subscript() -> NDArray {
+        get {
+            return getSubarray(array: self, indices: [])
+        }
+        set {
+            setSubarray(array: &self, indices: [], newValue: newValue)
+        }
+    }
+    
     public subscript(index: Int?...) -> NDArray {
         get {
             let ies = index.map { $0.map { NDArrayIndexElement(single: $0) } }
@@ -14,6 +23,21 @@ extension NDArray {
         }
     }
     
+    public subscript(indices: CountableRange<Int>?...) -> NDArray {
+        get {
+            let ies = indices.map { range in
+                range.map { NDArrayIndexElement(start: $0.startIndex, end: $0.endIndex, stride: 1) }
+            }
+            return getSubarray(array: self, indices: ies)
+        }
+        set {
+            let ies = indices.map { range in
+                range.map { NDArrayIndexElement(start: $0.startIndex, end: $0.endIndex, stride: 1) }
+            }
+            setSubarray(array: &self, indices: ies, newValue: newValue)
+        }
+    }
+
     /// Substitute for scalar setting
     public mutating func set(_ value: Float, for index: [Int?]) {
         let ies = index.map { $0.map { NDArrayIndexElement(single: $0) } }
