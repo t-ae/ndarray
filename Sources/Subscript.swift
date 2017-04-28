@@ -79,6 +79,17 @@ public struct NDArrayIndexElement {
     }
 }
 
+precedencegroup StridePrecedence {
+    associativity: left
+    lowerThan: RangeFormationPrecedence
+}
+
+infix operator ~~ : StridePrecedence
+
+public func ~~(range: CountableRange<Int>, stride: Int) -> NDArrayIndexElement {
+    return i(range, stride)
+}
+
 public func i(_ range: CountableRange<Int>, _ stride: Int = 1) -> NDArrayIndexElement {
     return NDArrayIndexElement(start: range.startIndex, end: range.endIndex, stride: stride)
 }
