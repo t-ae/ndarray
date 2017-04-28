@@ -12,6 +12,15 @@ extension NDArray {
         }
     }
     
+    public subscript(indices: NDArrayIndexElement?...) -> NDArray {
+        get {
+            return getSubarray(array: self, indices: indices)
+        }
+        set {
+            setSubarray(array: &self, indices: indices, newValue: newValue)
+        }
+    }
+    
     public subscript(index: Int?...) -> NDArray {
         get {
             let ies = index.map { $0.map { NDArrayIndexElement(single: $0) } }
@@ -26,13 +35,13 @@ extension NDArray {
     public subscript(indices: CountableRange<Int>?...) -> NDArray {
         get {
             let ies = indices.map { range in
-                range.map { NDArrayIndexElement(start: $0.startIndex, end: $0.endIndex, stride: 1) }
+                range.map { i($0) }
             }
             return getSubarray(array: self, indices: ies)
         }
         set {
             let ies = indices.map { range in
-                range.map { NDArrayIndexElement(start: $0.startIndex, end: $0.endIndex, stride: 1) }
+                range.map { i($0) }
             }
             setSubarray(array: &self, indices: ies, newValue: newValue)
         }
@@ -46,14 +55,14 @@ extension NDArray {
     
 }
 
-struct NDArrayIndexElement {
+public struct NDArrayIndexElement {
     var start: Int?
     var end: Int?
     var stride: Int?
     
     // strided range index
     init(start: Int?, end: Int?, stride: Int?) {
-        assert(stride != 0)
+        precondition(stride != 0)
         if let start = start, let end = end {
             precondition((end < 0 && start >= 0) || start <= end, "Invalid range: \(start)..<\(end)")
         }
@@ -67,6 +76,19 @@ struct NDArrayIndexElement {
         self.start = single
         self.end = nil
         self.stride = nil
+    }
+}
+
+public func i(_ range: CountableRange<Int>, _ stride: Int = 1) -> NDArrayIndexElement {
+    return NDArrayIndexElement(start: range.startIndex, end: range.endIndex, stride: stride)
+}
+public func i(_ start: Int?, _ end: Int?, _ stride: Int = 1) -> NDArrayIndexElement {
+    return NDArrayIndexElement(start: start, end: end, stride: stride)
+}
+
+extension NDArrayIndexElement: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self.init(single: value)
     }
 }
 
