@@ -8,6 +8,12 @@ extension NDArray {
     
     /// Get dimensions permuted NDArray.
     public func transposed(_ axes: [Int]) -> NDArray {
+        var axes = axes
+        for i in 0..<axes.count {
+            if axes[i] < 0 {
+                axes[i] += shape[i]
+            }
+        }
         precondition(axes.sorted() == [Int](0..<ndim), "Axes(\(axes)) don't match NDArray(shape: \(shape))")
         var x = self
         for (i, ax) in axes.enumerated() {
