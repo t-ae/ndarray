@@ -85,9 +85,14 @@ precedencegroup StridePrecedence {
 }
 
 infix operator ~~ : StridePrecedence
+prefix operator ~~
 
 public func ~~(range: CountableRange<Int>, stride: Int) -> NDArrayIndexElement {
     return i(range, stride)
+}
+
+public prefix func ~~(stride: Int) -> NDArrayIndexElement {
+    return i(nil, nil, stride)
 }
 
 public func i(_ range: CountableRange<Int>, _ stride: Int = 1) -> NDArrayIndexElement {

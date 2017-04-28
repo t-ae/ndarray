@@ -188,7 +188,7 @@ class SubscriptTests: XCTestCase {
                                         [ 7,  6,  5,  4],
                                         [ 3,  2,  1,  0]]]))
             
-            let c = b[nil, i(nil, nil, 2)]
+            let c = b[nil, ~~2]
             XCTAssertEqual(c, NDArray([[[23, 22, 21, 20],
                                         [15, 14, 13, 12]],
                                        [[11, 10,  9,  8],
@@ -209,7 +209,7 @@ class SubscriptTests: XCTestCase {
     func testSubscriptSet2() {
         do {
             var a = NDArray([0, 1, 2, 3, 4, 5, 6])
-            a[i(nil, nil, -2)] = NDArray([-6, -4, -2, 0])
+            a[~~(-2)] = NDArray([-6, -4, -2, 0])
             XCTAssertEqual(a, NDArray([0, 1, -2, 3, -4, 5, -6]))
             
             a[i(nil, 6, -2)] = NDArray([-6, -4, -2])
@@ -232,7 +232,7 @@ class SubscriptTests: XCTestCase {
                                         [ 0,  0,  0,  0],
                                         [ 0,  0,  0,  0]]]))
             
-            a[1, i(nil, nil, 2), i(1, nil, 2)] = NDArray([1, 2])
+            a[1, ~~2, i(1, nil, 2)] = NDArray([1, 2])
             XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
                                         [ 4,  5,  6,  7],
                                         [ 8,  9, 10, 11]],
@@ -248,7 +248,7 @@ class SubscriptTests: XCTestCase {
                                         [ 2,  0,  1,  0],
                                         [ 0,  1,  0,  2]]]))
             
-            a[1, 1, i(nil, nil, -2)] = NDArray([-1, -2]).flipped(0)
+            a[1, 1, ~~(-2)] = NDArray([-1, -2]).flipped(0)
             XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
                                         [ 4,  5,  6,  7],
                                         [ 8,  9, 10, 11]],
