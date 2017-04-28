@@ -55,7 +55,7 @@ struct NDArrayIndexElement {
     init(start: Int?, end: Int?, stride: Int?) {
         assert(stride != 0)
         if let start = start, let end = end {
-            precondition((end < 0 && start >= 0) || start <= end)
+            precondition((end < 0 && start >= 0) || start <= end, "Invalid range: \(start)..<\(end)")
         }
         self.start = start
         self.end = end
@@ -71,7 +71,7 @@ struct NDArrayIndexElement {
 }
 
 func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
-    precondition(indices.count <= array.ndim)
+    precondition(indices.count <= array.ndim, "Too many indices for NDArray.")
     
     var x = array
     
@@ -87,7 +87,7 @@ func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
         if start < 0 {
             start += array.shape[i]
         }
-        precondition(0 <= start && start < array.shape[i])
+        precondition(0 <= start && start < array.shape[i], "Index out of bounds.")
         guard let stride = ie.stride else {
             
             x.baseOffset += start * array.strides[i]
@@ -97,7 +97,7 @@ func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
         if end < 0 {
             end += array.shape[i]
         }
-        precondition(0 <= end && end <= array.shape[i])
+        precondition(0 <= end && end <= array.shape[i], "Index out of bounds.")
         let size = Int(ceil(abs(Float(end - start) / Float(stride))))
         x.shape.append(size)
         x.strides.append(stride * array.strides[i])
@@ -116,7 +116,7 @@ func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
 
 func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue: NDArray) {
     
-    precondition(indices.count <= array.ndim)
+    precondition(indices.count <= array.ndim, "Too many indices for NDArray.")
     
     // Make array continuous
     array.data = gatherElements(array, forceUniqueReference: true)
@@ -137,7 +137,7 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue
         if start < 0 {
             start += array.shape[i]
         }
-        precondition(0 <= start && start < array.shape[i])
+        precondition(0 <= start && start < array.shape[i], "Index out of bounds.")
         guard let stride = ie.stride else {
             dstOffset += start * array.strides[i]
             continue
@@ -146,7 +146,7 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue
         if end < 0 {
             end += array.shape[i]
         }
-        precondition(0 <= end && end <= array.shape[i])
+        precondition(0 <= end && end <= array.shape[i], "Index out of bounds.")
         let size = Int(ceil(abs(Float(end - start) / Float(stride))))
         dstShape.append(size)
         dstStrides.append(stride * array.strides[i])

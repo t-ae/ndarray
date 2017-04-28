@@ -8,7 +8,7 @@ extension NDArray {
     
     /// Get dimensions permuted NDArray.
     public func transposed(_ axes: [Int]) -> NDArray {
-        precondition(axes.sorted() == [Int](0..<ndim))
+        precondition(axes.sorted() == [Int](0..<ndim), "Axes(\(axes)) don't match NDArray(shape: \(shape))")
         var x = self
         for (i, ax) in axes.enumerated() {
             x.strides[i] = self.strides[ax]
@@ -25,8 +25,8 @@ extension NDArray {
             shape[arbit] = self.volume / shape.removing(at: arbit).prod()
         }
         
-        precondition(shape.all { $0 >= 0 })
-        precondition(self.volume == shape.prod())
+        precondition(shape.all { $0 >= 0 }, "Invalid shape.")
+        precondition(self.volume == shape.prod(), "New shape's volume must match with the number of elements.")
         
         let elements = gatherElements(self)
         return NDArray(shape: shape, elements: elements)

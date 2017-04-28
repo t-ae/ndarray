@@ -11,9 +11,9 @@ public func norm(_ arg: NDArray) -> Float {
 ///
 /// If argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two indexes
 public func inv(_ arg: NDArray) throws -> NDArray {
-    precondition(arg.ndim > 1)
+    precondition(arg.ndim > 1, "NDArray has shorter ndim(\(arg.ndim)) than 2.")
     let size = arg.shape[arg.ndim-1]
-    precondition(arg.shape[arg.ndim-2] == size)
+    precondition(arg.shape[arg.ndim-2] == size, "NDArray is not stack of matrices: shape(\(arg.shape))")
     
     let volume = arg.volume
     var elements = gatherElements(arg, forceUniqueReference: true)

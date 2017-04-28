@@ -4,6 +4,7 @@ extension NDArray {
     
     /// Create NDArray filled with specified values.
     public static func filled(_ value: Float, shape: [Int]) -> NDArray {
+        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
         return NDArray(shape: shape,
                        strides: [Int](repeating: 0, count: shape.count),
                        baseOffset: 0,
@@ -23,7 +24,7 @@ extension NDArray {
     /// Create uninitialized NDArray
     public static func empty(_ shape: [Int]) -> NDArray {
         let volume = shape.prod()
-        precondition(volume >= 0)
+        precondition(volume >= 0, "Invalid shape: \(shape)")
         let m = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { m.deallocate(capacity: volume) }
         return NDArray(shape: shape, elements: [Float](UnsafeBufferPointer(start: m, count: volume)))
@@ -31,7 +32,7 @@ extension NDArray {
     
     /// Create identity matrix.
     public static func eye(_ size: Int) -> NDArray {
-        precondition(size >= 0)
+        precondition(size >= 0, "Size(\(size)) must >= 0.")
         if size == 0 {
             return NDArray(shape: [0, 0], elements: [])
         } else {
@@ -62,7 +63,7 @@ extension NDArray {
     
     /// Create continuous NDArray 0..<count.
     public static func range(_ count: Int) -> NDArray {
-        precondition(count >= 0)
+        precondition(count >= 0, "Count(\(count)) must >= 0.")
         return NDArray.range(0..<count)
     }
     

@@ -4,7 +4,7 @@ extension NDArray: Sequence {
     public typealias Iterator = AnyIterator<NDArray>
     
     public func makeIterator() -> AnyIterator<NDArray> {
-        precondition(!self.isScalar)
+        precondition(!self.isScalar, "NDArray is scalar, not iterable.")
         
         var i = 0
         return AnyIterator{ _ in

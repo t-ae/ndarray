@@ -25,7 +25,7 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
             rhs.shape[i] = lhs.shape[i]
             rhs.strides[i] = 0
         } else {
-            preconditionFailure()
+            preconditionFailure("Can't broadcast: \(lhs.shape) and \(rhs.shape)")
         }
     }
     
@@ -34,7 +34,7 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
 
 /// Broadcast arg to shape.
 func broadcast(_ arg: NDArray, to shape: [Int]) -> NDArray {
-    precondition(arg.shape.count <= shape.count)
+    precondition(arg.shape.count <= shape.count, "Can't broadcast: \(arg.shape) to \(shape)")
     if arg.shape == shape {
         return arg
     }
@@ -52,7 +52,7 @@ func broadcast(_ arg: NDArray, to shape: [Int]) -> NDArray {
             arg.shape[i] = shape[i]
             arg.strides[i] = 0
         } else {
-            preconditionFailure()
+            preconditionFailure("Can't broadcast: \(arg.shape) to \(shape)")
         }
     }
     

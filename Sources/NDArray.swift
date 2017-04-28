@@ -10,7 +10,6 @@ public struct NDArray {
     public internal(set) var baseOffset: Int
     
     init(shape:[Int], strides: [Int], baseOffset: Int, data: [Float]) {
-        precondition(shape.all { $0 >= 0 })
         assert(shape.count == strides.count)
         assert(0 <= baseOffset && (baseOffset < data.count || data.isEmpty))
         self.shape = shape
@@ -21,8 +20,8 @@ public struct NDArray {
     
     /// Init with continuous strides.
     public init(shape: [Int], elements: [Float]) {
-        
-        precondition(shape.prod() == elements.count)
+        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
+        precondition(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
         
         self.init(shape: shape,
                   strides: continuousStrides(shape: shape),
@@ -37,6 +36,7 @@ public struct NDArray {
     
     /// Get single element.
     public func element(at ndIndex: [Int]) -> Float {
+        precondition(ndIndex.count == strides.count, "Invalid index for single element.")
         let ndIndex = normalizeIndex(shape: shape, ndIndex: ndIndex)
         let index = indexOffset(strides: strides, ndIndex: ndIndex) + baseOffset
         return data[index]

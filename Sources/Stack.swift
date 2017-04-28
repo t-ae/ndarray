@@ -8,7 +8,7 @@ extension NDArray {
     /// All arrays must have same shape.
     public static func stack(_ arrays: [NDArray], newAxis: Int = 0) -> NDArray {
         let shape = arrays.first!.shape
-        precondition(arrays.all { $0.shape == shape })
+        precondition(arrays.all { $0.shape == shape }, "All NDArrays must have same shape.")
         
         let reshaped = arrays.map { $0.expandDims(newAxis) }
         return concat(reshaped, along: newAxis)
@@ -22,7 +22,8 @@ extension NDArray {
         
         let shapes = arrays.map { $0.shape.removing(at: axis) }
         let shape = shapes.first!
-        precondition(shapes.all { $0 == shape })
+        precondition(shapes.all { $0 == shape },
+                     "All NDArray dimensions except for the concatenation axis must match exactly.")
         
         let elementsList = arrays.map { gatherElements($0) }
         let majorShape = [Int](shape.prefix(axis))

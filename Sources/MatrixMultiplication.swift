@@ -8,12 +8,13 @@ import Accelerate
 /// 1-D or 0-D arrays are not allowed.
 public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     
-    precondition(lhs.ndim > 1 && rhs.ndim > 1)
+    precondition(lhs.ndim > 1, "`lhs` is not matrix: shape: \(lhs.shape)")
+    precondition(rhs.ndim > 1, "`rhs` is not matrix: shape: \(rhs.shape)")
     
     let M = Int32(lhs.shape[lhs.ndim-2])
     let N = Int32(rhs.shape[rhs.ndim-1])
     let K = Int32(lhs.shape[lhs.ndim-1])
-    precondition(rhs.shape[rhs.ndim-2] == Int(K))
+    precondition(rhs.shape[rhs.ndim-2] == Int(K), "Incompatible shapes: \(lhs.shape) and \(rhs.shape)")
     
     let (lhs, rhs) = matmulBroadcast(lhs, rhs)
     let majorShape = [Int](lhs.shape.dropLast(2))

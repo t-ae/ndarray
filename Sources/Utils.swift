@@ -49,7 +49,7 @@ func continuousStrides(shape: [Int]) -> [Int] {
 
 /// Get offset.
 func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
-    precondition(strides.count == ndIndex.count)
+    assert(ndIndex.all { $0 >= 0 })
     return zip(ndIndex, strides)
         .map(*)
         .sum()
@@ -222,12 +222,12 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
 /// - Check all numbers in valid range
 /// - Process minus number
 func normalizeIndex(shape: [Int], ndIndex: [Int]) -> [Int] {
-    precondition(shape.count == ndIndex.count)
+    assert(shape.count == ndIndex.count)
     
     var ndIndex = ndIndex
     for i in 0..<ndIndex.count {
         if ndIndex[i] < -shape[i] || ndIndex[i] >= shape[i] {
-            preconditionFailure()
+            preconditionFailure("Index is not in valid range.")
         }
         if ndIndex[i] < 0 {
             ndIndex[i] += shape[i]
@@ -244,7 +244,7 @@ func normalizeAxis(axis: Int, ndim: Int) -> Int {
     if axis < 0 {
         axis += ndim
     }
-    precondition(axis >= 0 && axis < ndim)
+    precondition(axis >= 0 && axis < ndim, "Axis is not in valid range.")
     return axis
 }
 
