@@ -83,20 +83,21 @@ func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
             x.strides.append(array.strides[i])
             continue
         }
-        guard let stride = ie.stride else {
-            x.baseOffset += ie.start! * array.strides[i]
-            continue
-        }
         var start = ie.start ?? 0
         if start < 0 {
             start += array.shape[i]
         }
         precondition(0 <= start && start < array.shape[i])
+        guard let stride = ie.stride else {
+            
+            x.baseOffset += start * array.strides[i]
+            continue
+        }
         var end = ie.end ?? array.shape[i]
         if end < 0 {
             end += array.shape[i]
         }
-        precondition(0 <= end && end < array.shape[i])
+        precondition(0 <= end && end <= array.shape[i])
         let size = Int(ceil(abs(Float(end - start) / Float(stride))))
         x.shape.append(size)
         x.strides.append(stride * array.strides[i])
@@ -132,19 +133,20 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue
             dstStrides.append(array.strides[i])
             continue
         }
-        guard let stride = ie.stride else {
-            dstOffset += ie.start! * array.strides[i]
-            continue
-        }
         var start = ie.start ?? 0
         if start < 0 {
             start += array.shape[i]
         }
         precondition(0 <= start && start < array.shape[i])
+        guard let stride = ie.stride else {
+            dstOffset += start * array.strides[i]
+            continue
+        }
         var end = ie.end ?? array.shape[i]
         if end < 0 {
             end += array.shape[i]
         }
+        precondition(0 <= end && end <= array.shape[i])
         let size = Int(ceil(abs(Float(end - start) / Float(stride))))
         dstShape.append(size)
         dstStrides.append(stride * array.strides[i])
