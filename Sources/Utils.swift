@@ -3,11 +3,13 @@ import Accelerate
 
 /// Check if elements are aligned continuously.
 func isContinuous(shape: [Int], strides: [Int]) -> Bool {
+    assert(shape.count == strides.count)
     return shape.isEmpty || (strides.last == 1 && isStrided(shape: shape, strides: strides))
 }
 
 /// Check if whole elements are strided.
 func isStrided(shape: [Int], strides: [Int]) -> Bool {
+    assert(shape.count == strides.count)
     return shape.count == stridedDims(shape: shape, strides: strides)
 }
 
@@ -15,6 +17,7 @@ func isStrided(shape: [Int], strides: [Int]) -> Bool {
 ///
 /// Doesn't permit minus strides.
 func isDense(shape: [Int], strides: [Int]) -> Bool {
+    assert(shape.count == strides.count)
     
     if shape.count == 0 {
         return true
@@ -37,6 +40,7 @@ func isDense(shape: [Int], strides: [Int]) -> Bool {
 
 /// Get continuous strides.
 func continuousStrides(shape: [Int]) -> [Int] {
+    assert(shape.all { $0 >= 0 })
     guard !shape.isEmpty else {
         return []
     }
@@ -49,6 +53,7 @@ func continuousStrides(shape: [Int]) -> [Int] {
 
 /// Get offset.
 func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
+    assert(strides.count == ndIndex.count)
     assert(ndIndex.all { $0 >= 0 })
     return zip(ndIndex, strides)
         .map(*)
@@ -57,6 +62,7 @@ func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
 
 /// Get indices in row major order.
 func getIndices(shape: [Int]) -> [[Int]] {
+    assert(shape.all { $0 >= 0 })
     guard !shape.isEmpty else {
         return [[]]
     }
@@ -86,6 +92,7 @@ func getIndices(shape: [Int]) -> [[Int]] {
 /// Get offsets in row major order.
 func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
     assert(shape.count == strides.count)
+    assert(shape.all { $0 >= 0 })
     guard !shape.isEmpty else {
         return [0]
     }
@@ -126,6 +133,7 @@ func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
 /// Calculate how many dims are strided.
 func stridedDims(shape: [Int], strides: [Int]) -> Int {
     assert(shape.count == strides.count)
+    assert(shape.all { $0 >= 0 })
     var stridedDims = 0
     guard var stride = strides.last else {
         return 0
@@ -151,6 +159,7 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
 /// Calculate how many dims are dense.
 func denseDims(shape: [Int], strides: [Int]) -> Int {
     assert(shape.count == strides.count)
+    assert(shape.all { $0 >= 0 })
     
     var contStr = continuousStrides(shape: shape)[0..<strides.count]
     var strides = strides[0..<strides.count]
@@ -223,15 +232,14 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
 /// - Process minus number
 func normalizeIndex(shape: [Int], ndIndex: [Int]) -> [Int] {
     assert(shape.count == ndIndex.count)
+    assert(shape.all { $0 >= 0 })
     
     var ndIndex = ndIndex
     for i in 0..<ndIndex.count {
-        if ndIndex[i] < -shape[i] || ndIndex[i] >= shape[i] {
-            preconditionFailure("Index is not in valid range.")
-        }
         if ndIndex[i] < 0 {
             ndIndex[i] += shape[i]
         }
+        precondition(0 <= ndIndex[i] && ndIndex[i] < shape[i], "Index is not in valid range.")
     }
     return ndIndex
 }
@@ -240,6 +248,7 @@ func normalizeIndex(shape: [Int], ndIndex: [Int]) -> [Int] {
 /// - Check axis is in valid range
 /// - Process minus number
 func normalizeAxis(axis: Int, ndim: Int) -> Int {
+    assert(ndim > 0)
     var axis = axis
     if axis < 0 {
         axis += ndim
