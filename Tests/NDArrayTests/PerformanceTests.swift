@@ -93,4 +93,44 @@ class PerformanceTests: XCTestCase {
             _ = sqrt(a)
         }
     }
+    
+    func testMeanPerformance() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        measure {
+            _ = mean(a, along: 3)
+        }
+    }
+    
+    func testInvPerformance1() {
+        let shape = [10, 10, 10, 10, 10, 2, 2]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        measure {
+            _ = try! inv(a)
+        }
+    }
+    
+    func testInvPerformance2() {
+        let shape = [10, 10, 10, 10, 10, 2, 2]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed([0, 1, 2, 3, 4, 6, 5])
+        measure {
+            _ = try! inv(a)
+        }
+    }
+    
+    func testsClipPerformance() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
+        measure {
+            _ = a.clip(low: 100)
+        }
+    }
+    
+    func testsMaximumPerformance() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
+        measure {
+            _ = maximum(a, NDArray(scalar: 100))
+        }
+    }
 }
