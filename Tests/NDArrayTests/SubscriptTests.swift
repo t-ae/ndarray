@@ -12,7 +12,7 @@ class SubscriptTests: XCTestCase {
             XCTAssertEqual(a[1], NDArray([[ 9, 10, 11],
                                           [12, 13, 14],
                                           [15, 16, 17]]))
-            let x = a[-2]
+            
             XCTAssertEqual(a[-2], a[1])
             
             XCTAssertEqual(a[1, 1], NDArray([12, 13, 14]))
