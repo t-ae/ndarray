@@ -13,18 +13,18 @@ public func maximum(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
 
 extension NDArray {
     /// Clip lower values.
-    public func clip(low: Float) -> NDArray {
+    public func clipped(low: Float) -> NDArray {
         return apply(self, low, vDSP_vmax)
     }
     
     /// Clip higher values.
-    public func clip(high: Float) -> NDArray {
+    public func clipped(high: Float) -> NDArray {
         return apply(self, high, vDSP_vmin)
     }
     
     /// Clip lower and higher values.
-    public func clip(low: Float, high: Float) -> NDArray {
-        return self.clip(low: low).clip(high: high)
+    public func clipped(low: Float, high: Float) -> NDArray {
+        return self.clipped(low: low).clipped(high: high)
     }
 }
 

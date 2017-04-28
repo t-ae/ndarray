@@ -118,11 +118,11 @@ class PerformanceTests: XCTestCase {
         }
     }
     
-    func testsClipPerformance() {
+    func testsClippedPerformance() {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
         measure {
-            _ = a.clip(low: 100)
+            _ = a.clipped(low: 100)
         }
     }
     

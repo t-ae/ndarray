@@ -85,7 +85,7 @@ class IrisClassificationTests: XCTestCase {
             
             if i%100 == 0 {
                 print("\nstep: \(i)")
-                let losses = -y * log(out.clip(low: 1e-10))
+                let losses = -y * log(out.clipped(low: 1e-10))
                 let loss = mean(sum(losses, along: 1)).asScalar()
                 let featureLosses = sum(losses, along: 0) / labelsCount
                 print("loss: \(loss), (\(featureLosses.elements()))")
@@ -115,7 +115,7 @@ class IrisClassificationTests: XCTestCase {
             let out = softmax(h2)   // [90, 3]
             
             print("\ntest result:")
-            let losses = -y * log(out.clip(low: 1e-10))
+            let losses = -y * log(out.clipped(low: 1e-10))
             let loss = mean(sum(losses, along: 1)).asScalar()
             let featureLosses = sum(losses, along: 0) / labelsCount
             print("loss: \(loss), (\(featureLosses.elements()))")
@@ -133,7 +133,7 @@ class IrisClassificationTests: XCTestCase {
 }
 
 func relu(_ x: NDArray) -> NDArray {
-    return x.clip(low: 0)
+    return x.clipped(low: 0)
 }
 
 func d_relu(_ x: NDArray) -> NDArray {
