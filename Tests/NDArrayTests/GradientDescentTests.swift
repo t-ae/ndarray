@@ -24,7 +24,7 @@ class GradientDescentTests: XCTestCase {
         
         let alpha: Float = 0.1
         
-        for i in 0..<10000 {
+        for i in 0..<2000 {
             
             // calculate loss
             let distance = sum(theta * features, along: 1) - ys

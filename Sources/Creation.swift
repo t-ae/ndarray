@@ -36,12 +36,11 @@ extension NDArray {
         if size == 0 {
             return NDArray(shape: [0, 0], elements: [])
         } else {
-            let zeros = [Float](repeating: 0, count: size-1)
-            let data = zeros + [1] + zeros
-            return NDArray(shape: [size, size],
-                           strides: [-1, 1],
-                           baseOffset: size-1,
-                           data: data)
+            var elements = [Float](repeating: 0, count: size*size)
+            for i in 0..<size {
+                elements[i*size+i] = 1
+            }
+            return NDArray(shape: [size, size], elements: elements)
         }
     }
     
