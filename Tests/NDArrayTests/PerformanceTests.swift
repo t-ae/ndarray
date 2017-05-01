@@ -158,4 +158,16 @@ class PerformanceTests: XCTestCase {
             _ = maximum(a, b)
         }
     }
+    
+    func testStackPerformance() {
+        let shape = [10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        measure {
+            // In [4]: a = np.arange(10**5).reshape([10]*5)
+            // In [5]: timeit np.stack([a, a], -1)
+            // The slowest run took 4.25 times longer than the fastest. This could mean that an intermediate result is being cached.
+            // 1000 loops, best of 3: 242 µs per loop
+            _ = NDArray.stack([a, a], newAxis: -1)
+        }
+    }
 }
