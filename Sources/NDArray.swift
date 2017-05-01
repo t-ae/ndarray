@@ -53,6 +53,10 @@ public struct NDArray {
     public var volume: Int {
         return shape.prod()
     }
+    
+    public func asContiguousArray() -> NDArray {
+        return NDArray(shape: shape, elements: elements())
+    }
 }
 
 extension NDArray: Equatable {

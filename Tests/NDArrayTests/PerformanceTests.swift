@@ -4,14 +4,14 @@ import NDArray
 
 class PerformanceTests: XCTestCase {
     
-    func testGatherPerformance() {
+    func testAsContiguousArrayPerformance() {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
         measure {
             // In [16]: a = np.arange(10**6).reshape([10]*6).transpose()
             // In [17]: timeit np.ascontiguousarray(a)
             // 100 loops, best of 3: 14.1 ms per loop
-            _ = a.elements()
+            _ = a.asContiguousArray()
         }
     }
 
