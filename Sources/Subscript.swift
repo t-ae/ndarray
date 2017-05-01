@@ -166,9 +166,9 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue
     
     precondition(indices.count <= array.ndim, "Too many indices for NDArray.")
     
-    // Make array continuous
+    // Make array contiguous
     array.data = gatherElements(array, forceUniqueReference: true)
-    array.strides = continuousStrides(shape: array.shape)
+    array.strides = contiguousStrides(shape: array.shape)
     array.baseOffset = 0
     
     // Calculate destinaton

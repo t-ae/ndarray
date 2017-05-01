@@ -36,7 +36,7 @@ class SubscriptTests: XCTestCase {
             XCTAssertEqual(a[0..<0], NDArray.empty([0, 3, 3]))
         }
         do {
-            // uncontinuous
+            // uncontiguous
             let a = NDArray.range(0..<27).reshaped([3, 3, 3]).transposed()
             
             XCTAssertEqual(a[1], NDArray([[ 1, 10, 19],
@@ -52,7 +52,7 @@ class SubscriptTests: XCTestCase {
                                                [ 5, 14, 23]]))
         }
         do {
-            // uncontinuous + offset
+            // uncontiguous + offset
             let a = NDArray.range(0..<27).reshaped([3, 3, 3]).transposed()[1]
             
             XCTAssertEqual(a[1], NDArray([4, 13, 22]))
@@ -66,7 +66,7 @@ class SubscriptTests: XCTestCase {
     
     func testSubscriptSet1() {
         do {
-            // continuous and continuous
+            // contiguous and contiguous
             var a = NDArray.range(0..<24).reshaped([2, 3, 4])
             let b = NDArray.range(0..<12).reshaped([3, 4]) + 50
             a[1] = b
@@ -86,7 +86,7 @@ class SubscriptTests: XCTestCase {
                                         [58, -1, -2, 61]]]))
         }
         do {
-            // uncontinuous and continuous
+            // uncontiguous and contiguous
             var a = NDArray.range(0..<24).reshaped([2, 3, 4])
             let b = NDArray.range(0..<8).reshaped([2, 4]) + 50
             a[nil, 1] = b
@@ -98,7 +98,7 @@ class SubscriptTests: XCTestCase {
                                         [20, 21, 22, 23]]]))
         }
         do {
-            // continuous and uncontinuous
+            // contiguous and uncontiguous
             var a = NDArray.range(0..<24).reshaped([2, 3, 4])
             let b = (NDArray.range(0..<24).reshaped([2, 3, 4]) + 50)[1, nil, 1]
             // b = shape: [3], elements: [63, 67, 71]
@@ -112,7 +112,7 @@ class SubscriptTests: XCTestCase {
             
         }
         do {
-            // continuous and uncontinuous
+            // contiguous and uncontiguous
             var a = NDArray.range(0..<24).reshaped([2, 3, 4])
             let zero: NDArray = NDArray(scalar: 0)
             a[1, 1, 2] = zero
@@ -124,7 +124,7 @@ class SubscriptTests: XCTestCase {
                                         [20, 21, 22, 23]]]))
         }
         do {
-            // uncontinuous and uncontinuous
+            // uncontiguous and uncontiguous
             var a = NDArray.range(0..<8).reshaped([2, 2, 2]).transposed()
             let b = NDArray.range(0..<4).reshaped([2, 2]).transposed() + 1
             a[1] = b

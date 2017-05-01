@@ -6,14 +6,14 @@ class ArithmeticTests: XCTestCase {
     
     func testNeg() {
         do {
-            // continuous
+            // contiguous
             let a = NDArray.range(8).reshaped([2, 2, 2])[1]
             let b = -a
             XCTAssertEqual(b, NDArray([[-4, -5],
                                        [-6, -7]]))
         }
         do {
-            // dense, uncontinuous
+            // dense, uncontiguous
             let a = NDArray.range(8).reshaped([2, 2, 2]).transposed()
             let b = -a
             XCTAssertEqual(b, NDArray([[[-0, -4],

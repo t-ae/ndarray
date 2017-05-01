@@ -60,13 +60,13 @@ extension NDArray {
         return NDArray.eye(size) <*> diag.reshaped(diag.shape + [1])
     }
     
-    /// Create continuous NDArray 0..<count.
+    /// Create contiguous NDArray 0..<count.
     public static func range(_ count: Int) -> NDArray {
         precondition(count >= 0, "Count(\(count)) must >= 0.")
         return NDArray.range(0..<count)
     }
     
-    /// Create continuous NDArray.
+    /// Create contiguous NDArray.
     public static func range(_ range: CountableRange<Int>) -> NDArray {
         let elements = range.map { Float($0) }
         return NDArray(elements)

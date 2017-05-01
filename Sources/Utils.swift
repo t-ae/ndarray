@@ -1,8 +1,8 @@
 
 import Accelerate
 
-/// Check if elements are aligned continuously.
-func isContinuous(shape: [Int], strides: [Int]) -> Bool {
+/// Check if elements are aligned contiguously.
+func isContiguous(shape: [Int], strides: [Int]) -> Bool {
     assert(shape.count == strides.count)
     return shape.isEmpty || (strides.last == 1 && isStrided(shape: shape, strides: strides))
 }
@@ -38,8 +38,8 @@ func isDense(shape: [Int], strides: [Int]) -> Bool {
     }
 }
 
-/// Get continuous strides.
-func continuousStrides(shape: [Int]) -> [Int] {
+/// Get contiguous strides.
+func contiguousStrides(shape: [Int]) -> [Int] {
     assert(shape.all { $0 >= 0 })
     guard !shape.isEmpty else {
         return []
@@ -161,7 +161,7 @@ func denseDims(shape: [Int], strides: [Int]) -> Int {
     assert(shape.count == strides.count)
     assert(shape.all { $0 >= 0 })
     
-    var contStr = continuousStrides(shape: shape)[0..<strides.count]
+    var contStr = contiguousStrides(shape: shape)[0..<strides.count]
     var strides = strides[0..<strides.count]
     for i in 0..<shape.count {
         if Set(strides) == Set(contStr) {
@@ -178,7 +178,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
     
     let volume = arg.volume
     
-    if isContinuous(shape: arg.shape, strides: arg.strides) {
+    if isContiguous(shape: arg.shape, strides: arg.strides) {
         if volume == arg.data.count {
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)

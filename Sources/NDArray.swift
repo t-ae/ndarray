@@ -19,13 +19,13 @@ public struct NDArray {
         self.baseOffset = baseOffset
     }
     
-    /// Init with continuous strides.
+    /// Init with contiguous strides.
     public init(shape: [Int], elements: [Float]) {
         precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
         precondition(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
         
         self.init(shape: shape,
-                  strides: continuousStrides(shape: shape),
+                  strides: contiguousStrides(shape: shape),
                   baseOffset: 0,
                   data: elements)
     }

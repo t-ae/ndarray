@@ -16,7 +16,7 @@ class PerformanceTests: XCTestCase {
     }
 
     func testAddPerformance1() {
-        // two continuous arrays
+        // two contiguous arrays
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure { // 0.003sec
@@ -28,7 +28,7 @@ class PerformanceTests: XCTestCase {
     }
     
     func testAddPerformance2() {
-        // continuous + uncontinuous
+        // contiguous + uncontiguous
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
@@ -42,7 +42,7 @@ class PerformanceTests: XCTestCase {
     }
     
     func testAddPerformance3() {
-        // unconrinuous + uncontinuous
+        // unconriguous + uncontiguous
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
