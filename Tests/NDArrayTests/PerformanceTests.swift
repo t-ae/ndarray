@@ -3,6 +3,17 @@ import XCTest
 import NDArray
 
 class PerformanceTests: XCTestCase {
+    
+    func testGatherPerformance() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
+        measure {
+            // In [16]: a = np.arange(10**6).reshape([10]*6).transpose()
+            // In [17]: timeit np.ascontiguousarray(a)
+            // 100 loops, best of 3: 14.1 ms per loop
+            _ = a.elements()
+        }
+    }
 
     func testAddPerformance1() {
         // two continuous arrays
@@ -98,6 +109,9 @@ class PerformanceTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
+            // In [6]: a = np.arange(10**6).reshape([10]*6).astype(np.float32)
+            // In [7]: timeit np.mean(a)
+            // 1000 loops, best of 3: 451 µs per loop
             _ = mean(a, along: 3)
         }
     }
@@ -106,6 +120,9 @@ class PerformanceTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 2, 2]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         measure {
+            // In [11]: a = np.arange(10**5*2*2).reshape([10]*5+[2,2]).astype(np.float32)
+            // In [12]: timeit np.linalg.inv(a)
+            // 10 loops, best of 3: 29.7 ms per loop
             _ = try! inv(a)
         }
     }
@@ -122,15 +139,23 @@ class PerformanceTests: XCTestCase {
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
         measure {
+            // In [3]: a = np.arange(10**6).reshape([10]*6).astype(np.float32)
+            // In [4]: timeit np.maximum(a, 100)
+            // 1000 loops, best of 3: 1.27 ms per loop
             _ = a.clipped(low: 100)
         }
     }
     
     func testsMaximumPerformance() {
         let shape = [10, 10, 10, 10, 10, 10]
-        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        let b = a.transposed()
         measure {
-            _ = maximum(a, NDArray(scalar: 100))
+            // In [26]: a = np.arange(10**6).reshape([10]*6).astype(np.float32)
+            // In [27]: b = a.transpose()
+            // In [28]: timeit np.maximum(a, b)
+            // 100 loops, best of 3: 10.1 ms per loop
+            _ = maximum(a, b)
         }
     }
 }
