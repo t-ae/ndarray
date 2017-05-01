@@ -61,13 +61,13 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
     var (lhs, rhs) = (lhs, rhs)
     
     // lda >= N
-    if lhs.strides.last != 1 || lhs.strides[lhs.ndim-2] < lhs.shape.last! {
+    if (lhs.strides.last != 1 && lhs.shape.last != 1) || lhs.strides[lhs.ndim-2] < lhs.shape.last! {
         lhs.data = gatherElements(lhs)
         lhs.strides = contiguousStrides(shape: lhs.shape)
         lhs.baseOffset = 0
     }
     // ldb >= M
-    if rhs.strides.last != 1 || rhs.strides[rhs.ndim-2] < rhs.shape.last! {
+    if (rhs.strides.last != 1 && rhs.shape.last != 1) || rhs.strides[rhs.ndim-2] < rhs.shape.last! {
         rhs.data = gatherElements(rhs)
         rhs.strides = contiguousStrides(shape: rhs.shape)
         rhs.baseOffset = 0

@@ -14,6 +14,15 @@ class MatrixMultiplicationTests: XCTestCase {
             XCTAssertEqual(d, a)
         }
         do {
+            let a = NDArray.range(9).reshaped([3, 3])
+            let b = a[1..<2]
+            let c = a[nil, 1..<2]
+            XCTAssertEqual(b <*> c, NDArray(shape: [1, 1], elements: [54]))
+            XCTAssertEqual(c <*> b, NDArray([[ 3,  4,  5],
+                                             [12, 16, 20],
+                                             [21, 28, 35]]))
+        }
+        do {
             let a = NDArray.range(24).reshaped([2, 3, 4]).transposed([0, 2, 1])
             let b = NDArray.eye(3)
             let c = a <*> b

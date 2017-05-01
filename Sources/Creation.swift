@@ -5,10 +5,7 @@ extension NDArray {
     /// Create NDArray filled with specified values.
     public static func filled(_ value: Float, shape: [Int]) -> NDArray {
         precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
-        return NDArray(shape: shape,
-                       strides: [Int](repeating: 0, count: shape.count),
-                       baseOffset: 0,
-                       data: [value])
+        return NDArray(shape: shape, elements: [Float](repeating: value, count: shape.prod()))
     }
     
     /// Create NDArray filled with 0s.
