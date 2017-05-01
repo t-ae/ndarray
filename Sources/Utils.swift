@@ -4,13 +4,7 @@ import Accelerate
 /// Check if elements are aligned contiguously.
 func isContiguous(shape: [Int], strides: [Int]) -> Bool {
     assert(shape.count == strides.count)
-    return shape.isEmpty || (strides.last == 1 && isStrided(shape: shape, strides: strides))
-}
-
-/// Check if whole elements are strided.
-func isStrided(shape: [Int], strides: [Int]) -> Bool {
-    assert(shape.count == strides.count)
-    return shape.count == stridedDims(shape: shape, strides: strides)
+    return shape.isEmpty || (strides.last == 1 && shape.count == stridedDims(shape: shape, strides: strides))
 }
 
 /// Check if elements are densely placed.
@@ -154,23 +148,6 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
         }
     }
     return stridedDims
-}
-
-/// Calculate how many dims are dense.
-func denseDims(shape: [Int], strides: [Int]) -> Int {
-    assert(shape.count == strides.count)
-    assert(shape.all { $0 >= 0 })
-    
-    var contStr = contiguousStrides(shape: shape)[0..<strides.count]
-    var strides = strides[0..<strides.count]
-    for i in 0..<shape.count {
-        if Set(strides) == Set(contStr) {
-            return shape.count-i
-        }
-        strides = strides.dropFirst()
-        contStr = contStr.dropFirst()
-    }
-    return 1
 }
 
 /// Gather elements.
