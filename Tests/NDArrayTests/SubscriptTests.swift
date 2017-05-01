@@ -170,7 +170,7 @@ class SubscriptTests: XCTestCase {
                                        [[16, 17, 18, 19],
                                         [20, 21, 22, 23]]]))
             
-            let d = c[1, nil, i(nil, 3, -2)]
+            let d = c[1, nil, ..<3~~-2]
             XCTAssertEqual(d, NDArray([[18, 16],
                                        [22, 20]]))
             
@@ -180,7 +180,7 @@ class SubscriptTests: XCTestCase {
         }
         do {
             let a = NDArray.range(24).reshaped([2, 3, 4]).flipped(0).flipped(1).flipped(2)
-            let b = a[i(nil, nil)]
+            let b = a[nil]
             XCTAssertEqual(b, NDArray([[[23, 22, 21, 20],
                                         [19, 18, 17, 16],
                                         [15, 14, 13, 12]],
@@ -194,7 +194,7 @@ class SubscriptTests: XCTestCase {
                                        [[11, 10,  9,  8],
                                         [ 3,  2,  1,  0]]]))
             
-            let d = c[nil, nil, 1..<4 ~~ -1]
+            let d = c[nil, nil, 1..<4~~-1]
             XCTAssertEqual(d, NDArray([[[20, 21, 22],
                                         [12, 13, 14]],
                                        [[ 8,  9, 10],
@@ -211,8 +211,8 @@ class SubscriptTests: XCTestCase {
             var a = NDArray([0, 1, 2, 3, 4, 5, 6])
             a[~~-2] = NDArray([-6, -4, -2, 0])
             XCTAssertEqual(a, NDArray([0, 1, -2, 3, -4, 5, -6]))
-            
-            a[i(nil, 6, -2)] = NDArray([-6, -4, -2])
+
+            a[..<6~~-2] = NDArray([-6, -4, -2])
             XCTAssertEqual(a, NDArray([0, -2, -2, -4, -4, -6, -6]))
         }
         do {
@@ -232,7 +232,7 @@ class SubscriptTests: XCTestCase {
                                         [ 0,  0,  0,  0],
                                         [ 0,  0,  0,  0]]]))
             
-            a[1, ~~2, i(1, nil, 2)] = NDArray([1, 2])
+            a[1, ~~2, 1... ~~ 2] = NDArray([1, 2])
             XCTAssertEqual(a, NDArray([[[ 0,  1,  2,  3],
                                         [ 4,  5,  6,  7],
                                         [ 8,  9, 10, 11]],
