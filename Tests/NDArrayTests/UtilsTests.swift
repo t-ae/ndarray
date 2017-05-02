@@ -101,6 +101,13 @@ class UtilsTests: XCTestCase {
             let elements = gatherElements(a)
             XCTAssertEqual(elements, [1, 2, 3, 4])
         }
+        do {
+            let a = NDArray([[0, 1], [2, 3]])
+            XCTAssertEqual(a.flipped(0), NDArray([[2, 3], [0, 1]]))
+            XCTAssertEqual(a.flipped(1), NDArray([[1, 0], [3, 2]]))
+            XCTAssertEqual(a.flipped(1).flipped(0), NDArray([[3, 2], [1, 0]]))
+            XCTAssertEqual(a.flipped(0).flipped(1), NDArray([[3, 2], [1, 0]]))
+        }
     }
 
     func testBroadcast() {
