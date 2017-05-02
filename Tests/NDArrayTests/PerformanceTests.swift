@@ -175,12 +175,12 @@ extension PerformanceTests {
     func testsClippedPerformance() {
         
         // a = np.arange(10**7).reshape([10]*7).astype(np.float32)
-        // timeit np.maximum(a, 100)
+        // timeit np.clip(a, 100, 1000)
         
         let shape = [10, 10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
         measure {
-            _ = a.clipped(low: 100)
+            _ = a.clipped(low: 100, high: 1000)
         }
     }
     
