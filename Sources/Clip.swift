@@ -14,32 +14,33 @@ public func maximum(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
 extension NDArray {
     /// Clip lower values.
     public func clipped(low: Float) -> NDArray {
-        return apply(self, low, vDSP_vmax)
+        return clip(self, low: low, high: FLT_MAX)
     }
     
     /// Clip higher values.
     public func clipped(high: Float) -> NDArray {
-        return apply(self, high, vDSP_vmin)
+        return clip(self, low: FLT_MIN, high: high)
     }
     
     /// Clip lower and higher values.
     public func clipped(low: Float, high: Float) -> NDArray {
-        return self.clipped(low: low).clipped(high: high)
+        return clip(self, low: low, high: high)
     }
 }
 
 // MARK: Util
 private typealias vDSP_func = (UnsafePointer<Float>, vDSP_Stride, UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, vDSP_Stride, vDSP_Length) -> Void
 
-private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> NDArray {
+private func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
     
-    var scalar = scalar
+    var low = low
+    var high = high
     
     if isDense(shape: array.shape, strides: array.strides) {
         let src = array.startPointer
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: array.data.count)
         defer { dst.deallocate(capacity: array.data.count) }
-        vDSPfunc(src, 1, &scalar, 0, dst, 1, vDSP_Length(array.data.count))
+        vDSP_vclip(src, 1, &low, &high, dst, 1, vDSP_Length(array.data.count))
         return NDArray(shape: array.shape,
                        strides: array.strides,
                        baseOffset: 0,
@@ -65,7 +66,7 @@ private func apply(_ array: NDArray, _ scalar: Float, _ vDSPfunc: vDSP_func) -> 
         for offset in offsets {
             let src = src + offset
             
-            vDSPfunc(src, stride, &scalar, 0, dstPtr, 1, _blockSize)
+            vDSP_vclip(src, stride, &low, &high, dstPtr, 1, _blockSize)
             dstPtr += blockSize
         }
         
