@@ -46,28 +46,35 @@ private func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
                        baseOffset: 0,
                        data: [Float](UnsafeBufferPointer(start: dst, count: array.data.count)))
     } else {
-        // Separate scattered major shape and strided minor shape
-        let volume = array.volume
-        let minorDims = stridedDims(shape: array.shape, strides: array.strides)
-        let majorShape = [Int](array.shape.dropLast(minorDims))
-        let majorStrides = [Int](array.strides.dropLast(minorDims))
+        let ndim = array.shape.count
+        let volume = array.shape.prod()
         
-        let stride = array.strides.last!
-        let blockSize = array.shape.suffix(minorDims).prod()
+        let axis = getLeastStrideAxis(array.strides)
+        let srcStride = array.strides[axis]
+        let dims = getStridedDims(shape: array.shape, strides: array.strides, from: axis)
+        
+        let outerShape = [Int](array.shape[0..<axis-dims+1] + array.shape[axis+1..<ndim])
+        let outerStrides = [Int](array.strides[0..<axis-dims+1] + array.strides[axis+1..<ndim])
+        let blockSize = array.shape[axis-dims+1...axis].prod()
+        
+        let dstStrides = contiguousStrides(shape: array.shape)
+        let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
+        
+        let dstStride = dstStrides[axis]
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
-        let offsets = getOffsets(shape: majorShape, strides: majorStrides)
+        let srcOffsets = getOffsets(shape: outerShape, strides: outerStrides)
+        let dstOffsets = getOffsets(shape: outerShape, strides: dstOuterStrides)
         let _blockSize = vDSP_Length(blockSize)
         
         let src = array.startPointer
-        var dstPtr = dst
-        for offset in offsets {
-            let src = src + offset
+        for (os, od) in zip(srcOffsets, dstOffsets) {
+            let src = src + os
+            let dst = dst + od
             
-            vDSP_vclip(src, stride, &low, &high, dstPtr, 1, _blockSize)
-            dstPtr += blockSize
+            vDSP_vclip(src, srcStride, &low, &high, dst, dstStride, _blockSize)
         }
         
         return NDArray(shape: array.shape,

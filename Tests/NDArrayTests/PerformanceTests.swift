@@ -118,7 +118,7 @@ extension PerformanceTests {
     func testMeanPerformance() {
         
         // a = np.arange(10**7).reshape([10]*7).astype(np.float32)
-        // timeit np.mean(a)
+        // timeit np.mean(a, 3)
         
         let shape = [10, 10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
@@ -174,7 +174,7 @@ extension PerformanceTests {
 extension PerformanceTests {
     func testsClippedPerformance() {
         
-        // a = np.arange(10**7).reshape([10]*7).astype(np.float32)
+        // a = np.arange(10**7).reshape([10]*7).transpose().astype(np.float32)
         // timeit np.clip(a, 100, 1000)
         
         let shape = [10, 10, 10, 10, 10, 10, 10]
