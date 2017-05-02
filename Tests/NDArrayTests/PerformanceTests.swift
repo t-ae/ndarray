@@ -6,7 +6,7 @@ class PerformanceTests: XCTestCase {
     
     func testAsContiguousArrayPerformance() {
         
-        // a = np.arange(10**6).reshape([10]*6).transpose()
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6).transpose()
         // timeit np.ascontiguousarray(a)
         
         let shape = [10, 10, 10, 10, 10, 10]
@@ -21,7 +21,7 @@ class PerformanceTests: XCTestCase {
 extension PerformanceTests {
     func testAddPerformance1() {
         
-        // a = np.arange(10**6).reshape([10]*6).astype(float)
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // timeit a+a
         
         let shape = [10, 10, 10, 10, 10, 10]
@@ -33,7 +33,7 @@ extension PerformanceTests {
     
     func testAddPerformance2() {
         
-        // a = np.arange(10**6).reshape([10]*6).astype(float)
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // b = a.transpose()
         // timeit a+b
         
@@ -47,7 +47,7 @@ extension PerformanceTests {
     
     func testAddPerformance3() {
         
-        // a = np.arange(10**6).reshape([10]*6).astype(float)
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // b = a.transpose()
         // c = a.transpose([1,2,3,4,5,0])
         // timeit b+c
@@ -63,7 +63,7 @@ extension PerformanceTests {
     
     func testNegPerformance1() {
         
-        // a = np.arange(10**6).reshape([10]*6).astype(float)
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // timeit (-a)
         
         let shape = [10, 10, 10, 10, 10, 10]
@@ -75,7 +75,7 @@ extension PerformanceTests {
     
     func testNegPerformance2() {
         
-        // a = np.arange(10**7).reshape([10]*7).astype(float).transpose()[1]
+        // a = np.arange(10**7, dtype=np.float32).reshape([10]*7).transpose()[1]
         // timeit (-a)
         
         let shape = [10, 10, 10, 10, 10, 10, 10]
@@ -90,7 +90,7 @@ extension PerformanceTests {
 extension PerformanceTests {
     func testSqrtPerformance1() {
         
-        // a = np.arange(10**6).reshape([10]*6)
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // timeit np.sqrt(a)
         
         let shape = [10, 10, 10, 10, 10, 10]
@@ -102,7 +102,7 @@ extension PerformanceTests {
     
     func testSqrtPerformance2() {
         
-        // a = np.arange(10**7).reshape([10]*7).transpose()[1]
+        // a = np.arange(10**7, dtype=np.float32).reshape([10]*7).transpose()[1]
         // timeit np.sqrt(a)
         
         let shape = [10, 10, 10, 10, 10, 10, 10]
@@ -117,7 +117,7 @@ extension PerformanceTests {
 extension PerformanceTests {
     func testMeanPerformance() {
         
-        // a = np.arange(10**7).reshape([10]*7).astype(np.float32)
+        // a = np.arange(10**7, dtype=np.float32).reshape([10]*7)
         // timeit np.mean(a, 3)
         
         let shape = [10, 10, 10, 10, 10, 10, 10]
@@ -132,7 +132,7 @@ extension PerformanceTests {
 extension PerformanceTests {
     func testInvPerformance1() {
         
-        // a = np.arange(10**5*2*2).reshape([10]*5+[2,2]).astype(np.float32)
+        // a = np.arange(10**5*2*2, dtype=np.float32).reshape([10]*5+[2,2])
         // timeit np.linalg.inv(a)
         
         let shape = [10, 10, 10, 10, 10, 2, 2]
@@ -144,7 +144,7 @@ extension PerformanceTests {
     
     func testInvPerformance2() {
         
-        // a = np.arange(10**5*2*2).reshape([10]*5+[2,2]).transpose([0, 1, 2, 3, 4, 6, 5]).astype(np.float32)
+        // a = np.arange(10**5*2*2, dtype=np.float32).reshape([10]*5+[2,2]).transpose([0, 1, 2, 3, 4, 6, 5])
         // timeit np.linalg.inv(a)
         
         let shape = [10, 10, 10, 10, 10, 2, 2]
@@ -159,7 +159,7 @@ extension PerformanceTests {
 extension PerformanceTests {
     func testStackPerformance() {
         
-        // a = np.arange(10**5).reshape([10]*5)
+        // a = np.arange(10**5, dtype=np.float32).reshape([10]*5)
         // timeit np.stack([a, a, a, a], -1)
         
         let shape = [10, 10, 10, 10, 10]
@@ -174,7 +174,7 @@ extension PerformanceTests {
 extension PerformanceTests {
     func testsClippedPerformance() {
         
-        // a = np.arange(10**7).reshape([10]*7).transpose().astype(np.float32)
+        // a = np.arange(10**7, dtype=np.float32).reshape([10]*7).transpose()
         // timeit np.clip(a, 100, 1000)
         
         let shape = [10, 10, 10, 10, 10, 10, 10]
@@ -186,7 +186,7 @@ extension PerformanceTests {
     
     func testsMaximumPerformance() {
         
-        // a = np.arange(10**6).reshape([10]*6).astype(np.float32)
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // b = a.transpose()
         // timeit np.maximum(a, b)
         
