@@ -37,7 +37,7 @@ class IrisClassificationTests: XCTestCase {
         var W2 = NDArray.uniform(low: -W2_limit, high: W2_limit, shape: [numHiddenUnits1, numOutput]) // [5, 3]
         var b2 = NDArray.zeros([numOutput]) // [5]
         
-        let alpha: Float = 1e-3
+        let alpha: Float = 3e-4
         
         for i in 0...30000 {
             let h1_1 = x |*| W1     // [90, 5]
@@ -131,7 +131,6 @@ class IrisClassificationTests: XCTestCase {
         
         print("elapsed time: \(Date().timeIntervalSince(start))sec\n")
     }
-
 }
 
 func relu(_ x: NDArray) -> NDArray {
@@ -139,7 +138,7 @@ func relu(_ x: NDArray) -> NDArray {
 }
 
 func d_relu(_ x: NDArray) -> NDArray {
-    return relu(x) / abs(x)
+    return relu(x) / x.clipped(low: Float.leastNormalMagnitude)
 }
 
 func softmax(_ x: NDArray) -> NDArray {
