@@ -38,11 +38,11 @@ class IrisClassificationTests: XCTestCase {
         let alpha: Float = 1e-2
         
         for i in 0...3000 {
-            let h1_1 = x <*> W1     // [90, 5]
+            let h1_1 = x |*| W1     // [90, 5]
             let h1_2 = h1_1 + b1    // [90, 5]
             let h1 = relu(h1_2)     // [90, 5]
             
-            let h2_1 = h1 <*> W2    // [90, 3]
+            let h2_1 = h1 |*| W2    // [90, 3]
             let h2 = h2_1 + b2      // [90, 3]
             
             let out = softmax(h2)   // [90, 3]
@@ -67,14 +67,14 @@ class IrisClassificationTests: XCTestCase {
             let d_out_b2 = d_h2_b2 * d_out_h2           // [90, 3]
             let d_out_h2_1 = d_h2_h2_1 * d_out_h2       // [90, 3]
             let d_out_W2 = d_h2_1_W2.expandDims(-1)
-                <*> d_out_h2_1.expandDims(1) // [90, 5, 3]
-            let d_out_h1 = (d_h2_1_h1 <*> d_out_h2_1.expandDims(-1))
+                |*| d_out_h2_1.expandDims(1) // [90, 5, 3]
+            let d_out_h1 = (d_h2_1_h1 |*| d_out_h2_1.expandDims(-1))
                 .squeeze()                              // [90, 5]
             let d_out_h1_2 = d_h1_h1_2 * d_out_h1       // [90, 5]
             let d_out_b1 = d_out_h1_2 * d_h1_2_b1       // [90, 5]
             let d_out_h1_1 = d_h1_2_h1_1 * d_out_h1_2   // [90, 5]
             let d_out_W1 = d_h1_1_W1.expandDims(-1)
-                <*> d_out_h1_1.expandDims(1) // [90, 4, 5]
+                |*| d_out_h1_1.expandDims(1) // [90, 4, 5]
             
             // update
             b2 -= alpha * mean(d_out_b2, along: 0)
@@ -105,11 +105,11 @@ class IrisClassificationTests: XCTestCase {
             let y = toOneHot(labels)
             let labelsCount = sum(y, along: 0)
             
-            let h1_1 = x <*> W1     // [90, 5]
+            let h1_1 = x |*| W1     // [90, 5]
             let h1_2 = h1_1 + b1    // [90, 5]
             let h1 = relu(h1_2)     // [90, 5]
             
-            let h2_1 = h1 <*> W2    // [90, 3]
+            let h2_1 = h1 |*| W2    // [90, 3]
             let h2 = h2_1 + b2      // [90, 3]
             
             let out = softmax(h2)   // [90, 3]

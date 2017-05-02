@@ -70,7 +70,7 @@ class GradientDescentTests: XCTestCase {
         let features = NDArray.stack([xs*xs, xs, NDArray.ones(xs.shape)], newAxis: -1)
         print("features: \(features.shape)")
 
-        let theta = try! inv(features.transposed() <*> features) <*> features.transposed() <*> ys.reshaped([-1,1])
+        let theta = try! inv(features.transposed() |*| features) |*| features.transposed() |*| ys.reshaped([-1,1])
         print("\nanswer")
         print("theta: \(theta)")
         print("elapsed time: \(Date().timeIntervalSince(start))sec")

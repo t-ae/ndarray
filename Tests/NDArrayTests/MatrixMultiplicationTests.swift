@@ -8,8 +8,8 @@ class MatrixMultiplicationTests: XCTestCase {
         do {
             let a = NDArray([[1, 2], [3, 4]])
             let b = NDArray.eye(2)
-            let c = a <*> b
-            let d = b <*> a
+            let c = a |*| b
+            let d = b |*| a
             XCTAssertEqual(c, a)
             XCTAssertEqual(d, a)
         }
@@ -17,21 +17,21 @@ class MatrixMultiplicationTests: XCTestCase {
             let a = NDArray.range(9).reshaped([3, 3])
             let b = a[1..<2]
             let c = a[nil, 1..<2]
-            XCTAssertEqual(b <*> c, NDArray(shape: [1, 1], elements: [54]))
-            XCTAssertEqual(c <*> b, NDArray([[ 3,  4,  5],
+            XCTAssertEqual(b |*| c, NDArray(shape: [1, 1], elements: [54]))
+            XCTAssertEqual(c |*| b, NDArray([[ 3,  4,  5],
                                              [12, 16, 20],
                                              [21, 28, 35]]))
         }
         do {
             let a = NDArray.range(24).reshaped([2, 3, 4]).transposed([0, 2, 1])
             let b = NDArray.eye(3)
-            let c = a <*> b
+            let c = a |*| b
             XCTAssertEqual(c, a)
         }
         do {
             let a = NDArray.range(24).reshaped([2, 3, 4]).transposed()
             let b = NDArray([[1, 2], [3, 4]]).transposed()
-            let ans = a <*> b
+            let ans = a |*| b
             XCTAssertEqual(ans,
                            NDArray([[[ 24,  48],
                                      [ 36,  76],
@@ -49,7 +49,7 @@ class MatrixMultiplicationTests: XCTestCase {
                                      [ 45,  97],
                                      [ 57, 125]]]))
             
-            let ans2 = a[0] <*> b
+            let ans2 = a[0] |*| b
             XCTAssertEqual(ans2,
                            NDArray([[ 24,  48],
                                     [ 36,  76],
@@ -58,7 +58,7 @@ class MatrixMultiplicationTests: XCTestCase {
         do {
             let a = NDArray.eye(3)
             let b = NDArray.ones([3, 3, 3])
-            let ans = a <*> b
+            let ans = a |*| b
             XCTAssertEqual(ans, b)
         }
     }

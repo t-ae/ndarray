@@ -47,12 +47,12 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
                    elements: [Float](UnsafeBufferPointer(start: dst, count: majorSize*matrixSize)))
 }
 
-infix operator <*>: MultiplicationPrecedence
+infix operator |*|: MultiplicationPrecedence
 
 /// Matlix multiplication
 ///
 /// See `matmul`
-public func <*>(lhs: NDArray, rhs: NDArray) -> NDArray {
+public func |*|(lhs: NDArray, rhs: NDArray) -> NDArray {
     return matmul(lhs, rhs)
 }
 
