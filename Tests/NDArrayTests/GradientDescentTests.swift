@@ -2,6 +2,7 @@
 import XCTest
 import NDArray
 
+#if !SWIFT_PACKAGE
 class GradientDescentTests: XCTestCase {
 
     func testGradientDescent() {
@@ -77,5 +78,5 @@ class GradientDescentTests: XCTestCase {
         print("")
         
     }
-    
 }
+#endif

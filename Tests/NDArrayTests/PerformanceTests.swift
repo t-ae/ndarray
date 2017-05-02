@@ -1,7 +1,7 @@
 
 import XCTest
 @testable import NDArray
-
+#if !SWIFT_PACKAGE
 class PerformanceTests: XCTestCase {
     
     func testAsContiguousArrayPerformance() {
@@ -198,3 +198,4 @@ extension PerformanceTests {
         }
     }
 }
+#endif

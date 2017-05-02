@@ -2,6 +2,7 @@
 import XCTest
 import NDArray
 
+#if !SWIFT_PACKAGE
 class IrisClassificationTests: XCTestCase {
 
     func testLogisticRegression() {
@@ -164,3 +165,5 @@ func toOneHot(_ y: NDArray) -> NDArray {
     
     return NDArray.stack(ret)
 }
+
+#endif
