@@ -14,12 +14,12 @@ public func maximum(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
 extension NDArray {
     /// Clip lower values.
     public func clipped(low: Float) -> NDArray {
-        return clip(self, low: low, high: FLT_MAX)
+        return clip(self, low: low, high: Float.greatestFiniteMagnitude)
     }
     
     /// Clip higher values.
     public func clipped(high: Float) -> NDArray {
-        return clip(self, low: FLT_MIN, high: high)
+        return clip(self, low: -Float.greatestFiniteMagnitude, high: high)
     }
     
     /// Clip lower and higher values.
