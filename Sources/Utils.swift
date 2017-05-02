@@ -200,7 +200,6 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
     let ndim = arg.shape.count
     
     if isContiguous(shape: arg.shape, strides: arg.strides) {
-        // contiguous
         if volume == arg.data.count {
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
