@@ -19,30 +19,37 @@ func neg(_ arg: NDArray) -> NDArray {
                        baseOffset: 0,
                        data: [Float](UnsafeBufferPointer(start: dst, count: arg.data.count)))
     } else {
-        // Separate scattered major shape and strided minor shape
-        let volume = arg.volume
-        let minorDims = stridedDims(shape: arg.shape, strides: arg.strides)
-        let majorShape = [Int](arg.shape.dropLast(minorDims))
-        let majorStrides = [Int](arg.strides.dropLast(minorDims))
+        let ndim = arg.shape.count
+        let volume = arg.shape.prod()
         
-        let stride = arg.strides.last!
-        let blockSize = arg.shape.suffix(minorDims).prod()
+        let axis = getLeastStrideAxis(arg.strides)
+        let srcStride = arg.strides[axis]
+        let dims = getStridedDims(shape: arg.shape, strides: arg.strides, from: axis)
+        
+        let outerShape = [Int](arg.shape[0..<axis-dims+1] + arg.shape[axis+1..<ndim])
+        let outerStrides = [Int](arg.strides[0..<axis-dims+1] + arg.strides[axis+1..<ndim])
+        let blockSize = arg.shape[axis-dims+1...axis].prod()
+        
+        let dstStrides = contiguousStrides(shape: arg.shape)
+        let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
+        
+        let dstStride = dstStrides[axis]
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
-        let offsets = getOffsets(shape: majorShape, strides: majorStrides)
+        let srcOffsets = getOffsets(shape: outerShape, strides: outerStrides)
+        let dstOffsets = getOffsets(shape: outerShape, strides: dstOuterStrides)
         let _blockSize = vDSP_Length(blockSize)
         
         let src = arg.startPointer
-        var dstPtr = dst
-        for offset in offsets {
-            let src = src + offset
+        for (os, od) in zip(srcOffsets, dstOffsets) {
+            let src = src + os
+            let dst = dst + od
             
-            vDSP_vneg(src, stride, dstPtr, 1, _blockSize)
-            dstPtr += blockSize
+            vDSP_vneg(src, srcStride, dst, dstStride, _blockSize)
         }
-        
+
         return NDArray(shape: arg.shape,
                        elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
     }
