@@ -22,7 +22,7 @@ func testGradientDescent() {
     
     let alpha: Float = 0.1
     
-    for i in 0..<10000 {
+    for i in 0..<2000 {
         
         // calculate loss
         let distance = sum(theta * features, along: 1) - ys
@@ -53,6 +53,6 @@ func testGradientDescent() {
 }
 ```
 > answer  
-> theta: NDArray(shape: [3], data: [0.307677001, 0.192278847, 0.0993897617], strides: [1], baseOffset: 0)  
-> loss: 0.000391224  
-> elapsed time: 0.953428983688354sec  
+> theta: NDArray(shape: [3], data: [0.300824702, 0.199845955, 0.102966547], strides: [1], baseOffset: 0)  
+> loss: 0.00041115  
+> elapsed time: 0.166108965873718sec  s
