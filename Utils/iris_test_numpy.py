@@ -92,8 +92,8 @@ def main():
         d_out_W2 = np.matmul(np.expand_dims(d_h2_1_W2, -1),
                              np.expand_dims(d_out_h2_1, 1))  # [90, 5, 3]
         d_out_h1 = np.matmul(d_h2_1_h1,
-                             d_out_h2_1.reshape(list(d_out_h2_1.shape) + [1])) \
-            .reshape([numTrainSamples, numHiddenUnits1])  # [90, 5]
+                             np.expand_dims(d_out_h2_1, -1)) \
+            .squeeze()  # [90, 5]
         d_out_h1_2 = d_h1_h1_2 * d_out_h1  # [90, 5]
         d_out_b1 = d_out_h1_2 * d_h1_2_b1  # [90, 5]
         d_out_h1_1 = d_h1_2_h1_1 * d_out_h1_2  # [90, 5]
