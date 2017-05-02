@@ -150,12 +150,57 @@ func stridedDims(shape: [Int], strides: [Int]) -> Int {
     return stridedDims
 }
 
+/// Get the axis which has least stride.
+func getLeastStrideAxis(_ strides: [Int]) -> Int {
+    assert(!strides.isEmpty)
+    var axis = 0
+    var minimum = abs(strides[0])
+    for (i, s) in strides.enumerated().dropFirst() {
+        let sa = abs(s)
+        if sa < minimum {
+            minimum = sa
+            axis = i
+        }
+    }
+    return axis
+}
+
+/// Calculate how many dimensions are strided from axis.
+func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
+    assert(shape.count == strides.count)
+    assert(shape.all { $0 >= 0 })
+    assert(0 <= axis && axis < shape.count)
+    
+    var stride = strides[axis]
+    var stridedDims = 0
+    
+    var strides = strides
+    if stride < 0 {
+        stride = -stride
+        strides = strides.map { -$0 }
+    }
+    for i in (0...axis).reversed() {
+        if shape[i] == 1 {
+            stridedDims += 1
+        } else if strides[i] == stride {
+            stridedDims += 1
+            stride *= shape[i]
+        } else {
+            break
+        }
+    }
+    
+    return stridedDims
+}
+
 /// Gather elements.
 func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Float] {
     
-    let volume = arg.volume
+    let volume = arg.shape.prod()
+    let ndim = arg.shape.count
     
     if isContiguous(shape: arg.shape, strides: arg.strides) {
+        // contiguous
         if volume == arg.data.count {
             if forceUniqueReference {
                 let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
@@ -172,32 +217,38 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
             return [Float](arg.data[start..<end])
         }
     } else {
-        // Separate scattered major shape and strided minor shape
-        let minorDims = stridedDims(shape: arg.shape, strides: arg.strides)
-        let majorShape = [Int](arg.shape.dropLast(minorDims))
-        let majorStrides = [Int](arg.strides.dropLast(minorDims))
+
+        let axis = getLeastStrideAxis(arg.strides)
+        let srcStride = Int32(arg.strides[axis])
+        let dims = getStridedDims(shape: arg.shape, strides: arg.strides, from: axis)
+    
+        let outerShape = [Int](arg.shape[0..<axis-dims+1] + arg.shape[axis+1..<ndim])
+        let outerStrides = [Int](arg.strides[0..<axis-dims+1] + arg.strides[axis+1..<ndim])
+        let blockSize = arg.shape[axis-dims+1...axis].prod()
         
-        let stride = Int32(arg.strides.last!)
-        let blockSize = arg.shape.suffix(minorDims).prod()
+        let dstStrides = contiguousStrides(shape: arg.shape)
+        let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
+        
+        let dstStride = Int32(dstStrides[axis])
         
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
-        let offsets = getOffsets(shape: majorShape, strides: majorStrides)
+        let srcOffsets = getOffsets(shape: outerShape, strides: outerStrides)
+        let dstOffsets = getOffsets(shape: outerShape, strides: dstOuterStrides)
         let _blockSize = Int32(blockSize)
         
         let src: UnsafePointer<Float>
-        if stride < 0 {
-            src = arg.startPointer + (blockSize-1)*Int(stride)
+        if srcStride < 0 {
+            src = arg.startPointer + (blockSize-1) * Int(srcStride)
         } else {
             src = arg.startPointer
         }
-        var dstPtr = dst
-        for offset in offsets {
-            let src = src + offset
+        for (os, od) in zip(srcOffsets, dstOffsets) {
+            let src = src + os
+            let dst = dst + od
             
-            cblas_scopy(_blockSize, src, stride, dstPtr, 1)
-            dstPtr += blockSize
+            cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
         }
         
         return [Float](UnsafeBufferPointer(start: dst, count: volume))
