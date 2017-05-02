@@ -6,6 +6,8 @@ class IrisClassificationTests: XCTestCase {
 
     func testLogisticRegression() {
         
+        // Equivalent python script on ./Util/iris_test.py
+        
         let start = Date()
         
         let normalize_mu = mean(Iris.x_train, along: 0)
@@ -35,9 +37,9 @@ class IrisClassificationTests: XCTestCase {
         var W2 = NDArray.uniform(low: -W2_limit, high: W2_limit, shape: [numHiddenUnits1, numOutput]) // [5, 3]
         var b2 = NDArray.zeros([numOutput]) // [5]
         
-        let alpha: Float = 1e-2
+        let alpha: Float = 1e-3
         
-        for i in 0...3000 {
+        for i in 0...30000 {
             let h1_1 = x |*| W1     // [90, 5]
             let h1_2 = h1_1 + b1    // [90, 5]
             let h1 = relu(h1_2)     // [90, 5]
