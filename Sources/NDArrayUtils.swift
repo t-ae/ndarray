@@ -23,7 +23,9 @@ func isDense(shape: [Int], strides: [Int]) -> Bool {
     var strideCount = 0
     var stride = 1
     while true {
-        if let index = strides.index(of: stride) {
+        if strideCount == shape.count {
+            return true
+        } else if let index = strides.index(of: stride) {
             stride *= shape[index]
             strideCount += 1
         } else {

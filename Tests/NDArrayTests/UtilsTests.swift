@@ -33,6 +33,10 @@ class UtilsTests: XCTestCase {
             
             XCTAssertTrue(isDense(shape: [2, 3, 4], strides: [0, 0, 0]))
         }
+        do {
+            // one
+            XCTAssertTrue(isDense(shape: [1], strides: [1]))
+        }
     }
     
     func testStridedDims() {

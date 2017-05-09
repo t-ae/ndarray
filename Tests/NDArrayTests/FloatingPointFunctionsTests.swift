@@ -67,6 +67,13 @@ class FloatingPointFunctionsTests: XCTestCase {
         }
     }
     
+    func testLog() {
+        do {
+            let a = NDArray.ones([1])
+            let b = log(a)
+            XCTAssertEqual(b, NDArray.zeros([1]))
+        }
+    }
     
 
 }
