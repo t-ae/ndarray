@@ -13,4 +13,9 @@ class SelectTests: XCTestCase {
         XCTAssertEqual(a.select { $0[1].asScalar() < 7 }, NDArray([[0, 1, 2], [3, 4, 5]]))
     }
 
+    func testIndices() {
+        let a = NDArray.range(9).reshaped([3, 3])
+        
+        XCTAssertEqual(a.indices { $0[1].asScalar() < 7 }, [0, 1])
+    }
 }
