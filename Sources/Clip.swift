@@ -46,8 +46,8 @@ private func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
                        baseOffset: 0,
                        data: [Float](UnsafeBufferPointer(start: dst, count: array.data.count)))
     } else {
-        let ndim = array.shape.count
-        let volume = array.shape.prod()
+        let ndim = array.ndim
+        let volume = array.volume
         
         let axis = getLeastStrideAxis(array.strides)
         let srcStride = array.strides[axis]

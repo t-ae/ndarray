@@ -19,8 +19,8 @@ func neg(_ arg: NDArray) -> NDArray {
                        baseOffset: 0,
                        data: [Float](UnsafeBufferPointer(start: dst, count: arg.data.count)))
     } else {
-        let ndim = arg.shape.count
-        let volume = arg.shape.prod()
+        let ndim = arg.ndim
+        let volume = arg.volume
         
         let axis = getLeastStrideAxis(arg.strides)
         let srcStride = arg.strides[axis]

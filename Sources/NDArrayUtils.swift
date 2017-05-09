@@ -196,8 +196,8 @@ func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
 /// Gather elements.
 func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Float] {
     
-    let volume = arg.shape.prod()
-    let ndim = arg.shape.count
+    let volume = arg.volume
+    let ndim = arg.ndim
     
     if isContiguous(shape: arg.shape, strides: arg.strides) {
         if volume == arg.data.count {
