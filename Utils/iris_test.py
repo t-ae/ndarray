@@ -141,7 +141,7 @@ def main():
 
     answer = np.argmax(out, 1)
     trues = np.sum(answer == label_test)
-    accuracy = trues / numTrainSamples
+    accuracy = trues / len(x_test)
 
     print(f"accuracy: {accuracy}")
 

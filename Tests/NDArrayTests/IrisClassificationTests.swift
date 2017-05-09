@@ -38,7 +38,7 @@ class IrisClassificationTests: XCTestCase {
         var W2 = NDArray.uniform(low: -W2_limit, high: W2_limit, shape: [numHiddenUnits1, numOutput]) // [5, 3]
         var b2 = NDArray.zeros([numOutput]) // [5]
         
-        let alpha: Float = 3e-4
+        let alpha: Float = 1e-3
         
         for i in 0...30000 {
             let h1_1 = x |*| W1     // [90, 5]
@@ -124,7 +124,7 @@ class IrisClassificationTests: XCTestCase {
             print("loss: \(loss), (\(featureLosses.elements()))")
             let answer = argmax(out, along: 1)
             let trues = zip(answer, labels).filter { return $0 == $1 }.count
-            let accuracy = Float(trues) / Float(numTrainSamples)
+            let accuracy = Float(trues) / Float(x.shape[0])
             
             print("accuracy: \(accuracy)")
             print("")
