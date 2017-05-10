@@ -25,7 +25,7 @@ public struct NDArray {
         precondition(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
         
         self.init(shape: shape,
-                  strides: contiguousStrides(shape: shape),
+                  strides: getContiguousStrides(shape: shape),
                   baseOffset: 0,
                   data: elements)
     }
@@ -39,7 +39,7 @@ public struct NDArray {
     public func element(at ndIndex: [Int]) -> Float {
         precondition(ndIndex.count == strides.count, "Invalid index for single element.")
         let ndIndex = normalizeIndex(shape: shape, ndIndex: ndIndex)
-        let index = indexOffset(strides: strides, ndIndex: ndIndex) + baseOffset
+        let index = getIndexOffset(strides: strides, ndIndex: ndIndex) + baseOffset
         return data[index]
     }
     

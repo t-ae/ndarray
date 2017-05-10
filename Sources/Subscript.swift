@@ -73,7 +73,7 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     
     // Make array contiguous
     array.data = gatherElements(array, forceUniqueReference: true)
-    array.strides = contiguousStrides(shape: array.shape)
+    array.strides = getContiguousStrides(shape: array.shape)
     array.baseOffset = 0
     
     // Calculate destinaton
@@ -115,8 +115,8 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     // Copy
     let newValue = broadcast(newValue, to: dstShape)
     
-    let strDims = min(stridedDims(shape: dstShape, strides: dstStrides),
-                      stridedDims(shape: newValue.shape, strides: newValue.strides))
+    let strDims = min(getStridedDims(shape: dstShape, strides: dstStrides),
+                      getStridedDims(shape: newValue.shape, strides: newValue.strides))
     
     let majorShape = [Int](dstShape.dropLast(strDims))
     let minorShape = dstShape.suffix(strDims)
@@ -143,8 +143,8 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     }
     for majorIndex in majorIndices {
         let ndIndex = majorIndex + minorZeros
-        let src = src + indexOffset(strides: newValue.strides, ndIndex: ndIndex)
-        let dst = dst + indexOffset(strides: dstStrides, ndIndex: ndIndex)
+        let src = src + getIndexOffset(strides: newValue.strides, ndIndex: ndIndex)
+        let dst = dst + getIndexOffset(strides: dstStrides, ndIndex: ndIndex)
         cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
     }
 }

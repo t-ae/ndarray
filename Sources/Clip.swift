@@ -54,7 +54,7 @@ private func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
         let outerStrides = [Int](array.strides[0..<axis-dims+1] + array.strides[axis+1..<ndim])
         let blockSize = array.shape[axis-dims+1...axis].prod()
         
-        let dstStrides = contiguousStrides(shape: array.shape)
+        let dstStrides = getContiguousStrides(shape: array.shape)
         let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
         
         let dstStride = dstStrides[axis]

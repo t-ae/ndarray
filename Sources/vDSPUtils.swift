@@ -29,7 +29,7 @@ func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
         let outerStrides = [Int](arg.strides[0..<axis-dims+1] + arg.strides[axis+1..<ndim])
         let blockSize = arg.shape[axis-dims+1...axis].prod()
         
-        let dstStrides = contiguousStrides(shape: arg.shape)
+        let dstStrides = getContiguousStrides(shape: arg.shape)
         let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
         
         let dstStride = dstStrides[axis]
@@ -64,7 +64,7 @@ func apply(_ lhs: NDArray,
            _ rhs: Float,
            _ vDSPfunc: vDSP_vs_func) -> NDArray {
     
-    let strDims = stridedDims(shape: lhs.shape, strides: lhs.strides)
+    let strDims = getStridedDims(shape: lhs.shape, strides: lhs.strides)
     
     let majorShape = [Int](lhs.shape.dropLast(strDims))
     let minorShape = lhs.shape.suffix(strDims)
@@ -105,7 +105,7 @@ func apply(_ lhs: Float,
            _ rhs: NDArray,
            _ vDSPfunc: vDSP_sv_func) -> NDArray {
     
-    let strDims = stridedDims(shape: rhs.shape, strides: rhs.strides)
+    let strDims = getStridedDims(shape: rhs.shape, strides: rhs.strides)
     
     let majorShape = [Int](rhs.shape.dropLast(strDims))
     let minorShape = rhs.shape.suffix(strDims)
@@ -149,8 +149,8 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_vv_func) -> NDArray 
     let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
     defer { dst.deallocate(capacity: volume) }
     
-    let strDims = min(stridedDims(shape: lhs.shape, strides: lhs.strides),
-                      stridedDims(shape: rhs.shape, strides: rhs.strides))
+    let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),
+                      getStridedDims(shape: rhs.shape, strides: rhs.strides))
     
     let majorShape = [Int](lhs.shape.dropLast(strDims))
     let lMajorStrides = [Int](lhs.strides.dropLast(strDims))
@@ -220,7 +220,7 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> ND
 
 typealias vDSP_index_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, UnsafeMutablePointer<vDSP_Length>, vDSP_Length) -> Void
 
-// Reduce along a given axis (for argmin, argmux).
+// Reduce along a given axis (for argmin, argmax).
 func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func) -> NDArray {
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
     

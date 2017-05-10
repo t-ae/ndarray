@@ -4,7 +4,7 @@ import Accelerate
 /// Check if elements are aligned contiguously.
 func isContiguous(shape: [Int], strides: [Int]) -> Bool {
     assert(shape.count == strides.count)
-    return shape.isEmpty || (strides.last == 1 && shape.count == stridedDims(shape: shape, strides: strides))
+    return shape.isEmpty || (strides.last == 1 && shape.count == getStridedDims(shape: shape, strides: strides))
 }
 
 /// Check if elements are densely placed.
@@ -35,7 +35,7 @@ func isDense(shape: [Int], strides: [Int]) -> Bool {
 }
 
 /// Get contiguous strides.
-func contiguousStrides(shape: [Int]) -> [Int] {
+func getContiguousStrides(shape: [Int]) -> [Int] {
     assert(shape.all { $0 >= 0 })
     guard !shape.isEmpty else {
         return []
@@ -48,7 +48,7 @@ func contiguousStrides(shape: [Int]) -> [Int] {
 }
 
 /// Get offset.
-func indexOffset(strides: [Int], ndIndex: [Int]) -> Int {
+func getIndexOffset(strides: [Int], ndIndex: [Int]) -> Int {
     assert(strides.count == ndIndex.count)
     assert(ndIndex.all { $0 >= 0 })
     return zip(ndIndex, strides)
@@ -127,7 +127,7 @@ func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
 }
 
 /// Calculate how many dims are strided.
-func stridedDims(shape: [Int], strides: [Int]) -> Int {
+func getStridedDims(shape: [Int], strides: [Int]) -> Int {
     assert(shape.count == strides.count)
     assert(shape.all { $0 >= 0 })
     var stridedDims = 0
@@ -227,7 +227,7 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let outerStrides = [Int](arg.strides[0..<axis-dims+1] + arg.strides[axis+1..<ndim])
         let blockSize = arg.shape[axis-dims+1...axis].prod()
         
-        let dstStrides = contiguousStrides(shape: arg.shape)
+        let dstStrides = getContiguousStrides(shape: arg.shape)
         let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
         
         let dstStride = Int32(dstStrides[axis])

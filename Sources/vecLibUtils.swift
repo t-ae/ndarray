@@ -17,7 +17,7 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
                        data: [Float](UnsafeBufferPointer(start: dst, count: arg.data.count)))
     } else if arg.strides.last == 1 {
         let volume = arg.volume
-        let strDims = stridedDims(shape: arg.shape, strides: arg.strides)
+        let strDims = getStridedDims(shape: arg.shape, strides: arg.strides)
         
         let majorShape = [Int](arg.shape.dropLast(strDims))
         let majorStrides = [Int](arg.strides.dropLast(strDims))
@@ -66,8 +66,8 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
     defer { dst.deallocate(capacity: volume) }
     
     if lhs.strides.last == 1 && rhs.strides.last == 1 {
-        let strDims = min(stridedDims(shape: lhs.shape, strides: lhs.strides),
-                          stridedDims(shape: rhs.shape, strides: rhs.strides))
+        let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),
+                          getStridedDims(shape: rhs.shape, strides: rhs.strides))
         
         let majorShape = [Int](lhs.shape.dropLast(strDims))
         let lMajorStrides = [Int](lhs.strides.dropLast(strDims))

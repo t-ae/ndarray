@@ -39,37 +39,37 @@ class UtilsTests: XCTestCase {
         }
     }
     
-    func testStridedDims() {
+    func testGetStridedDims() {
         do {
-            let strDims = stridedDims(shape: [2, 2, 2], strides: [4, 2, 1])
+            let strDims = getStridedDims(shape: [2, 2, 2], strides: [4, 2, 1])
             XCTAssertEqual(strDims, 3)
         }
         do {
-            let strDims = stridedDims(shape: [2, 2], strides: [4, 2])
+            let strDims = getStridedDims(shape: [2, 2], strides: [4, 2])
             XCTAssertEqual(strDims, 2)
         }
         do {
-            let strDims = stridedDims(shape: [2, 2], strides: [2, 4])
+            let strDims = getStridedDims(shape: [2, 2], strides: [2, 4])
             XCTAssertEqual(strDims, 1)
         }
         do {
-            let strDims = stridedDims(shape: [2, 2], strides: [0, 0])
+            let strDims = getStridedDims(shape: [2, 2], strides: [0, 0])
             XCTAssertEqual(strDims, 2)
         }
         do {
-            let strDims = stridedDims(shape: [2, 1, 2, 2], strides: [4, 0, 2, 1])
+            let strDims = getStridedDims(shape: [2, 1, 2, 2], strides: [4, 0, 2, 1])
             XCTAssertEqual(strDims, 4)
         }
         do {
-            let strDims = stridedDims(shape: [3, 3], strides: [-3, -1])
+            let strDims = getStridedDims(shape: [3, 3], strides: [-3, -1])
             XCTAssertEqual(strDims, 2)
         }
         do {
-            let strDims = stridedDims(shape: [3, 3], strides: [3, -1])
+            let strDims = getStridedDims(shape: [3, 3], strides: [3, -1])
             XCTAssertEqual(strDims, 1)
         }
         do {
-            let strDims = stridedDims(shape: [3, 3], strides: [-6, -2])
+            let strDims = getStridedDims(shape: [3, 3], strides: [-6, -2])
             XCTAssertEqual(strDims, 2)
         }
     }
