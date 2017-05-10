@@ -14,7 +14,7 @@ public func round(_ arg: NDArray) -> NDArray {
 }
 
 public func abs(_ arg: NDArray) -> NDArray {
-    return apply(arg, vvfabsf)
+    return apply(arg, vDSP_vabs)
 }
 
 public func sqrt(_ arg: NDArray) -> NDArray {

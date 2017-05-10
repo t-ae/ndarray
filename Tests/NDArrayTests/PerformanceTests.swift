@@ -1,6 +1,8 @@
 
 import XCTest
+import Accelerate
 @testable import NDArray
+
 #if !SWIFT_PACKAGE
 class PerformanceTests: XCTestCase {
     
