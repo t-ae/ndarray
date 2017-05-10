@@ -28,9 +28,6 @@ extension NDArray {
     }
 }
 
-// MARK: Util
-private typealias vDSP_func = (UnsafePointer<Float>, vDSP_Stride, UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, vDSP_Stride, vDSP_Length) -> Void
-
 private func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
     
     var low = low
@@ -80,41 +77,4 @@ private func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
         return NDArray(shape: array.shape,
                        elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
     }
-}
-
-private func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_func) -> NDArray {
-    let (lhs, rhs) = broadcast(lhs, rhs)
-    
-    let volume = lhs.volume
-    let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
-    defer { dst.deallocate(capacity: volume) }
-    
-    let strDims = min(stridedDims(shape: lhs.shape, strides: lhs.strides),
-                      stridedDims(shape: rhs.shape, strides: rhs.strides))
-    
-    let majorShape = [Int](lhs.shape.dropLast(strDims))
-    let lMajorStrides = [Int](lhs.strides.dropLast(strDims))
-    let rMajorStrides = [Int](rhs.strides.dropLast(strDims))
-    
-    let lStride = vDSP_Stride(lhs.strides.last!)
-    let rStride = vDSP_Stride(rhs.strides.last!)
-    let blockSize = lhs.shape.suffix(strDims).prod()
-    let _blockSize = vDSP_Length(blockSize)
-    
-    let lOffsets = getOffsets(shape: majorShape, strides: lMajorStrides)
-    let rOffsets = getOffsets(shape: majorShape, strides: rMajorStrides)
-    
-    
-    let lSrc = lhs.startPointer
-    let rSrc = rhs.startPointer
-    var dstPtr = dst
-    for (lo, ro) in zip(lOffsets, rOffsets) {
-        vDSPfunc(lSrc + lo, lStride,
-                 rSrc + ro, rStride,
-                 dstPtr, 1, _blockSize)
-        dstPtr += blockSize
-    }
-    
-    return NDArray(shape: lhs.shape,
-                   elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
 }

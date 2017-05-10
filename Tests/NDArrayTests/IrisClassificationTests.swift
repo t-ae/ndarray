@@ -139,7 +139,7 @@ func relu(_ x: NDArray) -> NDArray {
 }
 
 func d_relu(_ x: NDArray) -> NDArray {
-    return relu(x) / x.clipped(low: Float.leastNormalMagnitude)
+    return copySign(magnitude: NDArray(scalar: 1), sign: x).clipped(low: 0)
 }
 
 func softmax(_ x: NDArray) -> NDArray {
