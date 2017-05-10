@@ -5,25 +5,24 @@ extension NDArray {
     
     public subscript(indices: NDArrayIndexElementProtocol?...) -> NDArray {
         get {
-            let indices = indices.map { $0.map(toNDArrayIndexElement) }
             return getSubarray(array: self, indices: indices)
         }
         set {
-            let indices = indices.map { $0.map(toNDArrayIndexElement) }
             setSubarray(array: &self, indices: indices, newValue: newValue)
         }
     }
 
     /// Substitute for scalar setting
     public mutating func set(_ value: Float, for index: [Int?]) {
-        let ies = index.map { $0.map { NDArrayIndexElement(single: $0) } }
-        setSubarray(array: &self, indices: ies, newValue: NDArray(scalar: value))
+        setSubarray(array: &self, indices: index, newValue: NDArray(scalar: value))
     }
 }
 
 //MARK: - Implementation
-func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
+func getSubarray(array: NDArray, indices: [NDArrayIndexElementProtocol?]) -> NDArray {
     precondition(indices.count <= array.ndim, "Too many indices for NDArray.")
+    
+    let indices = indices.map { $0.map(toNDArrayIndexElement) }
     
     var x = array
     
@@ -66,9 +65,11 @@ func getSubarray(array: NDArray, indices: [NDArrayIndexElement?]) -> NDArray {
     return x
 }
 
-func setSubarray(array: inout NDArray, indices: [NDArrayIndexElement?], newValue: NDArray) {
+func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], newValue: NDArray) {
     
     precondition(indices.count <= array.ndim, "Too many indices for NDArray.")
+    
+    let indices = indices.map { $0.map(toNDArrayIndexElement) }
     
     // Make array contiguous
     array.data = gatherElements(array, forceUniqueReference: true)

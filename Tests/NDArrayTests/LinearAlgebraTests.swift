@@ -11,6 +11,14 @@ class LinearAlgebraTests: XCTestCase {
         }
     }
     
+    func testNorm2() {
+        do {
+            let a = NDArray.range(9).reshaped([3, 3])
+            XCTAssertEqual(norm(a, along: 0), NDArray([6.70820393,  8.1240384 ,  9.64365076]))
+            XCTAssertEqual(norm(a, along: 1), NDArray([2.23606798,   7.07106781,  12.20655562]))
+        }
+    }
+    
     func testInvert() {
         do {
             let a = NDArray([[1, 0], [0, 1]])

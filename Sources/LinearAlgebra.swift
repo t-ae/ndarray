@@ -2,12 +2,29 @@
 import Foundation
 import Accelerate
 
-/// Calculate Frobenius norm
+/// Calculate Frobenius norm.
 public func norm(_ arg: NDArray) -> Float {
     return sqrtf(sum(arg*arg).asScalar())
 }
 
-/// Calculate matrix inverse
+/// Calcurate vector norms along axis.
+public func norm(_ arg: NDArray, along axis: Int) -> NDArray {
+    let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
+    let newShape = arg.shape.removing(at: axis)
+    
+    let indices = getIndices(shape: newShape)
+    
+    var elements = [Float](repeating: 0, count: newShape.prod())
+    for (i, index) in indices.enumerated() {
+        let expand: [Int?] = index.prefix(axis).map { Optional($0) } + [nil] + index.dropFirst(axis).map { Optional($0) }
+        let vector = getSubarray(array: arg, indices: expand)
+        elements[i] = norm(vector)
+    }
+    
+    return NDArray(shape: newShape, elements: elements)
+}
+
+/// Calculate matrix inverse.
 ///
 /// If argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two indexes
 public func inv(_ arg: NDArray) throws -> NDArray {
