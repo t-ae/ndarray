@@ -5,6 +5,7 @@ import Accelerate
 
 typealias vDSP_unary_func = (UnsafePointer<Float>, vDSP_Stride,
     UnsafeMutablePointer<Float>, vDSP_Stride, vDSP_Length) -> Void
+
 func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
         let src = arg.startPointer
@@ -63,37 +64,52 @@ typealias vDSP_vs_func = (UnsafePointer<Float>, vDSP_Stride,
 func apply(_ lhs: NDArray,
            _ rhs: Float,
            _ vDSPfunc: vDSP_vs_func) -> NDArray {
-    
-    let strDims = getStridedDims(shape: lhs.shape, strides: lhs.strides)
-    
-    let majorShape = [Int](lhs.shape.dropLast(strDims))
-    let minorShape = lhs.shape.suffix(strDims)
-    
-    let blockSize = minorShape.prod()
-    
-    let dst = UnsafeMutablePointer<Float>.allocate(capacity: lhs.volume)
-    defer { dst.deallocate(capacity: lhs.volume) }
-    
-    let majorStrides = [Int](lhs.strides.dropLast(strDims))
-    let offsets = OffsetSequence(shape: majorShape, strides: majorStrides)
-    
-    var rhs = rhs
-    let stride = vDSP_Stride(lhs.strides.last ?? 0)
-    let _blockSize = vDSP_Length(blockSize)
-    
-    let src = lhs.startPointer
-    var dstPtr = dst
-    for offset in offsets {
-        let src = src + offset
-        vDSPfunc(src, stride,
-                 &rhs,
-                 dstPtr, 1, _blockSize)
+    if isDense(shape: lhs.shape, strides: lhs.strides) {
+        var rhs = rhs
+        let src = lhs.startPointer
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: lhs.data.count)
+        defer { dst.deallocate(capacity: lhs.data.count) }
         
-        dstPtr += blockSize
+        vDSPfunc(src, 1,
+                 &rhs,
+                 dst, 1, vDSP_Length(lhs.data.count))
+        
+        return NDArray(shape: lhs.shape,
+                       strides: lhs.strides,
+                       baseOffset: 0,
+                       data: [Float](UnsafeBufferPointer(start: dst, count: lhs.data.count)))
+    } else {
+        let strDims = getStridedDims(shape: lhs.shape, strides: lhs.strides)
+        
+        let majorShape = [Int](lhs.shape.dropLast(strDims))
+        let minorShape = lhs.shape.suffix(strDims)
+        
+        let blockSize = minorShape.prod()
+        
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: lhs.volume)
+        defer { dst.deallocate(capacity: lhs.volume) }
+        
+        let majorStrides = [Int](lhs.strides.dropLast(strDims))
+        let offsets = OffsetSequence(shape: majorShape, strides: majorStrides)
+        
+        var rhs = rhs
+        let stride = vDSP_Stride(lhs.strides.last ?? 0)
+        let _blockSize = vDSP_Length(blockSize)
+        
+        let src = lhs.startPointer
+        var dstPtr = dst
+        for offset in offsets {
+            let src = src + offset
+            vDSPfunc(src, stride,
+                     &rhs,
+                     dstPtr, 1, _blockSize)
+            
+            dstPtr += blockSize
+        }
+        
+        return NDArray(shape: lhs.shape,
+                       elements: [Float](UnsafeBufferPointer(start: dst, count: lhs.volume)))
     }
-    
-    return NDArray(shape: lhs.shape,
-                   elements: [Float](UnsafeBufferPointer(start: dst, count: lhs.volume)))
 }
 
 // MARK: Scalar-Vector operation
@@ -105,36 +121,53 @@ func apply(_ lhs: Float,
            _ rhs: NDArray,
            _ vDSPfunc: vDSP_sv_func) -> NDArray {
     
-    let strDims = getStridedDims(shape: rhs.shape, strides: rhs.strides)
-    
-    let majorShape = [Int](rhs.shape.dropLast(strDims))
-    let minorShape = rhs.shape.suffix(strDims)
-    
-    let blockSize = minorShape.prod()
-    
-    let dst = UnsafeMutablePointer<Float>.allocate(capacity: rhs.volume)
-    defer { dst.deallocate(capacity: rhs.volume) }
-    
-    let majorStrides = [Int](rhs.strides.dropLast(strDims))
-    let offsets = OffsetSequence(shape: majorShape, strides: majorStrides)
-    
-    var lhs = lhs
-    let stride = vDSP_Stride(rhs.strides.last ?? 0)
-    let _blockSize = vDSP_Length(blockSize)
-    
-    let src = rhs.startPointer
-    var dstPtr = dst
-    for offset in offsets {
-        let src = src + offset
-        vDSPfunc(&lhs,
-                 src, stride,
-                 dstPtr, 1, _blockSize)
+    if isDense(shape: rhs.shape, strides: rhs.strides) {
+        var lhs = lhs
+        let src = rhs.startPointer
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: rhs.data.count)
+        defer { dst.deallocate(capacity: rhs.data.count) }
         
-        dstPtr += blockSize
+        vDSPfunc(&lhs,
+                 src, 1,
+                 dst, 1, vDSP_Length(rhs.data.count))
+        
+        return NDArray(shape: rhs.shape,
+                       strides: rhs.strides,
+                       baseOffset: 0,
+                       data: [Float](UnsafeBufferPointer(start: dst, count: rhs.data.count)))
+    } else {
+        let strDims = getStridedDims(shape: rhs.shape, strides: rhs.strides)
+        
+        let majorShape = [Int](rhs.shape.dropLast(strDims))
+        let minorShape = rhs.shape.suffix(strDims)
+        
+        let blockSize = minorShape.prod()
+        
+        let dst = UnsafeMutablePointer<Float>.allocate(capacity: rhs.volume)
+        defer { dst.deallocate(capacity: rhs.volume) }
+        
+        let majorStrides = [Int](rhs.strides.dropLast(strDims))
+        let offsets = OffsetSequence(shape: majorShape, strides: majorStrides)
+        
+        var lhs = lhs
+        let stride = vDSP_Stride(rhs.strides.last ?? 0)
+        let _blockSize = vDSP_Length(blockSize)
+        
+        let src = rhs.startPointer
+        var dstPtr = dst
+        for offset in offsets {
+            let src = src + offset
+            vDSPfunc(&lhs,
+                     src, stride,
+                     dstPtr, 1, _blockSize)
+            
+            dstPtr += blockSize
+        }
+        
+        return NDArray(shape: rhs.shape,
+                       elements: [Float](UnsafeBufferPointer(start: dst, count: rhs.volume)))
+
     }
-    
-    return NDArray(shape: rhs.shape,
-                   elements: [Float](UnsafeBufferPointer(start: dst, count: rhs.volume)))
 }
 
 // MARK: Vector-Vector operation
