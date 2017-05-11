@@ -107,13 +107,15 @@ private func _std(_ arg: NDArray, along axis: Int) -> NDArray {
         dst1Ptr += 1
         dst2Ptr += 1
     }
-    
-    let sum = NDArray(shape: newShape,
-                      elements: [Float](UnsafeBufferPointer(start: dst1, count: volume)))
-    let sum2 = NDArray(shape: newShape,
-                       elements: [Float](UnsafeBufferPointer(start: dst2, count: volume)))
-    
-    let mean = sum / Float(count)
-    let mean2 = sum2 / Float(count)
-    return sqrt(mean2 - mean*mean)
+    var _count = Float(count)
+    let _volume = vDSP_Length(volume)
+    vDSP_vsdiv(dst1, 1, &_count, dst1, 1, _volume)
+    vDSP_vsdiv(dst2, 1, &_count, dst2, 1, _volume)
+    vDSP_vsq(dst1, 1, dst1, 1, _volume)
+    vDSP_vsub(dst1, 1, dst2, 1, dst2, 1, _volume)
+    var _volume2 = Int32(volume)
+    vvsqrtf(dst2, dst2, &_volume2)
+
+    return NDArray(shape: newShape,
+                   elements: [Float](UnsafeBufferPointer(start: dst2, count: volume)))
 }
