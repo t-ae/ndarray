@@ -72,7 +72,7 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     let indices = indices.map { $0.map(toNDArrayIndexElement) }
     
     // Make array contiguous
-    array.data = gatherElements(array, forceUniqueReference: true)
+    array.data = gatherElements(array)
     array.strides = getContiguousStrides(shape: array.shape)
     array.baseOffset = 0
     
@@ -135,16 +135,19 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     } else {
         src = newValue.startPointer
     }
-    let dst: UnsafeMutablePointer<Float>
-    if dstStride < 0 {
-        dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset + (blockSize-1)*Int(dstStride)
-    } else {
-        dst = UnsafeMutablePointer(mutating: array.startPointer) + dstOffset
-    }
-    for majorIndex in majorIndices {
-        let ndIndex = majorIndex + minorZeros
-        let src = src + getIndexOffset(strides: newValue.strides, ndIndex: ndIndex)
-        let dst = dst + getIndexOffset(strides: dstStrides, ndIndex: ndIndex)
-        cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
+    // Force CoW
+    array.data.withUnsafeMutableBufferPointer { p in
+        let dst: UnsafeMutablePointer<Float>
+        if dstStride < 0 {
+            dst = p.baseAddress! + array.baseOffset + dstOffset + (blockSize-1)*Int(dstStride)
+        } else {
+            dst = p.baseAddress! + array.baseOffset + dstOffset
+        }
+        for majorIndex in majorIndices {
+            let ndIndex = majorIndex + minorZeros
+            let src = src + getIndexOffset(strides: newValue.strides, ndIndex: ndIndex)
+            let dst = dst + getIndexOffset(strides: dstStrides, ndIndex: ndIndex)
+            cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
+        }
     }
 }

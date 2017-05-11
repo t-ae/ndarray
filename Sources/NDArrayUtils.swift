@@ -126,22 +126,14 @@ func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
 }
 
 /// Gather elements.
-func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Float] {
+func gatherElements(_ arg: NDArray) -> [Float] {
     
     let volume = arg.volume
     let ndim = arg.ndim
     
     if isContiguous(shape: arg.shape, strides: arg.strides) {
         if volume == arg.data.count {
-            if forceUniqueReference {
-                let dst = UnsafeMutablePointer<Float>.allocate(capacity: arg.data.count)
-                defer { dst.deallocate(capacity: arg.data.count) }
-                cblas_scopy(Int32(arg.data.count), arg.data, 1, dst, 1)
-                // memcpy(dst, arg.data, arg.data.count*MemoryLayout<Float>.size)
-                return [Float](UnsafeBufferPointer(start: dst, count: arg.data.count))
-            } else {
-                return arg.data
-            }
+            return arg.data
         } else {
             let start = arg.baseOffset
             let end = start + volume

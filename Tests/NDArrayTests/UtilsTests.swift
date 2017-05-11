@@ -84,7 +84,7 @@ class UtilsTests: XCTestCase {
             let a = NDArray(shape: [0, 2, 3], elements: [])
             let elements = gatherElements(a)
             XCTAssertEqual(elements, [])
-            let elements2 = gatherElements(a, forceUniqueReference: true)
+            let elements2 = gatherElements(a)
             XCTAssertEqual(elements2, [])
         }
         do {

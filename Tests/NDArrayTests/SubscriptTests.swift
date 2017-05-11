@@ -151,6 +151,15 @@ class SubscriptTests: XCTestCase {
             XCTAssertEqual(a, NDArray([[6, 6],
                                        [5, 5]]))
         }
+        
+        do {
+            // CoW
+            let a = NDArray.range(4)
+            var b = a
+            b[0] = NDArray(scalar: 100)
+            XCTAssertEqual(a, NDArray([0, 1, 2, 3]))
+            XCTAssertEqual(b, NDArray([100, 1, 2, 3]))
+        }
     }
     
     func testSubscriptGet2() {
