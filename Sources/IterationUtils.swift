@@ -1,5 +1,5 @@
 
-// MARK: Index
+// MARK: - Index
 struct NDIndexSequence: Sequence {
     typealias Iterator = NDINdexIterator
     
@@ -60,7 +60,7 @@ struct NDINdexIterator: IteratorProtocol {
 }
 
 
-// MARK: Offset
+// MARK: - Offset
 struct OffsetSequence: Sequence {
     typealias Iterator = OffsetIterator
     let shape: [Int]
@@ -109,9 +109,8 @@ struct OffsetIterator: IteratorProtocol {
                 break
             }
             index[last-i] = 0
-            offset! -= strides[last-i]*shape[last-i]
             index[last-i-1] += 1
-            offset! += strides[last-i-1]
+            offset! += strides[last-i-1] - strides[last-i]*shape[last-i]
         }
         
         if index[0] == shape[0] {
