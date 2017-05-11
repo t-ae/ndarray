@@ -1,19 +1,28 @@
 
 import Foundation
-
-private func _uniform(low: Float = 0, high: Float = 1) -> Float {
-    return (high-low) * (Float(arc4random_uniform(UInt32.max-1)) / Float(UInt32.max)) + low
-}
+import Accelerate
 
 extension NDArray {
     /// Create randomly initialized NDArray.
     ///
     /// All values are sampled from the interval [`low`, `high`).
     public static func uniform(low: Float = 0, high: Float = 1, shape: [Int]) -> NDArray {
-        let count = shape.prod()
-        let elements = (0..<count).map { _ in _uniform(low: low, high: high) }
+        precondition(shape.all { $0 >= 0 })
+        let size = shape.prod()
+        let dst = UnsafeMutablePointer<UInt32>.allocate(capacity: size)
+        let dst2 = UnsafeMutablePointer<Float>.allocate(capacity: size)
+        defer {
+            dst.deallocate(capacity: size)
+            dst2.deallocate(capacity: size)
+        }
+        arc4random_buf(dst, MemoryLayout<UInt32>.size * size)
         
-        return NDArray(shape: shape, elements: elements)
+        vDSP_vfltu32(dst, 1, dst2, 1, vDSP_Length(size))
+        
+        let array = NDArray(shape: shape,
+                            elements: [Float](UnsafeBufferPointer(start: dst2, count: size)))
+        
+        return (high - low) * array / Float(UInt32.max) + low
     }
     
     /// Create randomly initialized NDArray.
