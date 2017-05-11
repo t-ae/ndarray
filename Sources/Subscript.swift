@@ -126,7 +126,7 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     let srcStride = Int32(newValue.strides.last ?? 1)
     let dstStride = Int32(dstStrides.last ?? 1)
     
-    let majorIndices = getIndices(shape: majorShape)
+    let majorIndices = NDIndexSequence(shape: majorShape)
     
     let _blockSize = Int32(blockSize)
     let src: UnsafePointer<Float>

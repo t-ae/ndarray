@@ -26,7 +26,7 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
-        let offsets = getOffsets(shape: majorShape, strides: majorStrides)
+        let offsets = OffsetSequence(shape: majorShape, strides: majorStrides)
         var _blockSize = Int32(blockSize)
         
         let src = arg.startPointer
@@ -74,8 +74,8 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         let rMajorStrides = [Int](rhs.strides.dropLast(strDims))
         let blockSize = lhs.shape.suffix(strDims).prod()
         
-        let lOffsets = getOffsets(shape: majorShape, strides: lMajorStrides)
-        let rOffsets = getOffsets(shape: majorShape, strides: rMajorStrides)
+        let lOffsets = OffsetSequence(shape: majorShape, strides: lMajorStrides)
+        let rOffsets = OffsetSequence(shape: majorShape, strides: rMajorStrides)
         var _blockSize = Int32(blockSize)
         
         let lSrc = lhs.startPointer

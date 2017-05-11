@@ -62,8 +62,8 @@ private func clip(_ array: NDArray, low: Float, high: Float) -> NDArray {
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
-        let srcOffsets = getOffsets(shape: outerShape, strides: outerStrides)
-        let dstOffsets = getOffsets(shape: outerShape, strides: dstOuterStrides)
+        let srcOffsets = OffsetSequence(shape: outerShape, strides: outerStrides)
+        let dstOffsets = OffsetSequence(shape: outerShape, strides: dstOuterStrides)
         let _blockSize = vDSP_Length(blockSize)
         
         let src = array.startPointer

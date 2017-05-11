@@ -12,7 +12,7 @@ public func norm(_ arg: NDArray, along axis: Int) -> NDArray {
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
     let newShape = arg.shape.removing(at: axis)
     
-    let indices = getIndices(shape: newShape)
+    let indices = NDIndexSequence(shape: newShape)
     
     var elements = [Float](repeating: 0, count: newShape.prod())
     for (i, index) in indices.enumerated() {

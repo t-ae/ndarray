@@ -1,19 +1,31 @@
 
 extension NDArray: Sequence {
     
-    public typealias Iterator = AnyIterator<NDArray>
+    public typealias Iterator = NDArrayIterator
     
-    public func makeIterator() -> AnyIterator<NDArray> {
-        precondition(!self.isScalar, "NDArray is scalar, not iterable.")
-        
-        var i = 0
-        return AnyIterator{ _ in
-            guard i < self.shape[0] else {
-                return nil
-            }
-            let subarray = self[i]
-            i += 1
-            return subarray
+    public func makeIterator() -> NDArrayIterator {
+        return NDArrayIterator(array: self)
+    }
+}
+
+public struct NDArrayIterator: IteratorProtocol {
+    public typealias Element = NDArray
+    
+    let array: NDArray
+    var index: Int
+    
+    init(array: NDArray) {
+        precondition(!array.isScalar, "Can't iterate scalar.")
+        self.array = array
+        self.index = 0
+    }
+    
+    public mutating func next() -> NDArray? {
+        guard index < array.shape[0] else {
+            return nil
         }
+        let subarray = array[index]
+        index += 1
+        return subarray
     }
 }

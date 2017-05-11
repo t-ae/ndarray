@@ -30,8 +30,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     
     let lPtr = lhs.startPointer
     let rPtr = rhs.startPointer
-    let lOffsets = getOffsets(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
-    let rOffsets = getOffsets(shape: majorShape, strides: [Int](rhs.strides.dropLast(2)))
+    let lOffsets = OffsetSequence(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
+    let rOffsets = OffsetSequence(shape: majorShape, strides: [Int](rhs.strides.dropLast(2)))
     var dstPtr = dst
     for (lo, ro) in zip(lOffsets, rOffsets) {
         cblas_sgemm(CblasRowMajor,

@@ -94,7 +94,7 @@ private func _std(_ arg: NDArray, along axis: Int) -> NDArray {
         dst2.deallocate(capacity: volume)
     }
     
-    let offsets = getOffsets(shape: newShape, strides: arg.strides.removing(at: axis))
+    let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     

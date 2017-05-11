@@ -56,74 +56,19 @@ func getIndexOffset(strides: [Int], ndIndex: [Int]) -> Int {
         .sum()
 }
 
-/// Get indices in row major order.
-func getIndices(shape: [Int]) -> [[Int]] {
-    assert(shape.all { $0 >= 0 })
-    guard !shape.isEmpty else {
-        return [[]]
-    }
-    guard !shape.contains(0) else {
-        return []
-    }
-    
-    var index = [Int](repeating: 0, count: shape.count)
-    var indices: [[Int]] = []
-    let last = index.count - 1
-    
-    repeat {
-        indices.append(index)
-        index[last] += 1
-        for i in 0..<last {
-            guard index[last-i] >= shape[last-i] else {
-                break
-            }
-            index[last-i] = 0
-            index[last-i-1] += 1
+/// Get the axis which has least stride.
+func getLeastStrideAxis(_ strides: [Int]) -> Int {
+    assert(!strides.isEmpty)
+    var axis = 0
+    var minimum = abs(strides[0])
+    for (i, s) in strides.enumerated().dropFirst() {
+        let sa = abs(s)
+        if sa < minimum {
+            minimum = sa
+            axis = i
         }
-    } while index[0] != shape[0]
-    
-    return indices
-}
-
-/// Get offsets in row major order.
-func getOffsets(shape: [Int], strides: [Int]) -> [Int] {
-    assert(shape.count == strides.count)
-    assert(shape.all { $0 >= 0 })
-    guard !shape.isEmpty else {
-        return [0]
     }
-    guard !shape.contains(0) else {
-        return []
-    }
-    
-    var index = [Int](repeating: 0, count: shape.count)
-    var offset = 0
-    
-    let volume = shape.prod()
-    let dst = UnsafeMutablePointer<Int>.allocate(capacity: volume)
-    defer { dst.deallocate(capacity: volume) }
-    
-    let last = index.count - 1
-    
-    var dstPtr = dst
-    repeat {
-        dstPtr.pointee = offset
-        dstPtr += 1
-        index[last] += 1
-        offset += strides[last]
-        
-        for i in 0..<last {
-            guard index[last-i] >= shape[last-i] else {
-                break
-            }
-            index[last-i] = 0
-            offset -= strides[last-i]*shape[last-i]
-            index[last-i-1] += 1
-            offset += strides[last-i-1]
-        }
-    } while index[0] != shape[0]
-    
-    return [Int](UnsafeBufferPointer(start: dst, count: volume))
+    return axis
 }
 
 /// Calculate how many dims are strided.
@@ -150,21 +95,6 @@ func getStridedDims(shape: [Int], strides: [Int]) -> Int {
         }
     }
     return stridedDims
-}
-
-/// Get the axis which has least stride.
-func getLeastStrideAxis(_ strides: [Int]) -> Int {
-    assert(!strides.isEmpty)
-    var axis = 0
-    var minimum = abs(strides[0])
-    for (i, s) in strides.enumerated().dropFirst() {
-        let sa = abs(s)
-        if sa < minimum {
-            minimum = sa
-            axis = i
-        }
-    }
-    return axis
 }
 
 /// Calculate how many dimensions are strided from axis.
@@ -235,8 +165,8 @@ func gatherElements(_ arg: NDArray, forceUniqueReference: Bool = false) -> [Floa
         let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { dst.deallocate(capacity: volume) }
         
-        let srcOffsets = getOffsets(shape: outerShape, strides: outerStrides)
-        let dstOffsets = getOffsets(shape: outerShape, strides: dstOuterStrides)
+        let srcOffsets = OffsetSequence(shape: outerShape, strides: outerStrides)
+        let dstOffsets = OffsetSequence(shape: outerShape, strides: dstOuterStrides)
         let _blockSize = Int32(blockSize)
         
         let src: UnsafePointer<Float>
