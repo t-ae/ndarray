@@ -20,8 +20,8 @@ extension NDArray {
     
     /// Create uninitialized NDArray
     public static func empty(_ shape: [Int]) -> NDArray {
+        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
         let volume = shape.prod()
-        precondition(volume >= 0, "Invalid shape: \(shape)")
         let m = UnsafeMutablePointer<Float>.allocate(capacity: volume)
         defer { m.deallocate(capacity: volume) }
         return NDArray(shape: shape, elements: [Float](UnsafeBufferPointer(start: m, count: volume)))
