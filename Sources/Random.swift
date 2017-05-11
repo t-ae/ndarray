@@ -19,7 +19,7 @@ extension NDArray {
     /// Create randomly initialized NDArray.
     ///
     /// All elements are sampled from N(mu, sigma).
-    public static func normal(mu: Float = 0, sigma: Float = 0, shape: [Int]) -> NDArray {
+    public static func normal(mu: Float = 0, sigma: Float = 1, shape: [Int]) -> NDArray {
         // Box-Muller's method
         let u1 = uniform(low: 0, high: 1, shape: shape)
         let u2 = uniform(low: 0, high: 1, shape: shape)
