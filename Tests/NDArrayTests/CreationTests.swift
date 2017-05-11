@@ -23,6 +23,10 @@ class CreationTests: XCTestCase {
     
     func testEye() {
         do {
+            let a = NDArray.eye(0)
+            XCTAssertEqual(a, NDArray(shape: [0, 0], elements: []))
+        }
+        do {
             let a = NDArray.eye(1)
             XCTAssertEqual(a, NDArray([[1]]))
         }

@@ -30,15 +30,11 @@ extension NDArray {
     /// Create identity matrix.
     public static func eye(_ size: Int) -> NDArray {
         precondition(size >= 0, "Size(\(size)) must >= 0.")
-        if size == 0 {
-            return NDArray(shape: [0, 0], elements: [])
-        } else {
-            var elements = [Float](repeating: 0, count: size*size)
-            for i in 0..<size {
-                elements[i*size+i] = 1
-            }
-            return NDArray(shape: [size, size], elements: elements)
+        var elements = [Float](repeating: 0, count: size*size)
+        for i in 0..<size {
+            elements[i*size+i] = 1
         }
+        return NDArray(shape: [size, size], elements: elements)
     }
     
     /// Create diagonal matrix.
