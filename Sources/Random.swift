@@ -19,10 +19,11 @@ extension NDArray {
         
         vDSP_vfltu32(dst, 1, dst2, 1, vDSP_Length(size))
         
-        let array = NDArray(shape: shape,
-                            elements: [Float](UnsafeBufferPointer(start: dst2, count: size)))
+        var elements = [Float](repeating: low, count: size)
+        cblas_saxpy(Int32(size), ((high - low) / Float(UInt32.max)), dst2, 1, &elements, 1)
         
-        return (high - low) * array / Float(UInt32.max) + low
+        return NDArray(shape: shape, elements: elements)
+        
     }
     
     /// Create randomly initialized NDArray.
