@@ -19,10 +19,12 @@ extension NDArray {
         
         vDSP_vfltu32(dst, 1, dst2, 1, vDSP_Length(size))
         
-        var elements = [Float](repeating: low, count: size)
-        cblas_saxpy(Int32(size), (high - low) / Float(UInt32.max), dst2, 1, &elements, 1)
+        var factor = (high - low) / Float(UInt32.max)
+        var low = low
+        vDSP_vsmsa(dst2, 1, &factor, &low, dst2, 1, vDSP_Length(size))
         
-        return NDArray(shape: shape, elements: elements)
+        return NDArray(shape: shape,
+                       elements: [Float](UnsafeMutableBufferPointer(start: dst2, count: size)))
         
     }
     
