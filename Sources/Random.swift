@@ -20,7 +20,7 @@ extension NDArray {
         vDSP_vfltu32(dst, 1, dst2, 1, vDSP_Length(size))
         
         var elements = [Float](repeating: low, count: size)
-        cblas_saxpy(Int32(size), ((high - low) / Float(UInt32.max)), dst2, 1, &elements, 1)
+        cblas_saxpy(Int32(size), (high - low) / Float(UInt32.max), dst2, 1, &elements, 1)
         
         return NDArray(shape: shape, elements: elements)
         
