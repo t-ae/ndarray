@@ -4,7 +4,7 @@ import Accelerate
 
 /// Calculate Frobenius norm.
 public func norm(_ arg: NDArray) -> Float {
-    return sqrtf(sum(arg*arg).asScalar())
+    return sqrtf(reduce(arg, vDSP_svesq).asScalar())
 }
 
 /// Calcurate vector norms along axis.
