@@ -54,7 +54,7 @@ extension NDArray {
         guard let size = diag.shape.last else {
             return diag
         }
-        return NDArray.eye(size) |*| diag.reshaped(diag.shape + [1])
+        return NDArray.eye(size) * diag.expandDims(-1)
     }
     
     /// Create contiguous NDArray 0..<count.

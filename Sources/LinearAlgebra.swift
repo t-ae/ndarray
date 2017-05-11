@@ -16,7 +16,8 @@ public func norm(_ arg: NDArray, along axis: Int) -> NDArray {
     
     var elements = [Float](repeating: 0, count: newShape.prod())
     for (i, index) in indices.enumerated() {
-        let expand: [Int?] = index.prefix(axis).map { Optional($0) } + [nil] + index.dropFirst(axis).map { Optional($0) }
+        
+        let expand = (index as [Int?]).inserting(nil, at: axis)
         let vector = getSubarray(array: arg, indices: expand)
         elements[i] = norm(vector)
     }

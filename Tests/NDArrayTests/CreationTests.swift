@@ -37,4 +37,19 @@ class CreationTests: XCTestCase {
                                        [0, 0, 1]]))
         }
     }
+    
+    func testDiagonal() {
+        do {
+            let a = NDArray.diagonal([0, 1, 2, 3])
+            XCTAssertEqual(a, NDArray([[0, 0, 0, 0],
+                                       [0, 1, 0, 0],
+                                       [0, 0, 2, 0],
+                                       [0, 0, 0, 3]]))
+        }
+        do {
+            let a = NDArray.diagonal(NDArray([[0,1], [2, 3]]))
+            XCTAssertEqual(a, NDArray([[[0, 0], [0, 1]],
+                                       [[2, 0], [0, 3]]]))
+        }
+    }
 }
