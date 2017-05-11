@@ -8,21 +8,10 @@ public func norm(_ arg: NDArray) -> Float {
 }
 
 /// Calcurate vector norms along axis.
-public func norm(_ arg: NDArray, along axis: Int) -> NDArray {
-    let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
-    let newShape = arg.shape.removing(at: axis)
+public func norm(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    let ret = sqrt(reduce(arg, along: axis, vDSP_svesq))
     
-    let indices = NDIndexSequence(shape: newShape)
-    
-    var elements = [Float](repeating: 0, count: newShape.prod())
-    for (i, index) in indices.enumerated() {
-        
-        let expand = (index as [Int?]).inserting(nil, at: axis)
-        let vector = getSubarray(array: arg, indices: expand)
-        elements[i] = norm(vector)
-    }
-    
-    return NDArray(shape: newShape, elements: elements)
+    return keepDims ? ret.expandDims(axis) : ret
 }
 
 /// Calculate matrix inverse.
