@@ -8,7 +8,7 @@ extension NDArray {
     
     /// Create new NDArray which contains only rows fufill `predicate`.
     public func select(where predicate: (NDArray)->Bool) -> NDArray {
-        return NDArray.stack(self.filter(predicate))
+        return NDArray.stack(filter(predicate))
     }
     
     /// Get row indices which fulfill `predicate`.

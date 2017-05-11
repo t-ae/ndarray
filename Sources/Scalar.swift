@@ -7,7 +7,7 @@ extension NDArray {
     
     /// Check if this ndarray is scalar.
     public var isScalar: Bool {
-        return self.shape.isEmpty
+        return shape.isEmpty
     }
     
     /// Get scalar value.

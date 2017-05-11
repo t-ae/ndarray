@@ -28,11 +28,11 @@ extension NDArray {
         
         var shape = shape
         if let arbit = shape.index(of: -1) {
-            shape[arbit] = self.volume / shape.removing(at: arbit).prod()
+            shape[arbit] = volume / shape.removing(at: arbit).prod()
         }
         
         precondition(shape.all { $0 >= 0 }, "Invalid shape.")
-        precondition(self.volume == shape.prod(), "New shape's volume must match with the number of elements.")
+        precondition(volume == shape.prod(), "New shape's volume must match with the number of elements.")
         
         let elements = gatherElements(self)
         return NDArray(shape: shape, elements: elements)
