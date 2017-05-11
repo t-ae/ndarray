@@ -11,25 +11,35 @@ public func max(_ arg: NDArray) -> NDArray {
     return reduce(arg, vDSP_maxv)
 }
 
-/// Caluclate sum of all elements.
+/// Calculate sum of all elements.
 public func sum(_ arg: NDArray) -> NDArray {
     return reduce(arg, vDSP_sve)
 }
 
-/// Caluclate mean of all elements.
+/// Calculate mean of all elements.
 public func mean(_ arg: NDArray) -> NDArray {
     return reduce(arg, vDSP_meanv)
 }
 
-/// Caluclate standard deviation of all elements.
-public func std(_ arg: NDArray) -> NDArray {
+/// Calculate mean and variance of all elements.
+public func moments(_ arg: NDArray) -> (mean: NDArray, variance: NDArray) {
     let elements = gatherElements(arg)
     var sum: Float = 0
     var sum2: Float = 0
     vDSP_sve_svesq(UnsafePointer(elements), 1, &sum, &sum2, vDSP_Length(elements.count))
     let mean = sum / Float(elements.count)
     let mean2 = sum2 / Float(elements.count)
-    return NDArray(scalar: sqrtf(mean2 - mean*mean))
+    return (NDArray(scalar: mean), NDArray(scalar: mean2 - mean*mean))
+}
+
+/// Calculate standard deviation of all elements.
+public func variance(_ arg: NDArray) -> NDArray {
+    return moments(arg).variance
+}
+
+/// Caluclate standard deviation of all elements.
+public func stddev(_ arg: NDArray) -> NDArray {
+    return sqrt(variance(arg))
 }
 
 /// Get minimal elements along a given axis.
@@ -73,15 +83,29 @@ public func mean(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDA
     return keepDims ? ret.expandDims(axis) : ret
 }
 
-/// Calculate standard deviations of elements along a given axis.
-public func std(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
-    let ret = _std(arg, along: axis)
+/// Calculate mean and variance of elements along a given axis.
+public func moments(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> (mean: NDArray, variance: NDArray) {
+    let (mean, variance) = _moments(arg, along: axis)
     
-    return keepDims ? ret.expandDims(axis) : ret
+    if keepDims {
+        return (mean.expandDims(axis), variance.expandDims(axis))
+    } else {
+        return (mean, variance)
+    }
+}
+
+/// Calculate variance of elements along a given axis.
+public func variance(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    return moments(arg, along: axis, keepDims: keepDims).variance
+}
+
+/// Calculate standard deviations of elements along a given axis.
+public func stddev(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+    return sqrt(variance(arg, along: axis, keepDims: keepDims))
 }
 
 // MARK: Util
-private func _std(_ arg: NDArray, along axis: Int) -> NDArray {
+private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, variance: NDArray) {
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
     
     let newShape = arg.shape.removing(at: axis)
@@ -110,12 +134,15 @@ private func _std(_ arg: NDArray, along axis: Int) -> NDArray {
     var _count = Float(count)
     let _volume = vDSP_Length(volume)
     vDSP_vsdiv(dst1, 1, &_count, dst1, 1, _volume)
+    let mean = NDArray(shape: newShape,
+                       elements: [Float](UnsafeBufferPointer(start: dst1, count: volume)))
+    
     vDSP_vsdiv(dst2, 1, &_count, dst2, 1, _volume)
     vDSP_vsq(dst1, 1, dst1, 1, _volume)
     vDSP_vsub(dst1, 1, dst2, 1, dst2, 1, _volume)
-    var _volume2 = Int32(volume)
-    vvsqrtf(dst2, dst2, &_volume2)
-
-    return NDArray(shape: newShape,
-                   elements: [Float](UnsafeBufferPointer(start: dst2, count: volume)))
+    
+    let variance =  NDArray(shape: newShape,
+                            elements: [Float](UnsafeBufferPointer(start: dst2, count: volume)))
+    
+    return (mean, variance)
 }

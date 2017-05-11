@@ -11,8 +11,8 @@ class IrisClassificationTests: XCTestCase {
         
         let start = Date()
         
-        let normalize_mu = mean(Iris.x_train, along: 0)
-        let normalize_sigma = std(Iris.x_train, along: 0)
+        let (normalize_mu, variance) = moments(Iris.x_train, along: 0)
+        let normalize_sigma = sqrt(variance)
         
         let x = (Iris.x_train - normalize_mu) / normalize_sigma
         let labels = Iris.y_train
