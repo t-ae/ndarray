@@ -191,7 +191,16 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
         dstPtr += 1
     }
     
-    // all indices are multiplied with stride.
-    return NDArray(shape: newShape,
-                   elements: dst.map { Float(Int($0)/stride) })
+    var elements = NDArrayData(size: volume)
+    elements.withUnsafeMutablePointer { p in
+        var p = p
+        let stride = UInt(stride)
+        for i in dst {
+            // all indices are multiplied with stride.
+            p.pointee = Float(i/stride)
+            p += 1
+        }
+    }
+    
+    return NDArray(shape: newShape, elements: elements)
 }
