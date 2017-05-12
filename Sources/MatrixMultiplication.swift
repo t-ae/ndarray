@@ -22,8 +22,7 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let matrixSize = Int(M*N)
     let majorSize = majorShape.prod()
     
-    let dst = UnsafeMutablePointer<Float>.allocate(capacity: majorSize*matrixSize)
-    defer { dst.deallocate(capacity: majorSize*matrixSize) }
+    let dst = [Float](repeating: 0, count: majorSize*matrixSize)
     
     let lda = Int32(lhs.strides[lhs.ndim-2])
     let ldb = Int32(rhs.strides[rhs.ndim-2])
@@ -32,7 +31,7 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let rPtr = rhs.startPointer
     let lOffsets = OffsetSequence(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
     let rOffsets = OffsetSequence(shape: majorShape, strides: [Int](rhs.strides.dropLast(2)))
-    var dstPtr = dst
+    var dstPtr = UnsafeMutablePointer(mutating: dst)
     for (lo, ro) in zip(lOffsets, rOffsets) {
         cblas_sgemm(CblasRowMajor,
                     CblasNoTrans, CblasNoTrans,
@@ -43,8 +42,7 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
         dstPtr += matrixSize
     }
     
-    return NDArray(shape: majorShape + [Int(M), Int(N)],
-                   elements: [Float](UnsafeBufferPointer(start: dst, count: majorSize*matrixSize)))
+    return NDArray(shape: majorShape + [Int(M), Int(N)], elements: dst)
 }
 
 infix operator |*|: MultiplicationPrecedence

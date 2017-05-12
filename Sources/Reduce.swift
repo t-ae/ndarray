@@ -111,20 +111,16 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()
     
-    let dst1 = UnsafeMutablePointer<Float>.allocate(capacity: volume)
-    let dst2 = UnsafeMutablePointer<Float>.allocate(capacity: volume)
-    defer {
-        dst1.deallocate(capacity: volume)
-        dst2.deallocate(capacity: volume)
-    }
+    var dst1 = [Float](repeating: 0, count: volume)
+    var dst2 = [Float](repeating: 0, count: volume)
     
     let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
     let src = arg.startPointer
-    var dst1Ptr = dst1
-    var dst2Ptr = dst2
+    var dst1Ptr = UnsafeMutablePointer(mutating: dst1)
+    var dst2Ptr = UnsafeMutablePointer(mutating: dst2)
     for offset in offsets {
         let src = src + offset
         vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
@@ -133,16 +129,14 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
     }
     var _count = Float(count)
     let _volume = vDSP_Length(volume)
-    vDSP_vsdiv(dst1, 1, &_count, dst1, 1, _volume)
-    let mean = NDArray(shape: newShape,
-                       elements: [Float](UnsafeBufferPointer(start: dst1, count: volume)))
+    vDSP_vsdiv(dst1, 1, &_count, &dst1, 1, _volume)
+    let mean = NDArray(shape: newShape, elements: dst1)
     
-    vDSP_vsdiv(dst2, 1, &_count, dst2, 1, _volume)
-    vDSP_vsq(dst1, 1, dst1, 1, _volume)
-    vDSP_vsub(dst1, 1, dst2, 1, dst2, 1, _volume)
+    vDSP_vsdiv(dst2, 1, &_count, &dst2, 1, _volume)
+    vDSP_vsq(dst1, 1, &dst1, 1, _volume)
+    vDSP_vsub(dst1, 1, &dst2, 1, &dst2, 1, _volume)
     
-    let variance =  NDArray(shape: newShape,
-                            elements: [Float](UnsafeBufferPointer(start: dst2, count: volume)))
+    let variance =  NDArray(shape: newShape, elements: dst2)
     
     return (mean, variance)
 }

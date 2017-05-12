@@ -154,8 +154,7 @@ func gatherElements(_ arg: NDArray) -> [Float] {
         
         let dstStride = Int32(dstStrides[axis])
         
-        let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
-        defer { dst.deallocate(capacity: volume) }
+        let dst = [Float](repeating: 0, count: volume)
         
         let srcOffsets = OffsetSequence(shape: outerShape, strides: outerStrides)
         let dstOffsets = OffsetSequence(shape: outerShape, strides: dstOuterStrides)
@@ -167,14 +166,15 @@ func gatherElements(_ arg: NDArray) -> [Float] {
         } else {
             src = arg.startPointer
         }
+        let dstHead = UnsafeMutablePointer(mutating: dst)
         for (os, od) in zip(srcOffsets, dstOffsets) {
             let src = src + os
-            let dst = dst + od
+            let dst = dstHead + od
             
             cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
         }
         
-        return [Float](UnsafeBufferPointer(start: dst, count: volume))
+        return dst
     }
 }
 

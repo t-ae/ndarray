@@ -36,10 +36,9 @@ extension NDArray {
         
         var srcs = elementsList.map { UnsafePointer($0) }
         
-        let dst = UnsafeMutablePointer<Float>.allocate(capacity: volume)
-        defer { dst.deallocate(capacity: volume) }
+        let dst = [Float](repeating: 0, count: volume)
         
-        var dstPtr = dst
+        var dstPtr = UnsafeMutablePointer(mutating: dst)
         for _ in 0..<majorShape.prod() {
             for i in 0..<srcs.count {
                 let size = blockSize*sizes[i]
@@ -49,7 +48,6 @@ extension NDArray {
             }
         }
         
-        return NDArray(shape: newShape,
-                       elements: [Float](UnsafeBufferPointer(start: dst, count: volume)))
+        return NDArray(shape: newShape, elements: dst)
     }
 }
