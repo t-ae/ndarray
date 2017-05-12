@@ -82,7 +82,7 @@ func getStridedDims(shape: [Int], strides: [Int]) -> Int {
     var strides = strides
     if stride < 0 {
         stride = -stride
-        strides = strides.map { -$0 }
+        strides = strides.map(-)
     }
     for (s, str) in zip(shape.reversed(), strides.reversed()) {
         if s == 1 {
@@ -109,7 +109,7 @@ func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
     var strides = strides
     if stride < 0 {
         stride = -stride
-        strides = strides.map { -$0 }
+        strides = strides.map(-)
     }
     for i in (0...axis).reversed() {
         if shape[i] == 1 {

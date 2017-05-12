@@ -13,7 +13,9 @@ extension NDArray {
     
     /// Get row indices which fulfill `predicate`.
     public func indices(where predicate: (NDArray)->Bool) -> [Int] {
-        return enumerated().filter { predicate($1) }.map { $0.offset }
+        return enumerated().flatMap { i, array in
+            predicate(array) ? i : nil
+        }
     }
     
 }
