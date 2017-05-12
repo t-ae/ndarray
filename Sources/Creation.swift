@@ -64,8 +64,15 @@ extension NDArray {
     
     /// Create contiguous NDArray.
     public static func range(_ range: CountableRange<Int>) -> NDArray {
-        let elements = range.map { Float($0) }
-        return NDArray(elements)
+        var elements = NDArrayData(size: range.count)
+        elements.withUnsafeMutablePointer { p in
+            var p = p
+            for e in range {
+                p.pointee = Float(e)
+                p += 1
+            }
+        }
+        return NDArray(shape: [range.count], elements: elements)
     }
     
     /// Create evenly spaced NDArray.
@@ -78,10 +85,15 @@ extension NDArray {
     ///
     /// `count` elements are in the interval [low, high].
     public static func linspace(low: Float, high: Float, count: Int) -> NDArray {
-        let elements = (0..<count).map { v -> Float in
-            low + (high-low)*Float(v)/Float(count-1)
+        var elements = NDArrayData(size: count)
+        elements.withUnsafeMutablePointer { p in
+            var p = p
+            for v in 0..<count {
+                p.pointee = low + (high-low)*Float(v)/Float(count-1)
+                p += 1
+            }
         }
-        return NDArray(elements)
+        return NDArray(shape: [count], elements: elements)
     }
 }
 
