@@ -34,7 +34,7 @@ extension NDArray {
         let newShape = shape.inserting(sizes.sum(), at: axis)
         let volume = newShape.prod()
         
-        var srcs = elementsList.map { UnsafePointer($0) }
+        var srcs = elementsList.map { $0.pointer }
         
         let dst = [Float](repeating: 0, count: volume)
         

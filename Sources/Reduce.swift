@@ -26,7 +26,7 @@ public func moments(_ arg: NDArray) -> (mean: NDArray, variance: NDArray) {
     let elements = gatherElements(arg)
     var sum: Float = 0
     var sum2: Float = 0
-    vDSP_sve_svesq(UnsafePointer(elements), 1, &sum, &sum2, vDSP_Length(elements.count))
+    vDSP_sve_svesq(elements.pointer, 1, &sum, &sum2, vDSP_Length(elements.count))
     let mean = sum / Float(elements.count)
     let mean2 = sum2 / Float(elements.count)
     return (NDArray(scalar: mean), NDArray(scalar: mean2 - mean*mean))

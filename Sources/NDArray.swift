@@ -2,14 +2,14 @@ public struct NDArray {
     /// Shape of NDArray.
     public internal(set) var shape: [Int]
     /// Source of elements.
-    public internal(set) var data: [Float]
+    var data: NDArrayData
     
     /// Strides for each dimensions.
     public internal(set) var strides: [Int]
     /// Base offset of data.
     public internal(set) var baseOffset: Int
     
-    init(shape:[Int], strides: [Int], baseOffset: Int, data: [Float]) {
+    init(shape:[Int], strides: [Int], baseOffset: Int, data: NDArrayData) {
         assert(shape.count == strides.count)
         assert(shape.all { $0 >= 0 })
         assert(0 <= baseOffset && (baseOffset < data.count || data.isEmpty))
@@ -19,20 +19,25 @@ public struct NDArray {
         self.baseOffset = baseOffset
     }
     
-    /// Init with contiguous strides.
-    public init(shape: [Int], elements: [Float]) {
-        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
-        precondition(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
-        
+    init(shape: [Int], elements: NDArrayData) {
         self.init(shape: shape,
                   strides: getContiguousStrides(shape: shape),
                   baseOffset: 0,
                   data: elements)
     }
     
+    /// Init with contiguous strides.
+    public init(shape: [Int], elements: [Float]) {
+        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
+        precondition(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
+        
+        self.init(shape: shape,
+                  elements: NDArrayData(elements))
+    }
+    
     /// Get all elements.
     public func elements() -> [Float] {
-        return gatherElements(self)
+        return gatherElements(self).asArray()
     }
     
     /// Get single element.
@@ -67,5 +72,17 @@ public func ==(lhs: NDArray, rhs: NDArray) -> Bool {
     guard lhs.shape == rhs.shape else {
         return false
     }
-    return gatherElements(lhs) == gatherElements(rhs)
+    let lhs = gatherElements(lhs)
+    let rhs = gatherElements(rhs)
+    
+    var lp = lhs.pointer
+    var rp = rhs.pointer
+    for _ in 0..<lhs.count {
+        guard lp.pointee == rp.pointee else {
+            return false
+        }
+        lp += 1
+        rp += 1
+    }
+    return true
 }

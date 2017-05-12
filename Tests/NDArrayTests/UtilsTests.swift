@@ -78,32 +78,35 @@ class UtilsTests: XCTestCase {
         do {
             let a = NDArray.eye(3)
             let elements = gatherElements(a)
-            XCTAssertEqual(elements, [1,0,0, 0,1,0, 0,0,1])
+            XCTAssertEqual(elements.asArray(), [1,0,0, 0,1,0, 0,0,1])
         }
         do {
             let a = NDArray(shape: [0, 2, 3], elements: [])
             let elements = gatherElements(a)
-            XCTAssertEqual(elements, [])
+            XCTAssertEqual(elements.asArray(), [])
             let elements2 = gatherElements(a)
-            XCTAssertEqual(elements2, [])
+            XCTAssertEqual(elements2.asArray(), [])
         }
         do {
             let a = NDArray(shape: [0, 2, 3], elements: []).transposed()
             let elements = gatherElements(a)
-            XCTAssertEqual(elements, [])
+            XCTAssertEqual(elements.asArray(), [])
         }
         do {
             let a = NDArray(shape: [3, 3],
                             strides: [3, -1],
                             baseOffset: 2,
-                            data: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0])
+                            data: NDArrayData([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]))
             let elements = gatherElements(a)
-            XCTAssertEqual(elements, [2, 1, 0, 5, 4, 3, 8, 7, 6])
+            XCTAssertEqual(elements.asArray(), [2, 1, 0, 5, 4, 3, 8, 7, 6])
         }
         do {
-            let a = NDArray(shape: [2, 2], strides: [4, -2], baseOffset: 2, data: [2, -1, 1, -1, 4, -1, 3, -1])
+            let a = NDArray(shape: [2, 2],
+                            strides: [4, -2],
+                            baseOffset: 2,
+                            data: NDArrayData([2, -1, 1, -1, 4, -1, 3, -1]))
             let elements = gatherElements(a)
-            XCTAssertEqual(elements, [1, 2, 3, 4])
+            XCTAssertEqual(elements.asArray(), [1, 2, 3, 4])
         }
         do {
             let a = NDArray([[0, 1], [2, 3]])
