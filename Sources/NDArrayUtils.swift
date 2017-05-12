@@ -126,7 +126,7 @@ func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
 }
 
 /// Gather elements.
-func gatherElements(_ arg: NDArray) -> [Float] {
+func gatherElements(_ arg: NDArray) -> NDArrayData {
     
     let volume = arg.volume
     let ndim = arg.ndim
@@ -137,7 +137,7 @@ func gatherElements(_ arg: NDArray) -> [Float] {
         } else {
             let start = arg.baseOffset
             let end = start + volume
-            return [Float](arg.data[start..<end])
+            return arg.data[start..<end]
         }
     } else {
 
@@ -154,7 +154,7 @@ func gatherElements(_ arg: NDArray) -> [Float] {
         
         let dstStride = Int32(dstStrides[axis])
         
-        let dst = [Float](repeating: 0, count: volume)
+        var dst = NDArrayData(size: volume)
         
         let srcOffsets = OffsetSequence(shape: outerShape, strides: outerStrides)
         let dstOffsets = OffsetSequence(shape: outerShape, strides: dstOuterStrides)
@@ -166,12 +166,13 @@ func gatherElements(_ arg: NDArray) -> [Float] {
         } else {
             src = arg.startPointer
         }
-        let dstHead = UnsafeMutablePointer(mutating: dst)
-        for (os, od) in zip(srcOffsets, dstOffsets) {
-            let src = src + os
-            let dst = dstHead + od
-            
-            cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
+        dst.withUnsafeMutablePointer { dstHead in
+            for (os, od) in zip(srcOffsets, dstOffsets) {
+                let src = src + os
+                let dst = dstHead + od
+                
+                cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
+            }
         }
         
         return dst
@@ -210,7 +211,7 @@ func normalizeAxis(axis: Int, ndim: Int) -> Int {
 
 extension NDArray {
     var startPointer: UnsafePointer<Float> {
-        return UnsafePointer(data) + baseOffset
+        return data.pointer + baseOffset
     }
 }
 

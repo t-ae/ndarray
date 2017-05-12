@@ -38,8 +38,8 @@ public func inv(_ arg: NDArray) throws -> NDArray {
     }
     
     // Force CoW
-    try elements.withUnsafeMutableBufferPointer { p -> Void in
-        var ptr = p.baseAddress!
+    try elements.withUnsafeMutablePointer { ptr in
+        var ptr = ptr
         for _ in 0..<numMatrices {
             
             sgetrf_(&N, &N, ptr, &N, pivots, &error)

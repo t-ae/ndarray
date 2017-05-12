@@ -6,14 +6,14 @@ struct NDArrayData: Collection {
         buffer = ManagedBuffer.create(minimumCapacity: size) { _ in size }
     }
     
-    init (array: [Float]) {
+    init (_ array: [Float]) {
         self.init(size: array.count)
         buffer.withUnsafeMutablePointerToElements { buf in
             buf.initialize(from: array, count: array.count)
         }
     }
     
-    init<C: Collection>(collection: C) where C.Iterator.Element == Float, C.IndexDistance == Int {
+    init<C: Collection>(_ collection: C) where C.Iterator.Element == Float, C.IndexDistance == Int {
         self.init(size: collection.count)
         buffer.withUnsafeMutablePointerToElements { buf in
             var buf = buf
@@ -60,12 +60,26 @@ struct NDArrayData: Collection {
         }
     }
     
-    mutating func withUnsafeMutablePointer<R>(body: (UnsafeMutablePointer<Float>) throws -> R) rethrows -> R {
+    subscript(range: CountableRange<Int>) -> NDArrayData {
+        assert(range.startIndex >= 0 && range.endIndex < count)
+        let new = NDArrayData(size: range.count)
+        let src = pointer + range.startIndex
+        new.buffer.withUnsafeMutablePointerToElements { buf in
+            buf.initialize(from: src, count: range.count)
+        }
+        return new
+    }
+    
+    mutating func withUnsafeMutablePointer<R>(_ body: (UnsafeMutablePointer<Float>) throws -> R) rethrows -> R {
         ensureUniquelyReferenced()
         return try buffer.withUnsafeMutablePointerToElements(body)
     }
     
     var pointer: UnsafePointer<Float> {
         return buffer.withUnsafeMutablePointerToElements { UnsafePointer($0) }
+    }
+    
+    func asArray() -> [Float] {
+        return [Float](UnsafeBufferPointer(start: pointer, count: count))
     }
 }

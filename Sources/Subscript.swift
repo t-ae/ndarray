@@ -136,12 +136,12 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
         src = newValue.startPointer
     }
     // Force CoW
-    array.data.withUnsafeMutableBufferPointer { p in
+    array.data.withUnsafeMutablePointer { p in
         let dst: UnsafeMutablePointer<Float>
         if dstStride < 0 {
-            dst = p.baseAddress! + array.baseOffset + dstOffset + (blockSize-1)*Int(dstStride)
+            dst = p + (array.baseOffset + dstOffset + (blockSize-1)*Int(dstStride))
         } else {
-            dst = p.baseAddress! + array.baseOffset + dstOffset
+            dst = p + (array.baseOffset + dstOffset)
         }
         for majorIndex in majorIndices {
             let ndIndex = majorIndex + minorZeros
