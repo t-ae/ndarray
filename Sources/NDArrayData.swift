@@ -13,14 +13,10 @@ struct NDArrayData: Collection {
         }
     }
     
-    init<C: Collection>(_ collection: C) where C.Iterator.Element == Float, C.IndexDistance == Int {
-        self.init(size: collection.count)
+    init(value: Float, count: Int) {
+        self.init(size: count)
         buffer.withUnsafeMutablePointerToElements { buf in
-            var buf = buf
-            for e in collection {
-                buf.pointee = e
-                buf += 1
-            }
+            buf.initialize(to: value, count: count)
         }
     }
     
