@@ -28,7 +28,7 @@ class NDArrayDataTests: XCTestCase {
         print("Start")
         Thread.sleep(forTimeInterval: 5)
         do {
-            var data = NDArrayData(value: 0, count: 1_000_000)
+            var data = NDArrayData(value: 0, count: 3_000_000)
             data[0] = 100
             print("Allocate")
             Thread.sleep(forTimeInterval: 5)
