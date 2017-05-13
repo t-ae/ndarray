@@ -77,15 +77,14 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         let rMajorStrides = [Int](rhs.strides.dropLast(strDims))
         let blockSize = lhs.shape.suffix(strDims).prod()
         
-        let lOffsets = OffsetSequence(shape: majorShape, strides: lMajorStrides)
-        let rOffsets = OffsetSequence(shape: majorShape, strides: rMajorStrides)
+        let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: lMajorStrides, rStrides: rMajorStrides)
         var _blockSize = Int32(blockSize)
         
         let lSrc = lhs.startPointer
         let rSrc = rhs.startPointer
         dst.withUnsafeMutablePointer { dst in
             var dst = dst
-            for (lo, ro) in zip(lOffsets, rOffsets) {
+            for (lo, ro) in offsets {
                 vvfunc(dst, lSrc + lo, rSrc + ro, &_blockSize)
                 dst += blockSize
             }

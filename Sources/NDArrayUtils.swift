@@ -156,8 +156,7 @@ func gatherElements(_ arg: NDArray) -> NDArrayData {
         
         var dst = NDArrayData(size: volume)
         
-        let srcOffsets = OffsetSequence(shape: outerShape, strides: outerStrides)
-        let dstOffsets = OffsetSequence(shape: outerShape, strides: dstOuterStrides)
+        let offsets = BinaryOffsetSequence(shape: outerShape, lStrides: outerStrides, rStrides: dstOuterStrides)
         let _blockSize = Int32(blockSize)
         
         let src: UnsafePointer<Float>
@@ -167,7 +166,7 @@ func gatherElements(_ arg: NDArray) -> NDArrayData {
             src = arg.startPointer
         }
         dst.withUnsafeMutablePointer { dstHead in
-            for (os, od) in zip(srcOffsets, dstOffsets) {
+            for (os, od) in offsets {
                 let src = src + os
                 let dst = dstHead + od
                 

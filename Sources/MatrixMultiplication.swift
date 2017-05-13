@@ -29,10 +29,12 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     
     let lPtr = lhs.startPointer
     let rPtr = rhs.startPointer
-    let lOffsets = OffsetSequence(shape: majorShape, strides: [Int](lhs.strides.dropLast(2)))
-    let rOffsets = OffsetSequence(shape: majorShape, strides: [Int](rhs.strides.dropLast(2)))
+    let offsets = BinaryOffsetSequence(shape: majorShape,
+                                       lStrides: [Int](lhs.strides.dropLast(2)),
+                                       rStrides: [Int](rhs.strides.dropLast(2)))
+    
     var dstPtr = UnsafeMutablePointer(mutating: dst)
-    for (lo, ro) in zip(lOffsets, rOffsets) {
+    for (lo, ro) in offsets {
         cblas_sgemm(CblasRowMajor,
                     CblasNoTrans, CblasNoTrans,
                     M, N, K,

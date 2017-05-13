@@ -38,13 +38,12 @@ func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
         
         var dst = NDArrayData(size: volume)
         
-        let srcOffsets = OffsetSequence(shape: outerShape, strides: outerStrides)
-        let dstOffsets = OffsetSequence(shape: outerShape, strides: dstOuterStrides)
+        let offsets = BinaryOffsetSequence(shape: outerShape, lStrides: outerStrides, rStrides: dstOuterStrides)
         let _blockSize = vDSP_Length(blockSize)
         
         let src = arg.startPointer
         dst.withUnsafeMutablePointer { dstHead in
-            for (os, od) in zip(srcOffsets, dstOffsets) {
+            for (os, od) in offsets {
                 let src = src + os
                 let dst = dstHead + od
                 
@@ -110,14 +109,13 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_vv_func) -> NDArray 
     let blockSize = lhs.shape.suffix(strDims).prod()
     let _blockSize = vDSP_Length(blockSize)
     
-    let lOffsets = OffsetSequence(shape: majorShape, strides: lMajorStrides)
-    let rOffsets = OffsetSequence(shape: majorShape, strides: rMajorStrides)
+    let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: lMajorStrides, rStrides: rMajorStrides)
     
     let lSrc = lhs.startPointer
     let rSrc = rhs.startPointer
     dst.withUnsafeMutablePointer { dst in
         var dst = dst
-        for (lo, ro) in zip(lOffsets, rOffsets) {
+        for (lo, ro) in offsets {
             vDSPfunc(lSrc + lo, lStride,
                      rSrc + ro, rStride,
                      dst, 1, _blockSize)
