@@ -110,10 +110,23 @@ class UtilsTests: XCTestCase {
         }
         do {
             let a = NDArray([[0, 1], [2, 3]])
-            XCTAssertEqual(a.flipped(0), NDArray([[2, 3], [0, 1]]))
-            XCTAssertEqual(a.flipped(1), NDArray([[1, 0], [3, 2]]))
-            XCTAssertEqual(a.flipped(1).flipped(0), NDArray([[3, 2], [1, 0]]))
-            XCTAssertEqual(a.flipped(0).flipped(1), NDArray([[3, 2], [1, 0]]))
+            let x1 = gatherElements(a.flipped(0))
+            XCTAssertEqual(x1.asArray(), [2, 3, 0, 1])
+            let x2 = gatherElements(a.flipped(1))
+            XCTAssertEqual(x2.asArray(), [1, 0, 3, 2])
+            let x3 = gatherElements(a.flipped(1).flipped(0))
+            XCTAssertEqual(x3.asArray(), [3, 2, 1, 0])
+            let x4 = gatherElements(a.flipped(0).flipped(1))
+            XCTAssertEqual(x4.asArray(), [3, 2, 1, 0])
+        }
+        do {
+            let a = NDArray.range(9).reshaped([3, 3])
+            let x1 = gatherElements(a[0])
+            XCTAssertEqual(x1.asArray(), [0, 1, 2])
+            let x2 = gatherElements(a[nil, 0])
+            XCTAssertEqual(x2.asArray(), [0, 3, 6])
+            let x3 = gatherElements(a[2])
+            XCTAssertEqual(x3.asArray(), [6, 7, 8])
         }
     }
 

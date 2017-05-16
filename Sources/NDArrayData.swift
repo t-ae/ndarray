@@ -57,7 +57,7 @@ struct NDArrayData: Collection {
     }
     
     subscript(range: CountableRange<Int>) -> NDArrayData {
-        assert(range.startIndex >= 0 && range.endIndex < count)
+        assert(range.startIndex >= 0 && range.endIndex <= count)
         let new = NDArrayData(size: range.count)
         let src = pointer + range.startIndex
         new.buffer.withUnsafeMutablePointerToElements { buf in
