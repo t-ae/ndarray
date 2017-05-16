@@ -11,6 +11,12 @@ extension NDArray {
         return NDArray.stack(filter(predicate))
     }
     
+    /// Create new NDArray with rows `mask == true`
+    public func select(_ mask: [Bool]) -> NDArray {
+        precondition(mask.count == shape[0])
+        return NDArray.stack(zip(self, mask).flatMap { $1 ? $0 : nil })
+    }
+    
     /// Get row indices which fulfill `predicate`.
     public func indices(where predicate: (NDArray)->Bool) -> [Int] {
         return enumerated().flatMap { i, array in
