@@ -132,6 +132,7 @@ typealias vDSP_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePo
 
 // Reduce all elements.
 func reduce(_ arg: NDArray, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
+    precondition(arg.shape.all { $0 > 0 }, "Can't reduce zero-size array.")
     let elements = gatherElements(arg)
     var result: Float = 0
     vDSPfunc(elements.pointer, 1, &result, vDSP_Length(elements.count))
@@ -142,6 +143,7 @@ func reduce(_ arg: NDArray, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
 func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
     
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
+    precondition(arg.shape[axis] > 0, "Can't reduce along zero-size axis.")
     
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()
@@ -170,6 +172,7 @@ typealias vDSP_index_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeMut
 // Reduce along a given axis (for argmin, argmax).
 func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func) -> NDArray {
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
+    precondition(arg.shape[axis] > 0, "Can't reduce along zero-size axis.")
     
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()

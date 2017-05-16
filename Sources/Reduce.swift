@@ -23,6 +23,7 @@ public func mean(_ arg: NDArray) -> NDArray {
 
 /// Calculate mean and variance of all elements.
 public func moments(_ arg: NDArray) -> (mean: NDArray, variance: NDArray) {
+    precondition(arg.shape.all { $0 > 0 }, "Can't reduce zero-size array.")
     let elements = gatherElements(arg)
     var sum: Float = 0
     var sum2: Float = 0
@@ -106,7 +107,10 @@ public func stddev(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> N
 
 // MARK: Util
 private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, variance: NDArray) {
+    
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
+    
+    precondition(arg.shape[axis] > 0, "Can't reduce along zero-size axis.")
     
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()
