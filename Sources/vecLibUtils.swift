@@ -9,7 +9,7 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         var count = Int32(arg.data.count)
         let src = arg.startPointer
         
-        var dst = NDArrayData(size: arg.data.count)
+        var dst = NDArrayData<Float>(size: arg.data.count)
         
         dst.withUnsafeMutablePointer {
             vvfunc($0, src, &count)
@@ -27,7 +27,7 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         let majorStrides = [Int](arg.strides.dropLast(strDims))
         let blockSize = arg.shape.suffix(strDims).prod()
         
-        var dst = NDArrayData(size: volume)
+        var dst = NDArrayData<Float>(size: volume)
         
         let offsets = OffsetSequence(shape: majorShape, strides: majorStrides)
         var _blockSize = Int32(blockSize)
@@ -50,7 +50,7 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         var count = Int32(volume)
         let elements = gatherElements(arg)
         
-        var dst = NDArrayData(size: volume)
+        var dst = NDArrayData<Float>(size: volume)
         
         dst.withUnsafeMutablePointer {
             vvfunc($0, elements.pointer, &count)
@@ -66,7 +66,7 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
     let (lhs, rhs) = broadcast(lhs, rhs)
     
     let volume = lhs.volume
-    var dst = NDArrayData(size: volume)
+    var dst = NDArrayData<Float>(size: volume)
     
     if lhs.strides.last == 1 && rhs.strides.last == 1 {
         let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),

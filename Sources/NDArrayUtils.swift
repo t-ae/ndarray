@@ -126,7 +126,7 @@ func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
 }
 
 /// Gather elements.
-func gatherElements(_ arg: NDArray) -> NDArrayData {
+func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
     
     let arg = arg.squeeze()
     let volume = arg.volume
@@ -155,7 +155,7 @@ func gatherElements(_ arg: NDArray) -> NDArrayData {
         
         let dstStride = Int32(dstStrides[axis])
         
-        var dst = NDArrayData(size: volume)
+        var dst = NDArrayData<Float>(size: volume)
         
         let offsets = BinaryOffsetSequence(shape: outerShape, lStrides: outerStrides, rStrides: dstOuterStrides)
         let _blockSize = Int32(blockSize)

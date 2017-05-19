@@ -1,19 +1,19 @@
 
-struct NDArrayData: Collection {
-    var buffer: ManagedBuffer<Int, Float>
+struct NDArrayData<T>: Collection {
+    var buffer: ManagedBuffer<Int, T>
     
     init(size: Int) {
         buffer = ManagedBuffer.create(minimumCapacity: size) { _ in size }
     }
     
-    init (_ array: [Float]) {
+    init (_ array: [T]) {
         self.init(size: array.count)
         buffer.withUnsafeMutablePointerToElements { buf in
             buf.initialize(from: array, count: array.count)
         }
     }
     
-    init(value: Float, count: Int) {
+    init(value: T, count: Int) {
         self.init(size: count)
         buffer.withUnsafeMutablePointerToElements { buf in
             buf.initialize(to: value, count: count)
@@ -46,7 +46,7 @@ struct NDArrayData: Collection {
         return index + 1
     }
     
-    subscript(index: Int) -> Float {
+    subscript(index: Int) -> T {
         get {
             return buffer.withUnsafeMutablePointerToElements { $0[index] }
         }
@@ -56,7 +56,7 @@ struct NDArrayData: Collection {
         }
     }
     
-    subscript(range: CountableRange<Int>) -> NDArrayData {
+    subscript(range: CountableRange<Int>) -> NDArrayData<T> {
         assert(range.startIndex >= 0 && range.endIndex <= count)
         let new = NDArrayData(size: range.count)
         let src = pointer + range.startIndex
@@ -66,16 +66,16 @@ struct NDArrayData: Collection {
         return new
     }
     
-    mutating func withUnsafeMutablePointer<R>(_ body: (UnsafeMutablePointer<Float>) throws -> R) rethrows -> R {
+    mutating func withUnsafeMutablePointer<R>(_ body: (UnsafeMutablePointer<T>) throws -> R) rethrows -> R {
         ensureUniquelyReferenced()
         return try buffer.withUnsafeMutablePointerToElements(body)
     }
     
-    var pointer: UnsafePointer<Float> {
+    var pointer: UnsafePointer<T> {
         return buffer.withUnsafeMutablePointerToElements { UnsafePointer($0) }
     }
     
-    func asArray() -> [Float] {
-        return [Float](UnsafeBufferPointer(start: pointer, count: count))
+    func asArray() -> [T] {
+        return [T](UnsafeBufferPointer(start: pointer, count: count))
     }
 }

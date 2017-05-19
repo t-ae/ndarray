@@ -28,7 +28,7 @@ extension NDArray {
     /// Create identity matrix.
     public static func eye(_ size: Int) -> NDArray {
         precondition(size >= 0, "Size(\(size)) must >= 0.")
-        var data = NDArrayData(value: 0, count: size*size)
+        var data = NDArrayData<Float>(value: 0, count: size*size)
         print(data.asArray())
         data.withUnsafeMutablePointer { p in
             var p = p
@@ -64,7 +64,7 @@ extension NDArray {
     
     /// Create contiguous NDArray.
     public static func range(_ range: CountableRange<Int>) -> NDArray {
-        var elements = NDArrayData(size: range.count)
+        var elements = NDArrayData<Float>(size: range.count)
         elements.withUnsafeMutablePointer { p in
             var p = p
             for e in range {
@@ -85,7 +85,7 @@ extension NDArray {
     ///
     /// `count` elements are in the interval [low, high].
     public static func linspace(low: Float, high: Float, count: Int) -> NDArray {
-        var elements = NDArrayData(size: count)
+        var elements = NDArrayData<Float>(size: count)
         elements.withUnsafeMutablePointer { p in
             var p = p
             for v in 0..<count {

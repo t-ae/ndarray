@@ -9,7 +9,7 @@ typealias vDSP_unary_func = (UnsafePointer<Float>, vDSP_Stride,
 func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
         let src = arg.startPointer
-        var dst = NDArrayData(size: arg.data.count)
+        var dst = NDArrayData<Float>(size: arg.data.count)
         
         dst.withUnsafeMutablePointer { p in
             vDSPfunc(src, 1, p, 1, vDSP_Length(arg.data.count))
@@ -36,7 +36,7 @@ func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
         
         let dstStride = dstStrides[axis]
         
-        var dst = NDArrayData(size: volume)
+        var dst = NDArrayData<Float>(size: volume)
         
         let offsets = BinaryOffsetSequence(shape: outerShape, lStrides: outerStrides, rStrides: dstOuterStrides)
         let _blockSize = vDSP_Length(blockSize)
@@ -95,7 +95,7 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_vv_func) -> NDArray 
     let (lhs, rhs) = broadcast(lhs, rhs)
     
     let volume = lhs.volume
-    var dst = NDArrayData(size: volume)
+    var dst = NDArrayData<Float>(size: volume)
     
     let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),
                       getStridedDims(shape: rhs.shape, strides: rhs.strides))
@@ -148,7 +148,7 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> ND
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()
     
-    var dst = NDArrayData(size: volume)
+    var dst = NDArrayData<Float>(size: volume)
     
     let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
     let count = vDSP_Length(arg.shape[axis])
@@ -192,7 +192,7 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
         dstPtr += 1
     }
     
-    var elements = NDArrayData(size: volume)
+    var elements = NDArrayData<Float>(size: volume)
     elements.withUnsafeMutablePointer { p in
         var p = p
         let stride = UInt(stride)

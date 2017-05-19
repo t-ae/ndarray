@@ -2,14 +2,14 @@ public struct NDArray {
     /// Shape of NDArray.
     public internal(set) var shape: [Int]
     /// Source of elements.
-    var data: NDArrayData
+    var data: NDArrayData<Float>
     
     /// Strides for each dimensions.
     public internal(set) var strides: [Int]
     /// Base offset of data.
     public internal(set) var baseOffset: Int
     
-    init(shape:[Int], strides: [Int], baseOffset: Int, data: NDArrayData) {
+    init(shape:[Int], strides: [Int], baseOffset: Int, data: NDArrayData<Float>) {
         assert(shape.count == strides.count)
         assert(shape.all { $0 >= 0 })
         assert(0 <= baseOffset && (baseOffset < data.count || data.isEmpty))
@@ -19,7 +19,7 @@ public struct NDArray {
         self.baseOffset = baseOffset
     }
     
-    init(shape: [Int], elements: NDArrayData) {
+    init(shape: [Int], elements: NDArrayData<Float>) {
         self.init(shape: shape,
                   strides: getContiguousStrides(shape: shape),
                   baseOffset: 0,
