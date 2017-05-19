@@ -2,13 +2,25 @@
 import Accelerate
 
 /// Sort 1 dimensional NDArray.
-public func sort(_ arg: NDArray, ascending: Bool = true) -> NDArray {
-    precondition(arg.ndim == 1, "`arg` must be 1 dimensional.")
-    var data = gatherElements(arg)
+public func sort(_ arg: NDArray, along axis: Int = -1, ascending: Bool = true) -> NDArray {
+    
+    let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
+    
+    let size = arg.shape[axis]
+    
+    let transposed = arg.transposed([Int](0..<arg.ndim).removing(at: axis).appending(axis))
+    
+    var data = gatherElements(transposed)
+    
     data.withUnsafeMutablePointer { p in
-        vDSP_vsort(p, vDSP_Length(data.count), ascending ? 1 : -1)
+        var p = p
+        for _ in 0..<data.count/size {
+            vDSP_vsort(p, vDSP_Length(size), ascending ? 1 : -1)
+            p += size
+        }
     }
-    return NDArray(shape: [data.count], elements: data)
+    return NDArray(shape: transposed.shape, elements: data)
+        .transposed([Int](0..<arg.ndim-1).inserting(arg.ndim-1, at: axis))
 }
 
 /// Index sort 1 dimensional NDArray.

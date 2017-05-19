@@ -230,6 +230,12 @@ extension Array {
         return ret
     }
     
+    func appending(_ newElement: Element) -> Array {
+        var ret = self
+        ret.append(newElement)
+        return ret
+    }
+    
     func inserting(_ newElement: Element, at: Int) -> Array {
         var ret = self
         ret.insert(newElement, at: at)
