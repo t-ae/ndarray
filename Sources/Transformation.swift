@@ -23,6 +23,15 @@ extension NDArray {
         return x
     }
     
+    public func moveAxis(from: Int, to: Int) -> NDArray {
+        let from = normalizeAxis(axis: from, ndim: ndim)
+        let to = normalizeAxis(axis: to, ndim: ndim)
+        var perm = [Int](0..<ndim)
+        perm.remove(at: from)
+        perm.insert(from, at: to)
+        return transposed(perm)
+    }
+    
     /// Get reshaped NDArray.
     public func reshaped(_ shape: [Int]) -> NDArray {
         

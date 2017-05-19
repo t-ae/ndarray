@@ -8,7 +8,7 @@ public func sort(_ arg: NDArray, along axis: Int = -1, ascending: Bool = true) -
     
     let size = arg.shape[axis]
     
-    let transposed = arg.transposed([Int](0..<arg.ndim).removing(at: axis).appending(axis))
+    let transposed = arg.moveAxis(from: axis, to: -1)
     
     var data = gatherElements(transposed)
     
@@ -19,8 +19,7 @@ public func sort(_ arg: NDArray, along axis: Int = -1, ascending: Bool = true) -
             p += size
         }
     }
-    return NDArray(shape: transposed.shape, elements: data)
-        .transposed([Int](0..<arg.ndim-1).inserting(arg.ndim-1, at: axis))
+    return NDArray(shape: transposed.shape, elements: data).moveAxis(from: -1, to: axis)
 }
 
 /// Index sort 1 dimensional NDArray.
