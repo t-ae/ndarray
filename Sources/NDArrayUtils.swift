@@ -128,6 +128,7 @@ func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
 /// Gather elements.
 func gatherElements(_ arg: NDArray) -> NDArrayData {
     
+    let arg = arg.squeeze()
     let volume = arg.volume
     let ndim = arg.ndim
     
