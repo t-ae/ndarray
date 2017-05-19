@@ -86,3 +86,9 @@ public func ==(lhs: NDArray, rhs: NDArray) -> Bool {
     }
     return true
 }
+
+extension NDArray: CustomStringConvertible {
+    public var description: String {
+        return "NDArray(shape: \(shape), elements: \(elements()))"
+    }
+}
