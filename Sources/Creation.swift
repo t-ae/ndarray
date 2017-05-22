@@ -29,7 +29,6 @@ extension NDArray {
     public static func eye(_ size: Int) -> NDArray {
         precondition(size >= 0, "Size(\(size)) must >= 0.")
         var data = NDArrayData(value: 0, count: size*size)
-        print(data.asArray())
         data.withUnsafeMutablePointer { p in
             var p = p
             for _ in 0..<size {
