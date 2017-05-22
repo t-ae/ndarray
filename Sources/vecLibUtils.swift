@@ -48,15 +48,13 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
     } else {
         let volume = arg.volume
         var count = Int32(volume)
-        let elements = gatherElements(arg)
+        var elements = gatherElements(arg)
         
-        var dst = NDArrayData(size: volume)
-        
-        dst.withUnsafeMutablePointer {
+        elements.withUnsafeMutablePointer {
             vvfunc($0, elements.pointer, &count)
         }
         
-        return NDArray(shape: arg.shape, elements: dst)
+        return NDArray(shape: arg.shape, elements: elements)
     }
 }
 
@@ -66,7 +64,6 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
     let (lhs, rhs) = broadcast(lhs, rhs)
     
     let volume = lhs.volume
-    var dst = NDArrayData(size: volume)
     
     if lhs.strides.last == 1 && rhs.strides.last == 1 {
         let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),
@@ -79,6 +76,8 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         
         let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: lMajorStrides, rStrides: rMajorStrides)
         var _blockSize = Int32(blockSize)
+        
+        var dst = NDArrayData(size: volume)
         
         let lSrc = lhs.startPointer
         let rSrc = rhs.startPointer
@@ -94,13 +93,13 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
     } else {
         var _volume = Int32(volume)
         
-        let lElements = gatherElements(lhs)
+        var lElements = gatherElements(lhs)
         let rElements = gatherElements(rhs)
         
-        dst.withUnsafeMutablePointer {
+        lElements.withUnsafeMutablePointer {
             vvfunc($0, lElements.pointer, rElements.pointer, &_volume)
         }
         
-        return NDArray(shape: lhs.shape, elements: dst)
+        return NDArray(shape: lhs.shape, elements: lElements)
     }
 }
