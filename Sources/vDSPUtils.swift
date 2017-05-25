@@ -8,11 +8,12 @@ typealias vDSP_unary_func = (UnsafePointer<Float>, vDSP_Stride,
 
 func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
+        let count = zip(arg.shape, arg.strides).flatMap { $1 != 0 ? $0 : nil }.prod()
         let src = arg.startPointer
-        var dst = NDArrayData<Float>(size: arg.data.count)
+        var dst = NDArrayData<Float>(size: count)
         
         dst.withUnsafeMutablePointer { p in
-            vDSPfunc(src, 1, p, 1, vDSP_Length(arg.data.count))
+            vDSPfunc(src, 1, p, 1, vDSP_Length(count))
         }
         
         return NDArray(shape: arg.shape,
