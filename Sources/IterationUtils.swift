@@ -2,8 +2,10 @@
 // MARK: - Offset
 struct OffsetSequence: Sequence {
     typealias Iterator = OffsetIterator
+    
     let shape: [Int]
     let strides: [Int]
+    
     init(shape: [Int], strides: [Int]) {
         assert(shape.all { $0 >= 0 })
         assert(shape.count == strides.count)
