@@ -145,7 +145,7 @@ func d_relu(_ x: NDArray) -> NDArray {
 func softmax(_ x: NDArray) -> NDArray {
     
     let e = exp(x)
-    let eSum = sum(e, along: 1).reshaped([-1 ,1])
+    let eSum = sum(e, along: 1, keepDims: true)
 
     return e / eSum
 }
