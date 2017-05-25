@@ -25,7 +25,6 @@ extension NDArray {
         }
         
         return NDArray(shape: shape, elements: dst2)
-        
     }
     
     /// Create randomly initialized NDArray.

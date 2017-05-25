@@ -13,6 +13,10 @@ class ReduceTests: XCTestCase {
             XCTAssertEqual(max(a, along: 1), NDArray([3, 1]))
             XCTAssertEqual(max(a, along: 1, keepDims: true), NDArray([[3], [1]]))
         }
+        do{
+            let a = NDArray.zeros([3, 0, 2])
+            XCTAssertEqual(max(a, along: 0), NDArray.zeros([0, 2]))
+        }
     }
     
     func testArgmin() {
