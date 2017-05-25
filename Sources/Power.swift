@@ -8,7 +8,11 @@ precedencegroup PowPrecedense {
 infix operator **: PowPrecedense
 
 public func **(lhs: NDArray, rhs: Float) -> NDArray {
-    return lhs ** NDArray(scalar: rhs)
+    let f: vvUnaryFunc = {
+        var rhs = rhs
+        vvpowsf($0, &rhs, $1, $2)
+    }
+    return apply(lhs, f)
 }
 
 public func **(lhs: Float, rhs: NDArray) -> NDArray {

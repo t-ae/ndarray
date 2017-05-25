@@ -7,6 +7,16 @@ class PowerTests: XCTestCase {
     func testPower() {
         do {
             let a = NDArray([[0, 1],
+                             [2, 3]])
+            
+            XCTAssertEqual(a**2, NDArray([[0, 1],
+                                          [4, 9]]))
+            
+            XCTAssertEqual(2**a, NDArray([[1, 2],
+                                          [4, 8]]))
+        }
+        do {
+            let a = NDArray([[0, 1],
                              [2, 2]])
             let b = NDArray([2, 3])
             
