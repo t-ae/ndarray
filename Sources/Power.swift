@@ -16,7 +16,7 @@ public func **(lhs: NDArray, rhs: Float) -> NDArray {
 }
 
 public func **(lhs: Float, rhs: NDArray) -> NDArray {
-    return NDArray(scalar: lhs) ** rhs
+    return NDArray.filled(lhs, shape: rhs.shape) ** rhs
 }
 
 public func **(lhs: NDArray, rhs: NDArray) -> NDArray {
