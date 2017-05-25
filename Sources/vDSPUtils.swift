@@ -177,19 +177,21 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()
     
-    let dst = [vDSP_Length](repeating: 0, count: volume)
+    var dst = NDArrayData<vDSP_Length>(size: volume)
     var e: Float = 0
     
     let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
-    var dstPtr = UnsafeMutablePointer(mutating: dst)
-    let src = arg.startPointer
-    for offset in offsets {
-        let src = src + offset
-        vDSPfunc(src, stride, &e, dstPtr, count)
-        dstPtr += 1
+    dst.withUnsafeMutablePointer {
+        var dstPtr = $0
+        let src = arg.startPointer
+        for offset in offsets {
+            let src = src + offset
+            vDSPfunc(src, stride, &e, dstPtr, count)
+            dstPtr += 1
+        }
     }
     
     var elements = NDArrayData<Float>(size: volume)

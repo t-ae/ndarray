@@ -9,13 +9,15 @@ extension NDArray {
     public static func uniform(low: Float = 0, high: Float = 1, shape: [Int]) -> NDArray {
         precondition(shape.all { $0 >= 0 })
         let size = shape.prod()
-        var dst1 = [UInt32](repeating: 0, count: size)
+        var dst1 = NDArrayData<UInt32>(size: size)
         var dst2 = NDArrayData<Float>(size: size)
-        arc4random_buf(&dst1, MemoryLayout<UInt32>.size * size)
         
         
+        dst1.withUnsafeMutablePointer {
+            arc4random_buf($0, MemoryLayout<UInt32>.size * size)
+        }
         dst2.withUnsafeMutablePointer {
-            vDSP_vfltu32(dst1, 1, $0, 1, vDSP_Length(size))
+            vDSP_vfltu32(dst1.pointer, 1, $0, 1, vDSP_Length(size))
             
             var factor = (high - low) / Float(UInt32.max)
             var low = low
