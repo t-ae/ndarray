@@ -66,6 +66,8 @@ struct OffsetSequence: Sequence {
     let shape: [Int]
     let strides: [Int]
     init(shape: [Int], strides: [Int]) {
+        assert(shape.all { $0 >= 0 })
+        assert(shape.count == strides.count)
         self.shape = shape
         self.strides = strides
     }
@@ -85,6 +87,8 @@ struct OffsetIterator: IteratorProtocol {
     let last: Int
     
     init(shape: [Int], strides: [Int]) {
+        assert(shape.all { $0 >= 0 })
+        assert(shape.count == strides.count)
         self.shape = shape
         self.strides = strides
         self.index = [Int](repeating: 0, count: shape.count)
@@ -129,6 +133,8 @@ struct BinaryOffsetSequence: Sequence {
     let rStrides: [Int]
     
     init(shape: [Int], lStrides: [Int], rStrides: [Int]) {
+        assert(shape.all { $0 >= 0 })
+        assert(shape.count == lStrides.count && shape.count == rStrides.count)
         self.shape = shape
         self.lStrides = lStrides
         self.rStrides = rStrides
@@ -151,6 +157,8 @@ struct BinaryOffsetIterator: IteratorProtocol {
     var offset: (l: Int, r: Int)?
     
     init(shape: [Int], lStrides: [Int], rStrides: [Int]) {
+        assert(shape.all { $0 >= 0 })
+        assert(shape.count == lStrides.count && shape.count == rStrides.count)
         self.shape = shape
         self.lStrides = lStrides
         self.rStrides = rStrides
