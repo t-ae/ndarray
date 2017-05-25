@@ -119,14 +119,15 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
                       getStridedDims(shape: newValue.shape, strides: newValue.strides))
     
     let majorShape = [Int](dstShape.dropLast(strDims))
-    let minorShape = dstShape.suffix(strDims)
-    let minorZeros = [Int](repeating: 0, count: minorShape.count)
     
-    let blockSize = minorShape.prod()
+    let srcMajorStrides = [Int](newValue.strides.dropLast(strDims))
+    let dstMajorStrides = [Int](dstStrides.dropLast(strDims))
+    
+    let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: srcMajorStrides, rStrides: dstMajorStrides)
+    
+    let blockSize = dstShape.suffix(strDims).prod()
     let srcStride = Int32(newValue.strides.last ?? 1)
     let dstStride = Int32(dstStrides.last ?? 1)
-    
-    let majorIndices = NDIndexSequence(shape: majorShape)
     
     let _blockSize = Int32(blockSize)
     let src: UnsafePointer<Float>
@@ -143,10 +144,9 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
         } else {
             dst = p + (array.baseOffset + dstOffset)
         }
-        for majorIndex in majorIndices {
-            let ndIndex = majorIndex + minorZeros
-            let src = src + getIndexOffset(strides: newValue.strides, ndIndex: ndIndex)
-            let dst = dst + getIndexOffset(strides: dstStrides, ndIndex: ndIndex)
+        for (os, od) in offsets {
+            let src = src + os
+            let dst = dst + od
             cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
         }
     }
