@@ -10,14 +10,17 @@ extension NDArray {
         precondition(shape.all { $0 >= 0 })
         let size = shape.prod()
         var dst1 = [UInt32](repeating: 0, count: size)
-        var dst2 = [Float](repeating: 0, count: size)
+        var dst2 = NDArrayData(size: size)
         arc4random_buf(&dst1, MemoryLayout<UInt32>.size * size)
         
-        vDSP_vfltu32(dst1, 1, &dst2, 1, vDSP_Length(size))
         
-        var factor = (high - low) / Float(UInt32.max)
-        var low = low
-        vDSP_vsmsa(dst2, 1, &factor, &low, &dst2, 1, vDSP_Length(size))
+        dst2.withUnsafeMutablePointer {
+            vDSP_vfltu32(dst1, 1, $0, 1, vDSP_Length(size))
+            
+            var factor = (high - low) / Float(UInt32.max)
+            var low = low
+            vDSP_vsmsa($0, 1, &factor, &low, $0, 1, vDSP_Length(size))
+        }
         
         return NDArray(shape: shape, elements: dst2)
         

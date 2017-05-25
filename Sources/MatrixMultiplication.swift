@@ -22,7 +22,7 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let matrixSize = Int(M*N)
     let majorSize = majorShape.prod()
     
-    let dst = [Float](repeating: 0, count: majorSize*matrixSize)
+    var dst = NDArrayData(size: majorSize*matrixSize)
     
     let lda = Int32(lhs.strides[lhs.ndim-2])
     let ldb = Int32(rhs.strides[rhs.ndim-2])
@@ -33,15 +33,17 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
                                        lStrides: [Int](lhs.strides.dropLast(2)),
                                        rStrides: [Int](rhs.strides.dropLast(2)))
     
-    var dstPtr = UnsafeMutablePointer(mutating: dst)
-    for (lo, ro) in offsets {
-        cblas_sgemm(CblasRowMajor,
-                    CblasNoTrans, CblasNoTrans,
-                    M, N, K,
-                    1, lPtr + lo, lda,
-                    rPtr + ro, ldb,
-                    0, dstPtr, N)
-        dstPtr += matrixSize
+    dst.withUnsafeMutablePointer {
+        var dstPtr = $0
+        for (lo, ro) in offsets {
+            cblas_sgemm(CblasRowMajor,
+                        CblasNoTrans, CblasNoTrans,
+                        M, N, K,
+                        1, lPtr + lo, lda,
+                        rPtr + ro, ldb,
+                        0, dstPtr, N)
+            dstPtr += matrixSize
+        }
     }
     
     return NDArray(shape: majorShape + [Int(M), Int(N)], elements: dst)

@@ -36,15 +36,17 @@ extension NDArray {
         
         var srcs = elementsList.map { $0.pointer }
         
-        let dst = [Float](repeating: 0, count: volume)
+        var dst = NDArrayData(size: volume)
         
-        var dstPtr = UnsafeMutablePointer(mutating: dst)
-        for _ in 0..<majorShape.prod() {
-            for i in 0..<srcs.count {
-                let size = blockSize*sizes[i]
-                cblas_scopy(Int32(size), srcs[i], 1, dstPtr, 1)
-                srcs[i] += size
-                dstPtr += size
+        dst.withUnsafeMutablePointer {
+            var dstPtr = $0
+            for _ in 0..<majorShape.prod() {
+                for i in 0..<srcs.count {
+                    let size = blockSize*sizes[i]
+                    cblas_scopy(Int32(size), srcs[i], 1, dstPtr, 1)
+                    srcs[i] += size
+                    dstPtr += size
+                }
             }
         }
         

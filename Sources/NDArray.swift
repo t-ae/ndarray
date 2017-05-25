@@ -65,26 +65,24 @@ public struct NDArray {
 }
 
 extension NDArray: Equatable {
-    
-}
-
-public func ==(lhs: NDArray, rhs: NDArray) -> Bool {
-    guard lhs.shape == rhs.shape else {
-        return false
-    }
-    let lhs = gatherElements(lhs)
-    let rhs = gatherElements(rhs)
-    
-    var lp = lhs.pointer
-    var rp = rhs.pointer
-    for _ in 0..<lhs.count {
-        guard lp.pointee == rp.pointee else {
+    public static func ==(lhs: NDArray, rhs: NDArray) -> Bool {
+        guard lhs.shape == rhs.shape else {
             return false
         }
-        lp += 1
-        rp += 1
+        let lhs = gatherElements(lhs)
+        let rhs = gatherElements(rhs)
+        
+        var lp = lhs.pointer
+        var rp = rhs.pointer
+        for _ in 0..<lhs.count {
+            guard lp.pointee == rp.pointee else {
+                return false
+            }
+            lp += 1
+            rp += 1
+        }
+        return true
     }
-    return true
 }
 
 extension NDArray: CustomStringConvertible {

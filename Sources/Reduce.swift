@@ -115,30 +115,37 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()
     
-    var dst1 = [Float](repeating: 0, count: volume)
-    var dst2 = [Float](repeating: 0, count: volume)
+    var dst1 = NDArrayData(size: volume)
+    var dst2 = NDArrayData(size: volume)
     
     let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
     let src = arg.startPointer
-    var dst1Ptr = UnsafeMutablePointer(mutating: dst1)
-    var dst2Ptr = UnsafeMutablePointer(mutating: dst2)
-    for offset in offsets {
-        let src = src + offset
-        vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
-        dst1Ptr += 1
-        dst2Ptr += 1
+    dst1.withUnsafeMutablePointer { d1 in
+        dst2.withUnsafeMutablePointer { d2 in
+            var dst1Ptr = d1
+            var dst2Ptr = d2
+            for offset in offsets {
+                let src = src + offset
+                vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
+                dst1Ptr += 1
+                dst2Ptr += 1
+            }
+            var _count = Float(count)
+            let _volume = vDSP_Length(volume)
+            vDSP_vsdiv(d1, 1, &_count, d1, 1, _volume)
+            
+            vDSP_vsdiv(d2, 1, &_count, d2, 1, _volume)
+            vDSP_vsq(d1, 1, d1, 1, _volume)
+            vDSP_vsub(d1, 1, d2, 1, d2, 1, _volume)
+        }
     }
-    var _count = Float(count)
-    let _volume = vDSP_Length(volume)
-    vDSP_vsdiv(dst1, 1, &_count, &dst1, 1, _volume)
+    
     let mean = NDArray(shape: newShape, elements: dst1)
     
-    vDSP_vsdiv(dst2, 1, &_count, &dst2, 1, _volume)
-    vDSP_vsq(dst1, 1, &dst1, 1, _volume)
-    vDSP_vsub(dst1, 1, &dst2, 1, &dst2, 1, _volume)
+    
     
     let variance =  NDArray(shape: newShape, elements: dst2)
     
