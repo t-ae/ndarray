@@ -128,6 +128,31 @@ extension PerformanceTests {
         }
     }
 }
+    
+// MARK - Pow
+extension PerformanceTests {
+    func testPow1() {
+        
+        // a = np.ones([128, 128, 128])
+        // timeit a ** 2
+
+        let a = NDArray.ones([128, 128, 128])
+        measure {
+            _ = a ** 2
+        }
+    }
+    
+    func testPow2() {
+        
+        // a = np.ones([128, 128, 128])
+        // timeit 2 ** a
+        
+        let a = NDArray.ones([128, 128, 128])
+        measure {
+            _ = 2 ** a
+        }
+    }
+}
 
 // MARK: - Reduce
 extension PerformanceTests {
