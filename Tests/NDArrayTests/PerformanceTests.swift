@@ -152,6 +152,31 @@ extension PerformanceTests {
             _ = 2 ** a
         }
     }
+    
+    func testPow3() {
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
+        // b = a.transpose()
+        // timeit a**a
+        
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        measure {
+            _ = a ** a
+        }
+    }
+    
+    func testPow4() {
+        // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
+        // b = a.transpose()
+        // timeit a+b
+        
+        let shape = [10, 10, 10, 10, 10, 10]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
+        let b = a.transposed()
+        measure {
+            _ = a ** b
+        }
+    }
 }
 
 // MARK: - Reduce
