@@ -25,7 +25,6 @@ struct OffsetIterator: IteratorProtocol {
     let strides: [Int]
     var index: [Int]
     var offset: Int?
-    let last: Int
     
     init(shape: [Int], strides: [Int]) {
         assert(shape.all { $0 >= 0 })
@@ -34,7 +33,6 @@ struct OffsetIterator: IteratorProtocol {
         self.strides = strides
         self.index = [Int](repeating: 0, count: shape.count)
         self.offset = 0
-        self.last = index.count - 1
     }
     
     mutating func next() -> Int? {
@@ -47,19 +45,17 @@ struct OffsetIterator: IteratorProtocol {
             return 0
         }
         
-        index[last] += 1
-        offset! += strides[last]
-        for i in 0..<last {
-            guard index[last-i] >= shape[last-i] else {
+        for i in (0..<index.count).reversed() {
+            if index[i] < shape[i]-1 {
+                index[i] += 1
+                offset! += strides[i]
                 break
+            } else if i > 0 {
+                index[i] = 0
+                offset! -= strides[i]*(shape[i]-1)
+            } else {
+                offset = nil
             }
-            index[last-i] = 0
-            index[last-i-1] += 1
-            offset! += strides[last-i-1] - strides[last-i]*shape[last-i]
-        }
-        
-        if index[0] == shape[0] {
-            offset = nil
         }
         
         return ret
@@ -94,7 +90,6 @@ struct BinaryOffsetIterator: IteratorProtocol {
     let lStrides: [Int]
     let rStrides: [Int]
     var index: [Int]
-    let last: Int
     var offset: (l: Int, r: Int)?
     
     init(shape: [Int], lStrides: [Int], rStrides: [Int]) {
@@ -104,7 +99,6 @@ struct BinaryOffsetIterator: IteratorProtocol {
         self.lStrides = lStrides
         self.rStrides = rStrides
         self.index = [Int](repeating: 0, count: shape.count)
-        self.last = index.count - 1
         self.offset = (0, 0)
     }
 
@@ -118,21 +112,19 @@ struct BinaryOffsetIterator: IteratorProtocol {
             return ret
         }
         
-        index[last] += 1
-        offset = (l: offset!.l + lStrides[last],
-                  r: offset!.r + rStrides[last])
-        for i in 0..<last {
-            guard index[last-i] >= shape[last-i] else {
+        for i in (0..<index.count).reversed() {
+            if index[i] < shape[i]-1 {
+                index[i] += 1
+                offset!.l += lStrides[i]
+                offset!.r += rStrides[i]
                 break
+            } else if i > 0 {
+                index[i] = 0
+                offset!.l -= lStrides[i]*(shape[i]-1)
+                offset!.r -= rStrides[i]*(shape[i]-1)
+            } else {
+                offset = nil
             }
-            index[last-i] = 0
-            index[last-i-1] += 1
-            offset = (l: offset!.l + lStrides[last-i-1] - lStrides[last-i]*shape[last-i],
-                      r: offset!.r + rStrides[last-i-1] - rStrides[last-i]*shape[last-i])
-        }
-        
-        if index[0] == shape[0] {
-            offset = nil
         }
         
         return ret

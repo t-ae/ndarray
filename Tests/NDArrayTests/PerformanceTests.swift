@@ -11,7 +11,7 @@ class PerformanceTests: XCTestCase {
         // a = np.arange(10**6, dtype=np.float32).reshape([10]*6).transpose()
         // timeit np.ascontiguousarray(a)
         
-        let shape = [10, 10, 10, 10, 10, 10]
+        let shape = [10, 10, 10, 10, 10, 10, 5]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed()
         measure {
             _ = a.asContiguousArray()
