@@ -86,7 +86,7 @@ class IrisClassificationTests: XCTestCase {
             b1 -= alpha * mean(d_out_b1, along: 0)
             W1 -= alpha * mean(d_out_W1, along: 0)
             
-            if i%100 == 0 {
+            if i%1000 == 0 {
                 print("\nstep: \(i)")
                 let losses = -y * log(out.clipped(low: 1e-10))
                 let loss = mean(sum(losses, along: 1)).asScalar()

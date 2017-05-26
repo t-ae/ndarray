@@ -21,10 +21,7 @@ def relu(x):
 
 
 def d_relu(x):
-    x = x.copy()
-    x[x < 0] = 0
-    x[x > 0] = 1
-    return x
+    return np.maximum(0, np.copysign(1, x))
 
 
 def main():
@@ -107,7 +104,7 @@ def main():
         b1 -= alpha * np.mean(d_out_b1, 0)
         W1 -= alpha * np.mean(d_out_W1, 0)
 
-        if i % 100 == 0:
+        if i % 1000 == 0:
             print(f"\nstep: {i}")
             out[out < 1e-10] = 1e-10
             losses = -y_train * np.log(out)
