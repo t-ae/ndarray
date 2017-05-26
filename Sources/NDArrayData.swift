@@ -36,7 +36,7 @@ struct NDArrayData<T>: Collection {
     }
     
     var count: Int {
-        return buffer.withUnsafeMutablePointerToHeader { $0.pointee }
+        return buffer.header
     }
     
     var startIndex: Int { return 0 }
