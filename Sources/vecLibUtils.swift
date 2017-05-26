@@ -53,7 +53,7 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         var elements = gatherElements(arg)
         
         elements.withUnsafeMutablePointer {
-            vvfunc($0, elements.pointer, &count)
+            vvfunc($0, $0, &count)
         }
         
         return NDArray(shape: arg.shape, elements: elements)
@@ -99,7 +99,7 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         let rElements = gatherElements(rhs)
         
         lElements.withUnsafeMutablePointer {
-            vvfunc($0, lElements.pointer, rElements.pointer, &_volume)
+            vvfunc($0, $0, rElements.pointer, &_volume)
         }
         
         return NDArray(shape: lhs.shape, elements: lElements)

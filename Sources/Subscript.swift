@@ -136,7 +136,6 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     } else {
         src = newValue.startPointer
     }
-    // Force CoW
     array.data.withUnsafeMutablePointer { p in
         let dst: UnsafeMutablePointer<Float>
         if dstStride < 0 {
