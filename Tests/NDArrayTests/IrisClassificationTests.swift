@@ -7,7 +7,7 @@ class IrisClassificationTests: XCTestCase {
 
     func testLogisticRegression() {
         
-        // Equivalent python script on ./Util/iris_test.py
+        // Equivalent python script on ./python/iris_test.py
         
         let start = Date()
         
