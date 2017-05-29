@@ -53,5 +53,89 @@ class AcceleratePerformanceTests: XCTestCase {
             vDSP_mmul(a, 1, b, 1, &c, 1, M, N, K)
         }
     }
+    
+    func testCopy() {
+        let stride = 4
+        let c = 100_000_000
+        let a = [Float](repeating: 1, count: c)
+        var b = [Float](repeating: 0, count: c/stride)
+        
+        measure {
+            for i in 0..<c/stride {
+                b[i] = a[stride*i]
+            }
+        }
+    }
+    
+    func testCopy_BLAS() {
+        let stride = 2
+        let c = 100_000_000
+        let a = [Float](repeating: 1, count: c)
+        var b = [Float](repeating: 0, count: c/stride)
+        measure {
+            cblas_scopy(Int32(c/stride), a, Int32(stride), &b, 1)
+        }
+    }
+    
+    func testCopy_vDSP() {
+        let stride = 2
+        let c = 100_000_000
+        let a = [Float](repeating: 1, count: c)
+        var b = [Float](repeating: 0, count: c/stride)
+        measure {
+            vDSP_mmov(a, &b, vDSP_Length(c/stride), 1, vDSP_Length(stride), 1)
+        }
+    }
+    
+    func testCopyMinus_BLAS() {
+        let stride = -4
+        let c = 100_000_000
+        let a = [Float](repeating: 1, count: c)
+        var b = [Float](repeating: 0, count: -c/stride)
+        measure {
+            cblas_scopy(Int32(-c/stride), a, Int32(stride), &b, 1)
+        }
+    }
+    
+    func testCopyMinus_vDSP() {
+        let stride = -4
+        let c = 100_000_000
+        let a = [Float](repeating: 1, count: c)
+        var b = [Float](repeating: 0, count: -c/stride)
+        measure {
+            let src = UnsafePointer(a) - stride - 1
+            vDSP_mmov(src, &b, vDSP_Length(-c/stride), 1, vDSP_Length(-stride), 1)
+            vDSP_vrvrs(&b, 1, vDSP_Length(-c/stride))
+        }
+    }
+    
+    func testCopyMatrix_BLAS() {
+        let m = 100000
+        let n = 1000
+        let a = [Float](repeating: 1, count: m*n)
+        var b = [Float](repeating: 0, count: m*n/4)
+        measure {
+            let numInRow = Int32(n/2)
+            var src = UnsafePointer(a)
+            var dst = UnsafeMutablePointer(mutating: &b)
+            let n2 = n/2
+            for _ in 0..<m/2 {
+                cblas_scopy(numInRow, src, 1, dst, 1)
+                src += n
+                dst += n2
+            }
+        }
+    }
+    
+    func testCopyMatrix_vDSP() {
+        let m = 100000
+        let n = 1000
+        let a = [Float](repeating: 1, count: m*n)
+        var b = [Float](repeating: 0, count: m*n/4)
+        measure {
+            let n2 = n/2
+            vDSP_mmov(a, &b, vDSP_Length(m/2), vDSP_Length(n/2), vDSP_Length(n), vDSP_Length(n2))
+        }
+    }
 }
 #endif
