@@ -20,5 +20,4 @@ class SequenceTests: XCTestCase {
                                         [0, 0, 1]]))
         }
     }
-
 }

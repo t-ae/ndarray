@@ -32,7 +32,11 @@ struct OffsetIterator: IteratorProtocol {
         self.shape = shape
         self.strides = strides
         self.index = [Int](repeating: 0, count: shape.count)
-        self.offset = 0
+        if shape.contains(0) {
+            self.offset = nil
+        } else {
+            self.offset = 0
+        }
     }
     
     mutating func next() -> Int? {
@@ -99,7 +103,11 @@ struct BinaryOffsetIterator: IteratorProtocol {
         self.lStrides = lStrides
         self.rStrides = rStrides
         self.index = [Int](repeating: 0, count: shape.count)
-        self.offset = (0, 0)
+        if shape.contains(0) {
+            self.offset = nil
+        } else {
+            self.offset = (0, 0)
+        }
     }
 
     mutating func next() -> (l: Int, r: Int)? {

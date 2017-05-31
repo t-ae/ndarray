@@ -55,7 +55,7 @@ class AcceleratePerformanceTests: XCTestCase {
     }
     
     func testCopy() {
-        let stride = 4
+        let stride = 2
         let c = 100_000_000
         let a = [Float](repeating: 1, count: c)
         var b = [Float](repeating: 0, count: c/stride)
