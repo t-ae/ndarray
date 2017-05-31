@@ -24,14 +24,11 @@ struct NDArrayData<T>: Collection {
         guard !isKnownUniquelyReferenced(&buffer) else {
             return
         }
-        let count = self.count
-        buffer = buffer.withUnsafeMutablePointerToElements { src in
-            return ManagedBuffer.create(minimumCapacity: count) { buf in
-                buf.withUnsafeMutablePointerToElements { dst in
-                    dst.initialize(from: src, count: count)
-                }
-                return count
+        buffer = ManagedBuffer.create(minimumCapacity: count) { buf in
+            buf.withUnsafeMutablePointerToElements { dst in
+                dst.initialize(from: pointer, count: count)
             }
+            return count
         }
     }
     
