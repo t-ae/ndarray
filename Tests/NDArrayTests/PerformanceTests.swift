@@ -17,6 +17,18 @@ class PerformanceTests: XCTestCase {
             _ = a.asContiguousArray()
         }
     }
+    
+    func testAsContiguousArray2() {
+        
+        // a = np.arange(10000*10000).reshape([10000, 10000])
+        // timeit np.ascontiguousarray(a)
+        
+        let shape = [10000, 10000]
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)[0..<5000, 0..<5000]
+        measure {
+            _ = a.asContiguousArray()
+        }
+    }
 }
 
 // MARK: - Arithmetic
@@ -238,7 +250,7 @@ extension PerformanceTests {
 
 // Clip
 extension PerformanceTests {
-    func testsClipped() {
+    func testClipped() {
         
         // a = np.arange(10**7, dtype=np.float32).reshape([10]*7).transpose()
         // timeit np.clip(a, 100, 1000)
@@ -250,7 +262,7 @@ extension PerformanceTests {
         }
     }
     
-    func testsMaximum() {
+    func testMaximum() {
         
         // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // b = a.transpose()
