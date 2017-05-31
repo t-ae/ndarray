@@ -78,9 +78,7 @@ extension PerformanceTests {
     func testAdd4() {
         
         // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
-        // b = a.transpose()
-        // c = a.transpose([1,2,3,4,5,0])
-        // timeit b+c
+        // timeit a+1
         
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
