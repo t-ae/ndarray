@@ -143,29 +143,25 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
     } else {
 
         let axis = getLeastStrideAxis(arg.strides)
-        let srcStride = arg.strides[axis]
         let dims = getStridedDims(shape: arg.shape, strides: arg.strides, from: axis)
     
         let outerShape = [Int](arg.shape[0..<axis-dims+1] + arg.shape[axis+1..<ndim])
         let outerStrides = [Int](arg.strides[0..<axis-dims+1] + arg.strides[axis+1..<ndim])
-        let blockSize = arg.shape[axis-dims+1...axis].prod()
         
         let dstStrides = getContiguousStrides(shape: arg.shape)
         let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
         
-        let dstStride = dstStrides[axis]
-        
         var dst = NDArrayData<Float>(size: volume)
-        
-        let offsets = BinaryOffsetSequence(shape: outerShape, lStrides: outerStrides, rStrides: dstOuterStrides)
 
         dst.withUnsafeMutablePointer {
             copyElements(src: arg.startPointer,
-                         srcStride: srcStride,
+                         srcStride: arg.strides[axis],
                          dst: $0,
-                         dstStride: dstStride,
-                         blockSize: blockSize,
-                         offsets: offsets)
+                         dstStride: dstStrides[axis],
+                         blockSize: arg.shape[axis-dims+1...axis].prod(),
+                         offsets: BinaryOffsetSequence(shape: outerShape,
+                                                       lStrides: outerStrides,
+                                                       rStrides: dstOuterStrides))
         }
         
         return dst
