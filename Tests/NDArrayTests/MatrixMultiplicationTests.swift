@@ -64,10 +64,25 @@ class MatrixMultiplicationTests: XCTestCase {
         do {
             let a = NDArray([1, 2, 3]).expandDims(1)
             let b = NDArray([1, 2, 3]).expandDims(0)
-            let ans = a |*| b
-            XCTAssertEqual(ans, NDArray([[1, 2, 3],
-                                         [2, 4, 6],
-                                         [3, 6, 9]]))
+            let ans1 = a |*| b
+            XCTAssertEqual(ans1, NDArray([[1, 2, 3],
+                                          [2, 4, 6],
+                                          [3, 6, 9]]))
+            let ans2 = b |*| a
+            XCTAssertEqual(ans2, NDArray([[14]]))
+        }
+        do {
+            let a = NDArray.range(9).reshaped([3, 3])
+            let b = NDArray.eye(3).flipped(0).flipped(1)
+            let ans1 = a.flipped(0).flipped(1) |*| b
+            XCTAssertEqual(ans1, NDArray([[8, 7, 6],
+                                          [5, 4, 3],
+                                          [2, 1, 0]]))
+            
+            let ans2 = a.flipped(0) |*| b
+            XCTAssertEqual(ans2, NDArray([[6, 7, 8],
+                                          [3, 4, 5],
+                                          [0, 1, 2]]))
         }
     }
 
