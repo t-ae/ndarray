@@ -67,6 +67,23 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
+    func testCopy_Pointer() {
+        let stride = 2
+        let c = 100_000_000
+        let a = [Float](repeating: 1, count: c)
+        var b = [Float](repeating: 0, count: c/stride)
+        
+        measure {
+            var pa = UnsafePointer(a)
+            var pb = UnsafeMutablePointer(mutating: &b)
+            for _ in 0..<c/stride {
+                pb.pointee = pa.pointee
+                pa += stride
+                pb += 1
+            }
+        }
+    }
+    
     func testCopy_BLAS() {
         let stride = 2
         let c = 100_000_000
@@ -135,6 +152,26 @@ class AcceleratePerformanceTests: XCTestCase {
         measure {
             let n2 = n/2
             vDSP_mmov(a, &b, vDSP_Length(m/2), vDSP_Length(n/2), vDSP_Length(n), vDSP_Length(n2))
+        }
+    }
+    
+    func testAddA() {
+        let count = 10_000_000
+        let a = [Float](repeating: 0, count: count)
+        let b: [Float] = [1]
+        var ans = [Float](repeating: 0, count: count)
+        measure {
+            vDSP_vadd(a, 1, b, 0, &ans, 1, vDSP_Length(count))
+        }
+    }
+    
+    func testAddB() {
+        let count = 10_000_000
+        let a = [Float](repeating: 0, count: count)
+        let b: [Float] = [1]
+        var ans = [Float](repeating: 0, count: count)
+        measure {
+            vDSP_vsadd(a, 1, b, &ans, 1, vDSP_Length(count))
         }
     }
 }
