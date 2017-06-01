@@ -143,7 +143,7 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
     } else {
 
         let axis = getLeastStrideAxis(arg.strides)
-        let srcStride = Int32(arg.strides[axis])
+        let srcStride = arg.strides[axis]
         let dims = getStridedDims(shape: arg.shape, strides: arg.strides, from: axis)
     
         let outerShape = [Int](arg.shape[0..<axis-dims+1] + arg.shape[axis+1..<ndim])
@@ -153,29 +153,45 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
         let dstStrides = getContiguousStrides(shape: arg.shape)
         let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
         
-        let dstStride = Int32(dstStrides[axis])
+        let dstStride = dstStrides[axis]
         
         var dst = NDArrayData<Float>(size: volume)
         
         let offsets = BinaryOffsetSequence(shape: outerShape, lStrides: outerStrides, rStrides: dstOuterStrides)
-        let _blockSize = Int32(blockSize)
-        
-        let src: UnsafePointer<Float>
-        if srcStride < 0 {
-            src = arg.startPointer + (blockSize-1) * Int(srcStride)
-        } else {
-            src = arg.startPointer
-        }
-        dst.withUnsafeMutablePointer { dstHead in
-            for (os, od) in offsets {
-                let src = src + os
-                let dst = dstHead + od
-                
-                cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
-            }
+
+        dst.withUnsafeMutablePointer {
+            copyElements(src: arg.startPointer,
+                         srcStride: srcStride,
+                         dst: $0,
+                         dstStride: dstStride,
+                         blockSize: blockSize,
+                         offsets: offsets)
         }
         
         return dst
+    }
+}
+
+@inline(__always)
+func copyElements(src: UnsafePointer<Float>,
+                  srcStride: Int,
+                  dst: UnsafeMutablePointer<Float>,
+                  dstStride: Int,
+                  blockSize: Int,
+                  offsets: BinaryOffsetSequence) {
+    var srcPtr = src
+    if srcStride < 0 {
+        srcPtr += (blockSize-1) * srcStride
+    }
+    var dstPtr = dst
+    if dstStride < 0 {
+        dstPtr += (blockSize-1) * dstStride
+    }
+    let _blockSize = Int32(blockSize)
+    let _srcStride = Int32(srcStride)
+    let _dstStride = Int32(dstStride)
+    for (os, od) in offsets {
+        cblas_scopy(_blockSize, srcPtr.advanced(by: os), _srcStride, dstPtr.advanced(by: od), _dstStride)
     }
 }
 

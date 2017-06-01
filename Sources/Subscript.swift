@@ -126,27 +126,14 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: srcMajorStrides, rStrides: dstMajorStrides)
     
     let blockSize = dstShape.suffix(strDims).prod()
-    let srcStride = Int32(newValue.strides.last ?? 1)
-    let dstStride = Int32(dstStrides.last ?? 1)
-    
-    let _blockSize = Int32(blockSize)
-    let src: UnsafePointer<Float>
-    if srcStride < 0 {
-        src = newValue.startPointer + (blockSize-1)*Int(srcStride)
-    } else {
-        src = newValue.startPointer
-    }
-    array.data.withUnsafeMutablePointer { p in
-        let dst: UnsafeMutablePointer<Float>
-        if dstStride < 0 {
-            dst = p + (array.baseOffset + dstOffset + (blockSize-1)*Int(dstStride))
-        } else {
-            dst = p + (array.baseOffset + dstOffset)
-        }
-        for (os, od) in offsets {
-            let src = src + os
-            let dst = dst + od
-            cblas_scopy(_blockSize, src, srcStride, dst, dstStride)
-        }
+    let srcStride = newValue.strides.last ?? 1
+    let dstStride = dstStrides.last ?? 1
+
+    array.data.withUnsafeMutablePointer {
+        copyElements(src: newValue.startPointer,
+                     srcStride: srcStride,
+                     dst: $0.advanced(by: array.baseOffset + dstOffset),
+                     dstStride: dstStride, blockSize: blockSize,
+                     offsets: offsets)
     }
 }
