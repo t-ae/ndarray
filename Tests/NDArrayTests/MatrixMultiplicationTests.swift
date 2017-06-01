@@ -61,6 +61,14 @@ class MatrixMultiplicationTests: XCTestCase {
             let ans = a |*| b
             XCTAssertEqual(ans, b)
         }
+        do {
+            let a = NDArray([1, 2, 3]).expandDims(1)
+            let b = NDArray([1, 2, 3]).expandDims(0)
+            let ans = a |*| b
+            XCTAssertEqual(ans, NDArray([[1, 2, 3],
+                                         [2, 4, 6],
+                                         [3, 6, 9]]))
+        }
     }
 
 }
