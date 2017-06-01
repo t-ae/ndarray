@@ -63,16 +63,22 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
     var (lhs, rhs) = (lhs, rhs)
     
     // lda >= N
-    if (lhs.strides.last != 1 && lhs.shape.last != 1) || lhs.strides[lhs.ndim-2] < lhs.shape.last! {
+    if needsGather(shape: lhs.shape, strides: lhs.strides) {
         lhs.data = gatherElements(lhs)
         lhs.strides = getContiguousStrides(shape: lhs.shape)
         lhs.baseOffset = 0
     }
+    if lhs.shape[lhs.ndim-2] == 1 {
+        lhs.strides[lhs.ndim-2] = lhs.shape.last!
+    }
     // ldb >= M
-    if (rhs.strides.last != 1 && rhs.shape.last != 1) || rhs.strides[rhs.ndim-2] < rhs.shape.last! {
+    if needsGather(shape: rhs.shape, strides: rhs.strides) {
         rhs.data = gatherElements(rhs)
         rhs.strides = getContiguousStrides(shape: rhs.shape)
         rhs.baseOffset = 0
+    }
+    if rhs.shape[rhs.ndim-2] == 1 {
+        rhs.strides[rhs.ndim-2] = rhs.shape.last!
     }
     
     let d = lhs.shape.count - rhs.shape.count
@@ -99,4 +105,20 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
     }
     
     return (lhs, rhs)
+}
+
+private func needsGather(shape: [Int], strides: [Int]) -> Bool {
+    assert(shape.count == strides.count)
+    assert(shape.count > 1)
+    let ndim = shape.count
+    
+    guard shape[ndim-1] == 1 || strides[ndim-1] == 1 else {
+        return true
+    }
+    
+    guard shape[ndim-2] == 1 || strides[ndim-2] >= shape[ndim-1] else {
+        return true
+    }
+    
+    return false
 }
