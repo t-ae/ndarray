@@ -41,6 +41,17 @@ class TransformationTests: XCTestCase {
                                  [15, 19, 23]]]))
     }
     
+    func testSwapAxes() {
+        let a = NDArray.range(8).reshaped([2, 2, 2])
+        
+        XCTAssertEqual(a.swapAxes(0, 1), NDArray([[[0, 1], [4, 5]],
+                                                  [[2, 3], [6, 7]]]))
+        XCTAssertEqual(a.swapAxes(1, -1), NDArray([[[0, 2], [1, 3]],
+                                                   [[4, 6], [5, 7]]]))
+        XCTAssertEqual(a.swapAxes(0, -1), NDArray([[[0, 4], [2, 6]],
+                                                   [[1, 5], [3, 7]]]))
+    }
+    
     func testReshape() {
         let a = NDArray.range(0..<10)
         XCTAssertEqual(a.reshaped([-1, 5]).shape, [2, 5])

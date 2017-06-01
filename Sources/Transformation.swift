@@ -71,6 +71,17 @@ extension NDArray {
         return x
     }
     
+    /// Interchange two axes of an array.
+    public func swapAxes(_ axis1: Int, _ axis2: Int) -> NDArray {
+        let axis1 = normalizeAxis(axis: axis1, ndim: ndim)
+        let axis2 = normalizeAxis(axis: axis2, ndim: ndim)
+        var axes = Array(0..<ndim)
+        axes[axis1] = axis2
+        axes[axis2] = axis1
+        
+        return transposed(axes)
+    }
+    
     /// Flip axis
     public func flipped(_ axis: Int) -> NDArray {
         
