@@ -5,7 +5,7 @@ import XCTest
 class TransformationTests: XCTestCase {
     
     func testTranspose() {
-        let a = NDArray.range(0..<24).reshaped([2, 3, 4]).transposed()
+        let a = NDArray.range(24).reshaped([2, 3, 4]).transposed()
         
         XCTAssertEqual(a,
                        NDArray([[[ 0, 12], [ 4, 16], [ 8, 20]],
@@ -15,7 +15,7 @@ class TransformationTests: XCTestCase {
     }
     
     func testMoveAxis() {
-        let a = NDArray.range(0..<24).reshaped([2, 3, 4])
+        let a = NDArray.range(24).reshaped([2, 3, 4])
         
         XCTAssertEqual(a.moveAxis(from: 0, to: -1),
                        NDArray([[[ 0, 12], [ 1, 13], [ 2, 14], [ 3, 15]],
@@ -53,7 +53,7 @@ class TransformationTests: XCTestCase {
     }
     
     func testReshape() {
-        let a = NDArray.range(0..<10)
+        let a = NDArray.range(10)
         XCTAssertEqual(a.reshaped([-1, 5]).shape, [2, 5])
         XCTAssertEqual(a.reshaped([2, -1]).shape, [2, 5])
     }

@@ -63,13 +63,13 @@ extension PerformanceTests {
         
         // a = np.arange(10**6, dtype=np.float32).reshape([10]*6)
         // b = a.transpose()
-        // c = a.transpose([1,2,3,4,5,0])
+        // c = a.moveaxes(0, -1)
         // timeit b+c
         
         let shape = [10, 10, 10, 10, 10, 10]
         let a = NDArray.range(shape.reduce(1, *)).reshaped(shape)
         let b = a.transposed()
-        let c = a.transposed([1, 2, 3, 4, 5, 0])
+        let c = a.moveAxis(from: 0, to: -1)
         measure {
             _ = b + c
         }
@@ -219,11 +219,11 @@ extension PerformanceTests {
     
     func testInv2() {
         
-        // a = np.arange(10**5*2*2, dtype=np.float32).reshape([10]*5+[2,2]).transpose([0, 1, 2, 3, 4, 6, 5])
+        // a = np.arange(10**5*2*2, dtype=np.float32).reshape([10]*5+[2,2]).swapaxes(-1, -2)
         // timeit np.linalg.inv(a)
         
         let shape = [10, 10, 10, 10, 10, 2, 2]
-        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).transposed([0, 1, 2, 3, 4, 6, 5])
+        let a = NDArray.range(shape.reduce(1, *)).reshaped(shape).swapAxes(-1, -2)
         measure {
             _ = try! inv(a)
         }

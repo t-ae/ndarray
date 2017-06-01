@@ -49,7 +49,7 @@ class ArithmeticTests: XCTestCase {
         do {
             // scalar + NDArray
             let a: NDArray = NDArray(scalar: 1)
-            let b = NDArray.range(0..<24).reshaped([2, 3, 4])
+            let b = NDArray.range(24).reshaped([2, 3, 4])
             let c = a + b
             XCTAssertEqual(c, NDArray([[[ 1,  2,  3,  4],
                                         [ 5,  6,  7,  8],
@@ -67,8 +67,8 @@ class ArithmeticTests: XCTestCase {
         }
         do {
             // broadcast
-            let a = NDArray.range(0..<8).reshaped([2, 2, 2])
-            let b = NDArray.range(0..<4).reshaped([2, 2])
+            let a = NDArray.range(8).reshaped([2, 2, 2])
+            let b = NDArray.range(4).reshaped([2, 2])
             
             XCTAssertEqual(a+b, NDArray([[[0,  2],
                                           [4,  6]],
