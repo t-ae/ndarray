@@ -115,16 +115,16 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
     let newShape = arg.shape.removing(at: axis)
     let volume = newShape.prod()
     
-    var dst1 = NDArrayData<Float>(size: volume)
-    var dst2 = NDArrayData<Float>(size: volume)
+    var dstMean = NDArrayData<Float>(size: volume)
+    var dstVar = NDArrayData<Float>(size: volume)
     
     let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
     let src = arg.startPointer
-    dst1.withUnsafeMutablePointer { d1 in
-        dst2.withUnsafeMutablePointer { d2 in
+    dstMean.withUnsafeMutablePointer { d1 in
+        dstVar.withUnsafeMutablePointer { d2 in
             var dst1Ptr = d1
             var dst2Ptr = d2
             for offset in offsets {
@@ -143,11 +143,6 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
         }
     }
     
-    let mean = NDArray(shape: newShape, elements: dst1)
-    
-    
-    
-    let variance =  NDArray(shape: newShape, elements: dst2)
-    
-    return (mean, variance)
+    return (mean: NDArray(shape: newShape, elements: dstMean),
+            variance: NDArray(shape: newShape, elements: dstVar))
 }

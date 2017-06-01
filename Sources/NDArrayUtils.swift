@@ -175,19 +175,23 @@ func copyElements(src: UnsafePointer<Float>,
                   dstStride: Int,
                   blockSize: Int,
                   offsets: BinaryOffsetSequence) {
-    var srcPtr = src
+    var src = src
     if srcStride < 0 {
-        srcPtr += (blockSize-1) * srcStride
+        src += (blockSize-1) * srcStride
     }
-    var dstPtr = dst
+    var dst = dst
     if dstStride < 0 {
-        dstPtr += (blockSize-1) * dstStride
+        dst += (blockSize-1) * dstStride
     }
     let _blockSize = Int32(blockSize)
     let _srcStride = Int32(srcStride)
     let _dstStride = Int32(dstStride)
     for (os, od) in offsets {
-        cblas_scopy(_blockSize, srcPtr.advanced(by: os), _srcStride, dstPtr.advanced(by: od), _dstStride)
+        cblas_scopy(_blockSize,
+                    src + os,
+                    _srcStride,
+                    dst + od,
+                    _dstStride)
     }
 }
 
