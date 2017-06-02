@@ -19,6 +19,41 @@ class LinearAlgebraTests: XCTestCase {
         }
     }
     
+    func testDeterminant() {
+        do {
+            let a = NDArray([[1, 2],
+                             [3, 4]])
+            let ans = try! determinant(a)
+            XCTAssertEqual(ans, NDArray(scalar: -2))
+        }
+        do {
+            let a = NDArray([[0, 2, 1],
+                             [1, 2, 0],
+                             [0, 0, 1]])
+            let ans = try! determinant(a)
+            XCTAssertEqual(ans, NDArray(scalar: -2))
+        }
+        do {
+            let a = NDArray([[4, 1, 0, 0, 2],
+                             [2, 2, 0, 4, 2],
+                             [0, 3, 3, 1, 1],
+                             [4, 2, 3, 1, 1],
+                             [2, 4, 4, 0, 4]])
+            let ans = try! determinant(a)
+            XCTAssertEqual(ans, NDArray(scalar: 192))
+        }
+        do {
+            let a = NDArray([[[1, 2],
+                              [3, 4]],
+                             [[1, 2],
+                              [2, 1]],
+                             [[1, 3],
+                              [3, 1]]])
+            let ans = try! determinant(a)
+            XCTAssertEqual(ans, NDArray([-2, -3, -8]))
+        }
+    }
+    
     func testInvert() {
         do {
             let a = NDArray([[1, 0], [0, 1]])
