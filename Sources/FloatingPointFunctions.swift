@@ -21,6 +21,10 @@ public func sqrt(_ arg: NDArray) -> NDArray {
     return apply(arg, vvsqrtf)
 }
 
+public func cbrt(_ arg: NDArray) -> NDArray {
+    return apply(arg, vvcbrtf)
+}
+
 public func log(_ arg: NDArray) -> NDArray {
     return apply(arg, vvlogf)
 }
@@ -76,3 +80,16 @@ public func cosh(_ arg: NDArray) -> NDArray {
 public func tanh(_ arg: NDArray) -> NDArray {
     return apply(arg, vvtanhf)
 }
+
+public func asinh(_ arg: NDArray) -> NDArray {
+    return apply(arg, vvasinhf)
+}
+
+public func acosh(_ arg: NDArray) -> NDArray {
+    return apply(arg, vvacoshf)
+}
+
+public func atanh(_ arg: NDArray) -> NDArray {
+    return apply(arg, vvatanhf)
+}
+
