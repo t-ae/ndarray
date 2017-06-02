@@ -1,7 +1,7 @@
 
 import Accelerate
 
-/// Sort 1 dimensional NDArray.
+/// Sort elements along specified axis.
 public func sort(_ arg: NDArray, along axis: Int = -1, ascending: Bool = true) -> NDArray {
     
     let axis = normalizeAxis(axis: axis, ndim: arg.ndim)
