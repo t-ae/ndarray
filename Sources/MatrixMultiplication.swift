@@ -68,7 +68,7 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
         lhs.strides = getContiguousStrides(shape: lhs.shape)
         lhs.baseOffset = 0
     }
-    if lhs.shape[lhs.ndim-2] == 1 {
+    if lhs.shape[lhs.ndim-2] == 1 { // set appropriate lda
         lhs.strides[lhs.ndim-2] = lhs.shape.last!
     }
     // ldb >= M
@@ -77,7 +77,7 @@ private func matmulBroadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArra
         rhs.strides = getContiguousStrides(shape: rhs.shape)
         rhs.baseOffset = 0
     }
-    if rhs.shape[rhs.ndim-2] == 1 {
+    if rhs.shape[rhs.ndim-2] == 1 { // set appropriate ldb
         rhs.strides[rhs.ndim-2] = rhs.shape.last!
     }
     
