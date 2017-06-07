@@ -72,7 +72,7 @@ class IrisClassificationTests: XCTestCase {
             let d_out_W2 = d_h2_1_W2.expandDims(-1)
                 |*| d_out_h2_1.expandDims(1) // [90, 5, 3]
             let d_out_h1 = (d_h2_1_h1 |*| d_out_h2_1.expandDims(-1))
-                .squeeze()                              // [90, 5]
+                .squeezed()                             // [90, 5]
             let d_out_h1_2 = d_h1_h1_2 * d_out_h1       // [90, 5]
             let d_out_b1 = d_out_h1_2 * d_h1_2_b1       // [90, 5]
             let d_out_h1_1 = d_h1_2_h1_1 * d_out_h1_2   // [90, 5]
