@@ -53,15 +53,15 @@ class IrisClassificationTests: XCTestCase {
             // back propagation
             let d_out_h2 = out - y  // [90, 3]
             
-            let d_h2_b2 = NDArray.ones(b2.shape)        // [90, 3]
+            let d_h2_b2 = NDArray.ones(b2.shape)        // [3]
             let d_h2_h2_1 = NDArray.ones(h2_1.shape)    // [90, 3]
             
             let d_h2_1_W2 = h1 // [90, 5]
-            let d_h2_1_h1 = W2 // [90, 5, 3]
+            let d_h2_1_h1 = W2 // [5, 3]
             
             let d_h1_h1_2 = d_relu(h1_2) // [90, 5]
             
-            let d_h1_2_b1 = NDArray.ones(b1.shape)      // [90, 5]
+            let d_h1_2_b1 = NDArray.ones(b1.shape)      // [5]
             let d_h1_2_h1_1 = NDArray.ones(h1_1.shape)  // [90, 5]
             
             let d_h1_1_W1 = x // [90, 4]
