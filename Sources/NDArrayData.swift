@@ -25,8 +25,10 @@ struct NDArrayData<T>: Collection {
             return
         }
         buffer = ManagedBuffer.create(minimumCapacity: count) { buf in
-            buf.withUnsafeMutablePointerToElements { dst in
-                dst.initialize(from: pointer, count: count)
+            withUnsafePointer { pointer in
+                buf.withUnsafeMutablePointerToElements { dst in
+                    dst.initialize(from: pointer, count: count)
+                }
             }
             return count
         }
@@ -56,11 +58,20 @@ struct NDArrayData<T>: Collection {
     subscript(range: CountableRange<Int>) -> NDArrayData<T> {
         assert(range.startIndex >= 0 && range.endIndex <= count)
         let new = NDArrayData(size: range.count)
-        let src = pointer + range.startIndex
-        new.buffer.withUnsafeMutablePointerToElements { buf in
-            buf.initialize(from: src, count: range.count)
+        withUnsafePointer { pointer in
+            let src = pointer + range.startIndex
+            new.buffer.withUnsafeMutablePointerToElements { buf in
+                buf.initialize(from: src, count: range.count)
+            }
         }
+        
         return new
+    }
+    
+    func withUnsafePointer<R>(_ body: (UnsafePointer<T>) throws -> R) rethrows -> R {
+        return try buffer.withUnsafeMutablePointerToElements {
+            try body(UnsafePointer($0))
+        }
     }
     
     mutating func withUnsafeMutablePointer<R>(_ body: (UnsafeMutablePointer<T>) throws -> R) rethrows -> R {
@@ -68,11 +79,7 @@ struct NDArrayData<T>: Collection {
         return try buffer.withUnsafeMutablePointerToElements(body)
     }
     
-    var pointer: UnsafePointer<T> {
-        return buffer.withUnsafeMutablePointerToElements { UnsafePointer($0) }
-    }
-    
     func asArray() -> [T] {
-        return [T](UnsafeBufferPointer(start: pointer, count: count))
+        return withUnsafePointer { [T](UnsafeBufferPointer(start: $0, count: count)) }
     }
 }

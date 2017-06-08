@@ -72,16 +72,20 @@ extension NDArray: Equatable {
         let lhs = gatherElements(lhs)
         let rhs = gatherElements(rhs)
         
-        var lp = lhs.pointer
-        var rp = rhs.pointer
-        for _ in 0..<lhs.count {
-            guard lp.pointee == rp.pointee else {
-                return false
+        return lhs.withUnsafePointer { lp in
+            rhs.withUnsafePointer { rp in
+                var lp = lp
+                var rp = rp
+                for _ in 0..<lhs.count {
+                    guard lp.pointee == rp.pointee else {
+                        return false
+                    }
+                    lp += 1
+                    rp += 1
+                }
+                return true
             }
-            lp += 1
-            rp += 1
         }
-        return true
     }
 }
 

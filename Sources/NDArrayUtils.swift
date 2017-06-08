@@ -152,16 +152,18 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
         let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
         
         var dst = NDArrayData<Float>(size: volume)
-
-        dst.withUnsafeMutablePointer {
-            copyElements(src: arg.startPointer,
-                         srcStride: arg.strides[axis],
-                         dst: $0,
-                         dstStride: dstStrides[axis],
-                         blockSize: arg.shape[axis-dims+1...axis].prod(),
-                         offsets: BinaryOffsetSequence(shape: outerShape,
-                                                       lStrides: outerStrides,
-                                                       rStrides: dstOuterStrides))
+        
+        arg.withUnsafePointer { p in
+            dst.withUnsafeMutablePointer {
+                copyElements(src: p,
+                             srcStride: arg.strides[axis],
+                             dst: $0,
+                             dstStride: dstStrides[axis],
+                             blockSize: arg.shape[axis-dims+1...axis].prod(),
+                             offsets: BinaryOffsetSequence(shape: outerShape,
+                                                           lStrides: outerStrides,
+                                                           rStrides: dstOuterStrides))
+            }
         }
         
         return dst
@@ -226,9 +228,27 @@ func normalizeAxis(axis: Int, ndim: Int) -> Int {
 }
 
 extension NDArray {
-    var startPointer: UnsafePointer<Float> {
-        return data.pointer + baseOffset
+    func withUnsafePointer<R>(_ body: (UnsafePointer<Float>) throws -> R) rethrows -> R{
+        return try data.withUnsafePointer {
+            try body($0 + baseOffset)
+            
+        }
     }
+}
+
+func withUnsafePointers<R>(_ list: [NDArrayData<Float>], _ body: @escaping ([UnsafePointer<Float>])->R) -> R {
+    
+    func process(_ list: [NDArrayData<Float>], _ ptrs: [UnsafePointer<Float>]) -> R{
+        if list.isEmpty {
+            return body(ptrs)
+        } else {
+            return list.first!.withUnsafePointer { p in
+                process(Array(list.dropFirst()), ptrs + [p])
+            }
+        }
+    }
+    
+    return process(list, [])
 }
 
 extension Array {

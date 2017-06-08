@@ -8,13 +8,13 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
         let count = zip(arg.shape, arg.strides).flatMap { $1 != 0 ? $0 : nil }.prod()
         
-        let src = arg.startPointer
-        
         var dst = NDArrayData<Float>(size: count)
         
         var _count = Int32(count)
-        dst.withUnsafeMutablePointer {
-            vvfunc($0, src, &_count)
+        arg.withUnsafePointer { src in
+            dst.withUnsafeMutablePointer {
+                vvfunc($0, src, &_count)
+            }
         }
         
         return NDArray(shape: arg.shape,
@@ -34,14 +34,15 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         let offsets = OffsetSequence(shape: majorShape, strides: majorStrides)
         var _blockSize = Int32(blockSize)
         
-        let src = arg.startPointer
-        dst.withUnsafeMutablePointer { dst in
-            var dst = dst
-            for offset in offsets {
-                let src = src + offset
-                
-                vvfunc(dst, src, &_blockSize)
-                dst += blockSize
+        arg.withUnsafePointer { src in
+            dst.withUnsafeMutablePointer { dst in
+                var dst = dst
+                for offset in offsets {
+                    let src = src + offset
+                    
+                    vvfunc(dst, src, &_blockSize)
+                    dst += blockSize
+                }
             }
         }
         
@@ -81,13 +82,15 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         
         var dst = NDArrayData<Float>(size: volume)
         
-        let lSrc = lhs.startPointer
-        let rSrc = rhs.startPointer
-        dst.withUnsafeMutablePointer { dst in
-            var dst = dst
-            for (lo, ro) in offsets {
-                vvfunc(dst, lSrc + lo, rSrc + ro, &_blockSize)
-                dst += blockSize
+        lhs.withUnsafePointer { lp in
+            rhs.withUnsafePointer { rp in
+                dst.withUnsafeMutablePointer { dst in
+                    var dst = dst
+                    for (lo, ro) in offsets {
+                        vvfunc(dst, lp + lo, rp + ro, &_blockSize)
+                        dst += blockSize
+                    }
+                }
             }
         }
         
@@ -98,8 +101,10 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         var lElements = gatherElements(lhs)
         let rElements = gatherElements(rhs)
         
-        lElements.withUnsafeMutablePointer {
-            vvfunc($0, $0, rElements.pointer, &_volume)
+        lElements.withUnsafeMutablePointer { lp in
+            rElements.withUnsafePointer { rp in
+                vvfunc(lp, lp, rp, &_volume)
+            }
         }
         
         return NDArray(shape: lhs.shape, elements: lElements)

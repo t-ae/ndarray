@@ -27,7 +27,9 @@ public func moments(_ arg: NDArray) -> (mean: NDArray, variance: NDArray) {
     let elements = gatherElements(arg)
     var sum: Float = 0
     var sum2: Float = 0
-    vDSP_sve_svesq(elements.pointer, 1, &sum, &sum2, vDSP_Length(elements.count))
+    elements.withUnsafePointer {
+        vDSP_sve_svesq($0, 1, &sum, &sum2, vDSP_Length(elements.count))
+    }
     let mean = sum / Float(elements.count)
     let mean2 = sum2 / Float(elements.count)
     return (NDArray(scalar: mean), NDArray(scalar: mean2 - mean*mean))
@@ -122,24 +124,25 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
-    let src = arg.startPointer
-    dstMean.withUnsafeMutablePointer { d1 in
-        dstVar.withUnsafeMutablePointer { d2 in
-            var dst1Ptr = d1
-            var dst2Ptr = d2
-            for offset in offsets {
-                let src = src + offset
-                vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
-                dst1Ptr += 1
-                dst2Ptr += 1
+    arg.withUnsafePointer { src in
+        dstMean.withUnsafeMutablePointer { d1 in
+            dstVar.withUnsafeMutablePointer { d2 in
+                var dst1Ptr = d1
+                var dst2Ptr = d2
+                for offset in offsets {
+                    let src = src + offset
+                    vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
+                    dst1Ptr += 1
+                    dst2Ptr += 1
+                }
+                var _count = Float(count)
+                let _volume = vDSP_Length(volume)
+                vDSP_vsdiv(d1, 1, &_count, d1, 1, _volume)
+                
+                vDSP_vsdiv(d2, 1, &_count, d2, 1, _volume)
+                vDSP_vsq(d1, 1, d1, 1, _volume)
+                vDSP_vsub(d1, 1, d2, 1, d2, 1, _volume)
             }
-            var _count = Float(count)
-            let _volume = vDSP_Length(volume)
-            vDSP_vsdiv(d1, 1, &_count, d1, 1, _volume)
-            
-            vDSP_vsdiv(d2, 1, &_count, d2, 1, _volume)
-            vDSP_vsq(d1, 1, d1, 1, _volume)
-            vDSP_vsub(d1, 1, d2, 1, d2, 1, _volume)
         }
     }
     
