@@ -30,6 +30,8 @@ public func determinant(_ arg: NDArray) throws -> NDArray {
     defer { pivots.deallocate(capacity: size) }
     
     var N = __CLPK_integer(size)
+    let _N = UnsafeMutablePointer(&N)
+    
     var error: __CLPK_integer = 0
     
     var out = NDArrayData<Float>(size: numMatrices)
@@ -40,7 +42,7 @@ public func determinant(_ arg: NDArray) throws -> NDArray {
             var dst = dst
             for _ in 0..<numMatrices {
                 // LU decomposition
-                sgetrf_(&N, &N, ptr, &N, pivots, &error)
+                sgetrf_(_N, _N, ptr, _N, pivots, &error)
                 if error < 0 {
                     throw NDArrayLUDecompError.IrregalValue
                 } else if error > 0 {
@@ -82,6 +84,7 @@ public func inv(_ arg: NDArray) throws -> NDArray {
     let numMatrices = volume / (size*size)
     
     var N = __CLPK_integer(size)
+    let _N = UnsafeMutablePointer(&N)
     var pivots = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: size)
     var workspace = UnsafeMutablePointer<__CLPK_real>.allocate(capacity: size)
     var error: __CLPK_integer = 0
@@ -95,14 +98,14 @@ public func inv(_ arg: NDArray) throws -> NDArray {
         var ptr = ptr
         for _ in 0..<numMatrices {
             
-            sgetrf_(&N, &N, ptr, &N, pivots, &error)
+            sgetrf_(_N, _N, ptr, _N, pivots, &error)
             if error < 0 {
                 throw NDArrayLUDecompError.IrregalValue
             } else if error > 0 {
                 throw NDArrayLUDecompError.SingularMatrix
             }
             
-            sgetri_(&N, ptr, &N, pivots, workspace, &N, &error)
+            sgetri_(_N, ptr, _N, pivots, workspace, _N, &error)
             if error < 0 {
                 throw NDArrayInvError.IrregalValue
             } else if error > 0 {
