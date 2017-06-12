@@ -174,5 +174,43 @@ class AcceleratePerformanceTests: XCTestCase {
             vDSP_vsadd(a, 1, b, &ans, 1, vDSP_Length(count))
         }
     }
+    
+    func testParallel1() {
+        let count = 1000000
+        let a = [Float](repeating: 0, count: count*8)
+        let b = [Float](repeating: 0, count: count*8)
+        let ans = [Float](repeating: 0, count: count*8)
+        measure {
+            DispatchQueue.concurrentPerform(iterations: count) { i in
+                let ap = UnsafePointer(a).advanced(by: 8*i)
+                let bp = UnsafePointer(b).advanced(by: 8*i)
+                let ansp = UnsafeMutablePointer(mutating: ans).advanced(by: 8*i)
+                
+                vDSP_vadd(ap, 1, bp, 1, ansp, 1, 8)
+            }
+        }
+    }
+    
+    func testParallel2() {
+        let count = 1000000
+        let a = [Float](repeating: 0, count: count*8)
+        let b = [Float](repeating: 0, count: count*8)
+        let ans = [Float](repeating: 0, count: count*8)
+        measure {
+            DispatchQueue.concurrentPerform(iterations: 10) { i in
+                var ap = UnsafePointer(a).advanced(by: 8*i*count/10)
+                var bp = UnsafePointer(b).advanced(by: 8*i*count/10)
+                var ansp = UnsafeMutablePointer(mutating: ans).advanced(by: 8*i*count/10)
+                for _ in 0..<count/10 {
+                    vDSP_vadd(ap, 1, bp, 1, ansp, 1, 8)
+                    ap += 8
+                    bp += 8
+                    ansp += 8
+                }
+                
+                vDSP_vadd(ap, 1, bp, 1, ansp, 1, 8)
+            }
+        }
+    }
 }
 #endif
