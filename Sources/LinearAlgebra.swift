@@ -119,6 +119,10 @@ public func inv(_ arg: NDArray) throws -> NDArray {
     return NDArray(shape: arg.shape, elements: elements)
 }
 
+/// Calculate singular value decomposition.
+///
+/// If argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two dimensions.
+/// `U` and `VT` are stack of matrices, and S is stack of vectors.
 public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) {
     precondition(arg.ndim > 1, "NDArray has shorter ndim(\(arg.ndim)) than 2.")
     let m = arg.shape[arg.ndim-2]
