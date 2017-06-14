@@ -119,6 +119,77 @@ public func inv(_ arg: NDArray) throws -> NDArray {
     return NDArray(shape: arg.shape, elements: elements)
 }
 
+public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) {
+    precondition(arg.ndim > 1, "NDArray has shorter ndim(\(arg.ndim)) than 2.")
+    let m = arg.shape[arg.ndim-2]
+    let n = arg.shape[arg.ndim-1]
+    
+    var elements = gatherElements(arg.swapAxes(-1, -2))
+    let outerShape = [Int](arg.shape.dropLast(2))
+    let outerVolume = outerShape.prod()
+    
+    var jobz = Int8(UnicodeScalar("A")!.value)
+    var _m = __CLPK_integer(m)
+    let mp = UnsafeMutablePointer(&_m)
+    var _n = __CLPK_integer(n)
+    let np = UnsafeMutablePointer(&_n)
+    let minMN = min(m, n)
+    let lwork = 3*minMN*minMN + max(max(m, n), 4*minMN*minMN + 4*minMN)
+    let work = UnsafeMutablePointer<Float>.allocate(capacity: lwork)
+    var _lwork = __CLPK_integer(lwork)
+    let iwork = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: 8*minMN)
+    var info: __CLPK_integer = 0
+    defer {
+        work.deallocate(capacity: lwork)
+        iwork.deallocate(capacity: 8*minMN)
+    }
+    
+    var u = NDArrayData<Float>(size: outerVolume * m * m)
+    var s = NDArrayData<Float>(size: outerVolume * minMN)
+    var vt = NDArrayData<Float>(size: outerVolume * n * n)
+    
+    try elements.withUnsafeMutablePointer { ep in
+        try u.withUnsafeMutablePointer { u in
+            try s.withUnsafeMutablePointer { s in
+                try vt.withUnsafeMutablePointer { vt in
+                    var ep = ep
+                    var u = u
+                    var s = s
+                    var vt = vt
+                    
+                    for _ in 0..<outerVolume {
+                        sgesdd_(&jobz,
+                                mp, np,
+                                ep, mp,
+                                s,
+                                u, mp,
+                                vt, np,
+                                work,
+                                &_lwork,
+                                iwork,
+                                &info)
+                        
+                        if info < 0 {
+                            throw NDArraySVDError.IrregalValue
+                        } else if info > 0 {
+                            throw NDArraySVDError.NotConverge
+                        }
+                        
+                        ep += m*n
+                        u += m*m
+                        s += minMN
+                        vt += n*n
+                    }
+                }
+            }
+        }
+    }
+    
+    return (U: NDArray(shape:outerShape + [m, m], elements: u).swapAxes(-1, -2),
+            S: NDArray(shape: outerShape + [minMN], elements: s),
+            VT: NDArray(shape: outerShape + [n, n], elements: vt).swapAxes(-1, -2))
+}
+
 public enum NDArrayLUDecompError: Error {
     case IrregalValue
     case SingularMatrix
@@ -127,4 +198,9 @@ public enum NDArrayLUDecompError: Error {
 public enum NDArrayInvError: Error {
     case IrregalValue
     case SingularMatrix
+}
+
+public enum NDArraySVDError: Error {
+    case IrregalValue
+    case NotConverge
 }

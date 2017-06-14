@@ -81,5 +81,32 @@ class LinearAlgebraTests: XCTestCase {
                                        accuracy: 1e-5)
         }
     }
+    
+    func testSVD() {
+        do {
+            let a = NDArray.range(1..<9).reshaped([4, 2])
+            let (u, s, vt) = try! svd(a)
+            var S = NDArray.zeros([4, 2])
+            S[0..<2, 0..<2] = NDArray.diagonal(s)
+            let ans = u |*| S |*| vt
+            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+        }
+        do {
+            let a = NDArray.range(12).reshaped([4, 3])
+            let (u, s, vt) = try! svd(a)
+            var S = NDArray.zeros([4, 3])
+            S[0..<3, 0..<3] = NDArray.diagonal(s)
+            let ans = u |*| S |*| vt
+            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+        }
+        do {
+            let a = NDArray.range(3*4*5).reshaped([3, 4, 5])
+            let (u, s, vt) = try! svd(a)
+            var S = NDArray.zeros([3, 4, 5])
+            S[nil, 0..<4, 0..<4] = NDArray.diagonal(s)
+            let ans = u |*| S |*| vt
+            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-3)
+        }
+    }
 
 }
