@@ -126,6 +126,14 @@ class LinearAlgebraTests: XCTestCase {
                                                 [ 2,  0, -1]]),
                                        accuracy: 1e-5)
         }
+        do {
+            let a = NDArray.range(3*4).reshaped([3, 4])
+            let apinv = try! pinv(a)
+            print(apinv)
+            XCTAssertEqualWithAccuracy(a,
+                                       a |*| apinv |*| a,
+                                       accuracy: 1e-5)
+        }
     }
 
 }

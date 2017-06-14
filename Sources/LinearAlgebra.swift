@@ -194,20 +194,23 @@ public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) 
             VT: NDArray(shape: outerShape + [n, n], elements: vt).swapAxes(-1, -2))
 }
 
-public func pinv(_ arg: NDArray) throws -> NDArray {
+/// Calculate pseudo inverse of matrices.
+///
+/// If argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two dimensions.
+public func pinv(_ arg: NDArray, rcond: Float = 1e-15) throws -> NDArray {
     precondition(arg.ndim > 1, "NDArray has shorter ndim(\(arg.ndim)) than 2.")
     let m = arg.shape[arg.ndim-2]
     let n = arg.shape[arg.ndim-1]
     let outerShape = [Int](arg.shape.dropLast(2))
     
     let (u, s, vt) = try svd(arg)
-    var S = NDArray.zeros(outerShape + [m, n])
+    var S_ = NDArray.zeros(outerShape + [n, m])
     
-    setSubarray(array: &S,
+    setSubarray(array: &S_,
                 indices: [NDArrayIndexElement?](repeating: nil, count: outerShape.count) + [..<min(m, n), ..<min(m, n)],
                 newValue: NDArray.diagonal(1/s))
     
-    return vt.swapAxes(-1, -2) |*| S |*| u.swapAxes(-1, -2)
+    return vt.swapAxes(-1, -2) |*| S_ |*| u.swapAxes(-1, -2)
 }
 
 public enum NDArrayLUDecompError: Error {
