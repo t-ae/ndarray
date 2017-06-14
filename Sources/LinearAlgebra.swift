@@ -194,6 +194,22 @@ public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) 
             VT: NDArray(shape: outerShape + [n, n], elements: vt).swapAxes(-1, -2))
 }
 
+public func pinv(_ arg: NDArray) throws -> NDArray {
+    precondition(arg.ndim > 1, "NDArray has shorter ndim(\(arg.ndim)) than 2.")
+    let m = arg.shape[arg.ndim-2]
+    let n = arg.shape[arg.ndim-1]
+    let outerShape = [Int](arg.shape.dropLast(2))
+    
+    let (u, s, vt) = try svd(arg)
+    var S = NDArray.zeros(outerShape + [m, n])
+    
+    setSubarray(array: &S,
+                indices: [NDArrayIndexElement?](repeating: nil, count: outerShape.count) + [..<min(m, n), ..<min(m, n)],
+                newValue: NDArray.diagonal(1/s))
+    
+    return vt.swapAxes(-1, -2) |*| S |*| u.swapAxes(-1, -2)
+}
+
 public enum NDArrayLUDecompError: Error {
     case IrregalValue
     case SingularMatrix

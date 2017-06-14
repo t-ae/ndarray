@@ -108,5 +108,24 @@ class LinearAlgebraTests: XCTestCase {
             XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-3)
         }
     }
+    
+    func testPinv() {
+        do {
+            let a = NDArray([[1, 0], [0, 1]])
+            XCTAssertEqualWithAccuracy(try! pinv(a), a, accuracy: 1e-3)
+            let b = NDArray.stack([a, a, a])
+            XCTAssertEqualWithAccuracy(try! pinv(b), b, accuracy: 1e-3)
+        }
+        do {
+            let a = NDArray([[1, 2, 3],
+                             [1, 3, 5],
+                             [2, 4, 5]])
+            XCTAssertEqualWithAccuracy(try! pinv(a),
+                                       NDArray([[ 5, -2, -1],
+                                                [-5,  1,  2],
+                                                [ 2,  0, -1]]),
+                                       accuracy: 1e-5)
+        }
+    }
 
 }
