@@ -107,14 +107,31 @@ class LinearAlgebraTests: XCTestCase {
             let ans = u |*| S |*| vt
             XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-3)
         }
+        do {
+            let a = NDArray.range(1..<9).reshaped([4, 2])
+            let (u, s, vt) = try! svd(a, fullMatrices: false)
+            let ans = u |*| (s.expandDims(-1) * vt)
+            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+        }
+        do {
+            let a = NDArray.range(1..<9).reshaped([2, 4])
+            let (u, s, vt) = try! svd(a, fullMatrices: false)
+            let ans = u |*| (s.expandDims(-1) * vt)
+            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+        }
+        do {
+            let a = NDArray.range(12).reshaped([3, 4])
+            let (u, s, vt) = try! svd(a, fullMatrices: false)
+            let ans = u |*| (s.expandDims(-1) * vt)
+            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+        }
     }
     
     func testPinv() {
         do {
-            let a = NDArray([[1, 0], [0, 1]])
+            let a = NDArray([[1, 0],
+                             [0, 1]])
             XCTAssertEqualWithAccuracy(try! pinv(a), a, accuracy: 1e-3)
-            let b = NDArray.stack([a, a, a])
-            XCTAssertEqualWithAccuracy(try! pinv(b), b, accuracy: 1e-3)
         }
         do {
             let a = NDArray([[1, 2, 3],
@@ -129,7 +146,15 @@ class LinearAlgebraTests: XCTestCase {
         do {
             let a = NDArray.range(3*4).reshaped([3, 4])
             let apinv = try! pinv(a)
-            print(apinv)
+            print(a |*| apinv |*| a)
+            XCTAssertEqualWithAccuracy(a,
+                                       a |*| apinv |*| a,
+                                       accuracy: 1e-5)
+        }
+        do {
+            let a = NDArray.range(3*4).reshaped([4, 3])
+            let apinv = try! pinv(a)
+            print(a |*| apinv |*| a)
             XCTAssertEqualWithAccuracy(a,
                                        a |*| apinv |*| a,
                                        accuracy: 1e-5)

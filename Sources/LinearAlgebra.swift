@@ -123,16 +123,15 @@ public func inv(_ arg: NDArray) throws -> NDArray {
 ///
 /// If argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two dimensions.
 /// `U` and `VT` are stack of matrices, and S is stack of vectors.
-public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) {
+public func svd(_ arg: NDArray, fullMatrices: Bool = true) throws -> (U: NDArray, S: NDArray, VT: NDArray) {
     precondition(arg.ndim > 1, "NDArray has shorter ndim(\(arg.ndim)) than 2.")
     let m = arg.shape[arg.ndim-2]
     let n = arg.shape[arg.ndim-1]
     
-    var elements = gatherElements(arg.swapAxes(-1, -2))
+    var elements = gatherElements(arg.swapAxes(-1, -2)) // col major
     let outerShape = [Int](arg.shape.dropLast(2))
     let outerVolume = outerShape.prod()
     
-    var jobz = Int8(UnicodeScalar("A")!.value)
     var _m = __CLPK_integer(m)
     let mp = UnsafeMutablePointer(&_m)
     var _n = __CLPK_integer(n)
@@ -148,9 +147,30 @@ public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) 
         iwork.deallocate(capacity: 8*minMN)
     }
     
-    var u = NDArrayData<Float>(size: outerVolume * m * m)
+    var jobz: Int8
+    var u: NDArrayData<Float>
     var s = NDArrayData<Float>(size: outerVolume * minMN)
-    var vt = NDArrayData<Float>(size: outerVolume * n * n)
+    var vt: NDArrayData<Float>
+    let ucols: Int
+    let vtrows: Int
+    var ldvt: __CLPK_integer
+    
+    if fullMatrices {
+        jobz = Int8(UnicodeScalar("A")!.value)
+        u = NDArrayData<Float>(size: outerVolume * m * m)
+        vt = NDArrayData<Float>(size: outerVolume * n * n)
+        ucols = m
+        vtrows = n
+        ldvt = __CLPK_integer(n)
+    } else {
+        jobz = Int8(UnicodeScalar("S")!.value)
+        u = NDArrayData<Float>(size: outerVolume * minMN * m)
+        vt = NDArrayData<Float>(size: outerVolume * minMN * n)
+         vt = NDArrayData<Float>(value: 0, count: outerVolume * minMN * n)
+        ucols = minMN
+        vtrows = minMN
+        ldvt = __CLPK_integer(minMN)
+    }
     
     try elements.withUnsafeMutablePointer { ep in
         try u.withUnsafeMutablePointer { u in
@@ -167,7 +187,7 @@ public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) 
                                 ep, mp,
                                 s,
                                 u, mp,
-                                vt, np,
+                                vt, &ldvt,
                                 work,
                                 &_lwork,
                                 iwork,
@@ -180,37 +200,37 @@ public func svd(_ arg: NDArray) throws -> (U: NDArray, S: NDArray, VT: NDArray) 
                         }
                         
                         ep += m*n
-                        u += m*m
+                        u += m*ucols
                         s += minMN
-                        vt += n*n
+                        vt += vtrows*n
                     }
                 }
             }
         }
     }
     
-    return (U: NDArray(shape:outerShape + [m, m], elements: u).swapAxes(-1, -2),
+    return (U: NDArray(shape:outerShape + [ucols, m], elements: u).swapAxes(-1, -2),
             S: NDArray(shape: outerShape + [minMN], elements: s),
-            VT: NDArray(shape: outerShape + [n, n], elements: vt).swapAxes(-1, -2))
+            VT: NDArray(shape: outerShape + [n, vtrows], elements: vt).swapAxes(-1, -2))
 }
 
-/// Calculate pseudo inverse of matrices.
-///
-/// If argument is N-D, N > 2, it is treated as a stack of matrices residing in the last two dimensions.
-public func pinv(_ arg: NDArray, rcond: Float = 1e-15) throws -> NDArray {
-    precondition(arg.ndim > 1, "NDArray has shorter ndim(\(arg.ndim)) than 2.")
-    let m = arg.shape[arg.ndim-2]
-    let n = arg.shape[arg.ndim-1]
-    let outerShape = [Int](arg.shape.dropLast(2))
+/// Calculate pseudo inverse of matrix.
+public func pinv(_ arg: NDArray, rcond: Float = 1e-5) throws -> NDArray {
+    precondition(arg.ndim == 2, "NDArray has must be matrix.")
+
+    var (u, s, vt) = try svd(arg, fullMatrices: false)
     
-    let (u, s, vt) = try svd(arg)
-    var S_ = NDArray.zeros(outerShape + [n, m])
+    let cutoff = rcond*max(s, along: -1).asScalar()
     
-    setSubarray(array: &S_,
-                indices: [NDArrayIndexElement?](repeating: nil, count: outerShape.count) + [..<min(m, n), ..<min(m, n)],
-                newValue: NDArray.diagonal(1/s))
+    for i in 0..<s.shape[0] {
+        if s[i].asScalar() > cutoff {
+            s[i] = 1/s[i]
+        } else {
+            s[i] = NDArray(scalar: 0)
+        }
+    }
     
-    return vt.swapAxes(-1, -2) |*| S_ |*| u.swapAxes(-1, -2)
+    return vt.swapAxes(-1, -2) |*| (s.expandDims(-1) * u.swapAxes(-1, -2))
 }
 
 public enum NDArrayLUDecompError: Error {
