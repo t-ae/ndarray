@@ -157,6 +157,13 @@ class LinearAlgebraTests: XCTestCase {
                                        a |*| apinv |*| a,
                                        accuracy: 1e-5)
         }
+        do {
+            let a = NDArray.range(10*20).reshaped([10, 20])
+            let apinv = try! pinv(a)
+            XCTAssertEqualWithAccuracy(a,
+                                       a |*| apinv |*| a,
+                                       accuracy: 1e-3)
+        }
     }
 
 }
