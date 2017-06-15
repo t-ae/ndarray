@@ -29,10 +29,10 @@ public func determinant(_ arg: NDArray) throws -> NDArray {
     var pivots = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: size)
     defer { pivots.deallocate(capacity: size) }
     
-    var N = __CLPK_integer(size)
-    let _N = UnsafeMutablePointer(&N)
+    var n = __CLPK_integer(size)
+    let _n = UnsafeMutablePointer(&n)
     
-    var error: __CLPK_integer = 0
+    var info: __CLPK_integer = 0
     
     var out = NDArrayData<Float>(size: numMatrices)
     
@@ -42,11 +42,11 @@ public func determinant(_ arg: NDArray) throws -> NDArray {
             var dst = dst
             for _ in 0..<numMatrices {
                 // LU decomposition
-                sgetrf_(_N, _N, ptr, _N, pivots, &error)
-                if error < 0 {
-                    throw NDArrayLUDecompError.IrregalValue
-                } else if error > 0 {
-                    throw NDArrayLUDecompError.SingularMatrix
+                sgetrf_(_n, _n, ptr, _n, pivots, &info)
+                if info < 0 {
+                    throw LinearAlgebraError.IrregalValue(func: "sgetrf_", nth: -Int(info))
+                } else if info > 0 {
+                    throw LinearAlgebraError.SingularMatrix
                 }
                 
                 // prod
@@ -83,11 +83,11 @@ public func inv(_ arg: NDArray) throws -> NDArray {
     
     let numMatrices = volume / (size*size)
     
-    var N = __CLPK_integer(size)
-    let _N = UnsafeMutablePointer(&N)
+    var n = __CLPK_integer(size)
+    let _n = UnsafeMutablePointer(&n)
     var pivots = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: size)
     var workspace = UnsafeMutablePointer<__CLPK_real>.allocate(capacity: size)
-    var error: __CLPK_integer = 0
+    var info: __CLPK_integer = 0
     
     defer {
         pivots.deallocate(capacity: size)
@@ -98,18 +98,18 @@ public func inv(_ arg: NDArray) throws -> NDArray {
         var ptr = ptr
         for _ in 0..<numMatrices {
             
-            sgetrf_(_N, _N, ptr, _N, pivots, &error)
-            if error < 0 {
-                throw NDArrayLUDecompError.IrregalValue
-            } else if error > 0 {
-                throw NDArrayLUDecompError.SingularMatrix
+            sgetrf_(_n, _n, ptr, _n, pivots, &info)
+            if info < 0 {
+                throw LinearAlgebraError.IrregalValue(func: "sgetrf_", nth: -Int(info))
+            } else if info > 0 {
+                throw LinearAlgebraError.SingularMatrix
             }
             
-            sgetri_(_N, ptr, _N, pivots, workspace, _N, &error)
-            if error < 0 {
-                throw NDArrayInvError.IrregalValue
-            } else if error > 0 {
-                throw NDArrayInvError.SingularMatrix
+            sgetri_(_n, ptr, _n, pivots, workspace, _n, &info)
+            if info < 0 {
+                throw LinearAlgebraError.IrregalValue(func: "sgetri_", nth: -Int(info))
+            } else if info > 0 {
+                throw LinearAlgebraError.SingularMatrix
             }
             
             ptr += size*size
@@ -194,9 +194,9 @@ public func svd(_ arg: NDArray, fullMatrices: Bool = true) throws -> (U: NDArray
                                 &info)
                         
                         if info < 0 {
-                            throw NDArraySVDError.IrregalValue
+                            throw LinearAlgebraError.IrregalValue(func: "sgesdd_", nth: -Int(info))
                         } else if info > 0 {
-                            throw NDArraySVDError.NotConverge
+                            throw LinearAlgebraError.NotConverged
                         }
                         
                         ep += m*n
@@ -233,17 +233,9 @@ public func pinv(_ arg: NDArray, rcond: Float = 1e-5) throws -> NDArray {
     return vt.swapAxes(-1, -2) |*| (s.expandDims(-1) * u.swapAxes(-1, -2))
 }
 
-public enum NDArrayLUDecompError: Error {
-    case IrregalValue
+public enum LinearAlgebraError: Error {
+    case IrregalValue(func: String, nth: Int)
     case SingularMatrix
+    case NotConverged
 }
 
-public enum NDArrayInvError: Error {
-    case IrregalValue
-    case SingularMatrix
-}
-
-public enum NDArraySVDError: Error {
-    case IrregalValue
-    case NotConverge
-}
