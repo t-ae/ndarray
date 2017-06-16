@@ -12,16 +12,14 @@ extension NDArray {
         var dst1 = NDArrayData<UInt32>(size: size)
         var dst2 = NDArrayData<Float>(size: size)
         
-        dst1.withUnsafeMutablePointer { p1 in
-            arc4random_buf(p1, MemoryLayout<UInt32>.size * size)
+        withUnsafeMutablePointers(&dst1, &dst2) { p0, p1 in
+            arc4random_buf(p0, MemoryLayout<UInt32>.size * size)
             
-            dst2.withUnsafeMutablePointer { p2 in
-                vDSP_vfltu32(p1, 1, p2, 1, vDSP_Length(size))
-                
-                var factor = (high - low) / Float(UInt32.max)
-                var low = low
-                vDSP_vsmsa(p2, 1, &factor, &low, p2, 1, vDSP_Length(size))
-            }
+            vDSP_vfltu32(p0, 1, p1, 1, vDSP_Length(size))
+            
+            var factor = (high - low) / Float(UInt32.max)
+            var low = low
+            vDSP_vsmsa(p1, 1, &factor, &low, p1, 1, vDSP_Length(size))
         }
         
         return NDArray(shape: shape, elements: dst2)
