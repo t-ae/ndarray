@@ -273,4 +273,23 @@ extension PerformanceTests {
         }
     }
 }
+    
+extension PerformanceTests {
+    func testMapElements() {
+        
+        let a = NDArray.range(-1000000..<1000000).reshaped([100, -1])
+        measure {
+            _ = a.mapElements { $0 > 0 ? 1 : 0 }
+        }
+    }
+    
+    func testMapElementsEquivalent() {
+        
+        let a = NDArray.range(-1000000..<1000000).reshaped([100, -1])
+        measure {
+            let ones = copySign(magnitude: NDArray.ones(a.shape), sign: a)
+            _ = ones.clipped(low: 0)
+        }
+    }
+}
 #endif

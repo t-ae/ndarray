@@ -42,5 +42,4 @@ extension NDArray {
             predicate(array) ? i : nil
         }
     }
-    
 }
