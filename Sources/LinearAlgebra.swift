@@ -2,20 +2,34 @@
 import Foundation
 import Accelerate
 
-/// Calculate Frobenius norm.
+/// Calculate Frobenius norm of matrices.
+///
+/// - Parameters:
+///   - arg: stack of matrices
+///   - axes: axes which matrices lie
+///   - keepDims: Squash dimensions or not
 public func matrixNorm(_ arg: NDArray, axes: (Int, Int) = (-1, -2), keepDims: Bool = false) -> NDArray {
-    let axes = (normalizeAxis(axis: axes.0, ndim: arg.ndim),
-                normalizeAxis(axis: axes.1, ndim: arg.ndim))
+    let ax0 = normalizeAxis(axis: axes.0, ndim: arg.ndim)
+    let ax1 = normalizeAxis(axis: axes.1, ndim: arg.ndim)
     
-    precondition(axes.0 != axes.1, "Duplicate axes given")
-    let sumRow = reduce(arg, along: axes.0, vDSP_svesq).expandDims(axes.0)
-    let ans = sqrt(sum(sumRow, along: axes.1, keepDims: true))
+    precondition(ax0 != ax1, "Duplicate axes given")
     
-    return keepDims ? ans : ans.squeezed()
+    let greaterAxis = max(ax0, ax1)
+    let lesserAxis = min(ax0, ax1)
+    
+    let sumRow = reduce(arg, along: greaterAxis, vDSP_svesq)
+    let ans = sqrt(sum(sumRow, along: lesserAxis, keepDims: keepDims))
+    
+    return keepDims ? ans.expandDims(greaterAxis) : ans
 }
 
-/// Calcurate vector norms along axis.
-public func vectorNorm(_ arg: NDArray, along axis: Int = -1, keepDims: Bool = false) -> NDArray {
+/// Calcurate eunclid norms of vectors.
+///
+/// - Parameters:
+///   - arg: stack of vectors
+///   - axis: axis which vectors lie
+///   - keepDims: Squash dimension or not
+public func vectorNorm(_ arg: NDArray, axis: Int = -1, keepDims: Bool = false) -> NDArray {
     let ret = sqrt(reduce(arg, along: axis, vDSP_svesq))
     
     return keepDims ? ret.expandDims(axis) : ret

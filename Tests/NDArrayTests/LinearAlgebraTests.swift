@@ -11,12 +11,12 @@ class LinearAlgebraTests: XCTestCase {
         }
         do {
             let a = NDArray.range(9).reshaped([3, 3])
-            XCTAssertEqual(vectorNorm(a, along: 0), NDArray([6.70820393,  8.1240384 ,  9.64365076]))
-            XCTAssertEqual(vectorNorm(a, along: 1), NDArray([2.23606798,   7.07106781,  12.20655562]))
+            XCTAssertEqual(vectorNorm(a, axis: 0), NDArray([6.70820393,  8.1240384 ,  9.64365076]))
+            XCTAssertEqual(vectorNorm(a, axis: 1), NDArray([2.23606798,   7.07106781,  12.20655562]))
             
-            XCTAssertEqual(vectorNorm(a, along: 0, keepDims: true),
+            XCTAssertEqual(vectorNorm(a, axis: 0, keepDims: true),
                            NDArray([[6.70820393,  8.1240384 ,  9.64365076]]))
-            XCTAssertEqual(vectorNorm(a, along: 1, keepDims: true),
+            XCTAssertEqual(vectorNorm(a, axis: 1, keepDims: true),
                            NDArray([[2.23606798],  [7.07106781], [12.20655562]]))
         }
     }
