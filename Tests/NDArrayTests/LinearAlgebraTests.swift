@@ -4,18 +4,41 @@ import NDArray
 
 class LinearAlgebraTests: XCTestCase {
 
-    func testNorm() {
+    func testVectorNorm() {
         do {
             let a = NDArray([1, 2, 3])
-            XCTAssertEqual(norm(a), sqrtf(14))
+            XCTAssertEqual(vectorNorm(a), NDArray(scalar: sqrtf(14)))
+        }
+        do {
+            let a = NDArray.range(9).reshaped([3, 3])
+            XCTAssertEqual(vectorNorm(a, along: 0), NDArray([6.70820393,  8.1240384 ,  9.64365076]))
+            XCTAssertEqual(vectorNorm(a, along: 1), NDArray([2.23606798,   7.07106781,  12.20655562]))
+            
+            XCTAssertEqual(vectorNorm(a, along: 0, keepDims: true),
+                           NDArray([[6.70820393,  8.1240384 ,  9.64365076]]))
+            XCTAssertEqual(vectorNorm(a, along: 1, keepDims: true),
+                           NDArray([[2.23606798],  [7.07106781], [12.20655562]]))
         }
     }
     
-    func testNorm2() {
+    func testMatrixNorm() {
         do {
             let a = NDArray.range(9).reshaped([3, 3])
-            XCTAssertEqual(norm(a, along: 0), NDArray([6.70820393,  8.1240384 ,  9.64365076]))
-            XCTAssertEqual(norm(a, along: 1), NDArray([2.23606798,   7.07106781,  12.20655562]))
+            XCTAssertEqual(matrixNorm(a), NDArray(scalar: 14.282856857085701))
+        }
+        do {
+            let a = NDArray.range(27).reshaped([3, 3, 3])
+            print(a.ndim)
+            XCTAssertEqual(matrixNorm(a, axes: (1, 2)), NDArray([ 14.28285686,  39.7617907 ,  66.4529909 ]))
+            XCTAssertEqual(matrixNorm(a, axes: (0, 2)), NDArray([ 37.30951621,  44.86646855,  52.87721627]))
+            XCTAssertEqual(matrixNorm(a, axes: (0, 1)), NDArray([ 42.84857057,  45.39823785,  48.0       ]))
+            
+            XCTAssertEqual(matrixNorm(a, axes: (1, 2), keepDims: true),
+                           NDArray([ [[14.28285686]],  [[39.7617907]] ,  [[66.4529909]] ]))
+            XCTAssertEqual(matrixNorm(a, axes: (0, 2), keepDims: true),
+                           NDArray([ [[37.30951621],  [44.86646855],  [52.87721627]]]))
+            XCTAssertEqual(matrixNorm(a, axes: (0, 1), keepDims: true),
+                           NDArray([[[ 42.84857057,  45.39823785,  48.0       ]]]))
         }
     }
     

@@ -3,12 +3,19 @@ import Foundation
 import Accelerate
 
 /// Calculate Frobenius norm.
-public func norm(_ arg: NDArray) -> Float {
-    return sqrtf(reduce(arg, vDSP_svesq).asScalar())
+public func matrixNorm(_ arg: NDArray, axes: (Int, Int) = (-1, -2), keepDims: Bool = false) -> NDArray {
+    let axes = (normalizeAxis(axis: axes.0, ndim: arg.ndim),
+                normalizeAxis(axis: axes.1, ndim: arg.ndim))
+    
+    precondition(axes.0 != axes.1, "Duplicate axes given")
+    let sumRow = reduce(arg, along: axes.0, vDSP_svesq).expandDims(axes.0)
+    let ans = sqrt(sum(sumRow, along: axes.1, keepDims: true))
+    
+    return keepDims ? ans : ans.squeezed()
 }
 
 /// Calcurate vector norms along axis.
-public func norm(_ arg: NDArray, along axis: Int, keepDims: Bool = false) -> NDArray {
+public func vectorNorm(_ arg: NDArray, along axis: Int = -1, keepDims: Bool = false) -> NDArray {
     let ret = sqrt(reduce(arg, along: axis, vDSP_svesq))
     
     return keepDims ? ret.expandDims(axis) : ret
