@@ -133,9 +133,9 @@ public func svd(_ arg: NDArray, fullMatrices: Bool = true) throws -> (U: NDArray
     let outerVolume = outerShape.prod()
     
     var _m = __CLPK_integer(m)
-    let mp = UnsafeMutablePointer(&_m)
     var _n = __CLPK_integer(n)
-    let np = UnsafeMutablePointer(&_n)
+    var lda = _m
+    var ldu = _m
     let minMN = min(m, n)
     let lwork = 3*minMN*minMN + max(max(m, n), 4*minMN*minMN + 4*minMN)
     let work = UnsafeMutablePointer<Float>.allocate(capacity: lwork)
@@ -182,16 +182,12 @@ public func svd(_ arg: NDArray, fullMatrices: Bool = true) throws -> (U: NDArray
                     var vt = vt
                     
                     for _ in 0..<outerVolume {
-                        sgesdd_(&jobz,
-                                mp, np,
-                                ep, mp,
+                        sgesdd_(&jobz, &_m, &_n,
+                                ep, &lda,
                                 s,
-                                u, mp,
+                                u, &ldu,
                                 vt, &ldvt,
-                                work,
-                                &_lwork,
-                                iwork,
-                                &info)
+                                work, &_lwork, iwork, &info)
                         
                         if info < 0 {
                             throw LinearAlgebraError.IrregalValue(func: "sgesdd_", nth: -Int(info))
@@ -216,7 +212,7 @@ public func svd(_ arg: NDArray, fullMatrices: Bool = true) throws -> (U: NDArray
 
 /// Calculate pseudo inverse of matrix.
 public func pinv(_ arg: NDArray, rcond: Float = 1e-5) throws -> NDArray {
-    precondition(arg.ndim == 2, "NDArray has must be matrix.")
+    precondition(arg.ndim == 2, "NDArray must be a matrix.")
 
     var (u, s, vt) = try svd(arg, fullMatrices: false)
     
@@ -231,6 +227,59 @@ public func pinv(_ arg: NDArray, rcond: Float = 1e-5) throws -> NDArray {
     }
     
     return vt.swapAxes(-1, -2) |*| (s.expandDims(-1) * u.swapAxes(-1, -2))
+}
+
+// Compute the rank of matrix
+public func matrixRank(_ arg: NDArray, tol: Float? = nil) -> Int {
+    precondition(arg.ndim == 2, "NDArray must be a matrix.")
+    let m = arg.shape[arg.ndim-2]
+    let n = arg.shape[arg.ndim-1]
+    
+    if m < 2 || n < 2 {
+        return arg.data.filter { $0 != 0 }.isEmpty ? 0 : 1
+    }
+    
+    // treat as n by m matrix
+    var jobz = Int8(UnicodeScalar("N").value)
+    var _m = __CLPK_integer(m)
+    var _n =  __CLPK_integer(n)
+    
+    var a = gatherElements(arg)
+    var lda = _n
+    
+    var dummy: Float = 0
+    var lddummy: __CLPK_integer = 1
+    let _dummy = UnsafeMutablePointer(&dummy)
+    let _lddummy = UnsafeMutablePointer(&lddummy)
+    
+    let lwork = 3*min(m, n) + 2*max(max(m, n), 6*min(m, n)) // not optimal size
+    let work = UnsafeMutablePointer<Float>.allocate(capacity: lwork)
+    var _lwork = __CLPK_integer(lwork)
+    let iwork = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: 8*min(m, n))
+    var info: __CLPK_integer = 0
+    var s = NDArrayData<Float>(size: min(m, n))
+    
+    defer {
+        work.deallocate(capacity: lwork)
+        iwork.deallocate(capacity: 8*min(m, n))
+    }
+    
+    a.withUnsafeMutablePointer { a in
+        s.withUnsafeMutablePointer { s -> Void in
+            sgesdd_(&jobz, &_n, &_m,
+                    a, &lda,
+                    s,
+                    _dummy, _lddummy,
+                    _dummy, _lddummy,
+                    work,  &_lwork, iwork, &info)
+        }
+    }
+    assert(info == 0)
+    let maxS = s[0]
+    
+    let eps: Float = 1.1920929e-07 // np.finfo(np.float32).eps
+    let tol = tol ?? maxS * Float(max(m, n)) * eps
+    return s.prefix { $0 > tol }.count
 }
 
 public enum LinearAlgebraError: Error {
