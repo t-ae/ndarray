@@ -125,24 +125,22 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
     let stride = arg.strides[axis]
     
     arg.withUnsafePointer { src in
-        dstMean.withUnsafeMutablePointer { d1 in
-            dstVar.withUnsafeMutablePointer { d2 in
-                var dst1Ptr = d1
-                var dst2Ptr = d2
-                for offset in offsets {
-                    let src = src + offset
-                    vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
-                    dst1Ptr += 1
-                    dst2Ptr += 1
-                }
-                var _count = Float(count)
-                let _volume = vDSP_Length(volume)
-                vDSP_vsdiv(d1, 1, &_count, d1, 1, _volume)
-                
-                vDSP_vsdiv(d2, 1, &_count, d2, 1, _volume)
-                vDSP_vsq(d1, 1, d1, 1, _volume)
-                vDSP_vsub(d1, 1, d2, 1, d2, 1, _volume)
+        withUnsafeMutablePointers(&dstMean, &dstVar) { d1, d2 in
+            var dst1Ptr = d1
+            var dst2Ptr = d2
+            for offset in offsets {
+                let src = src + offset
+                vDSP_sve_svesq(src, stride, dst1Ptr, dst2Ptr, count)
+                dst1Ptr += 1
+                dst2Ptr += 1
             }
+            var _count = Float(count)
+            let _volume = vDSP_Length(volume)
+            vDSP_vsdiv(d1, 1, &_count, d1, 1, _volume)
+            
+            vDSP_vsdiv(d2, 1, &_count, d2, 1, _volume)
+            vDSP_vsq(d1, 1, d1, 1, _volume)
+            vDSP_vsub(d1, 1, d2, 1, d2, 1, _volume)
         }
     }
     

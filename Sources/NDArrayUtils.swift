@@ -236,21 +236,7 @@ extension NDArray {
     }
 }
 
-func withUnsafePointers<R>(_ list: [NDArrayData<Float>], _ body: @escaping ([UnsafePointer<Float>])->R) -> R {
-    
-    func process(_ list: [NDArrayData<Float>], _ ptrs: [UnsafePointer<Float>]) -> R{
-        if list.isEmpty {
-            return body(ptrs)
-        } else {
-            return list.first!.withUnsafePointer { p in
-                process(Array(list.dropFirst()), ptrs + [p])
-            }
-        }
-    }
-    
-    return process(list, [])
-}
-
+// MARK: - Standard library extensions
 extension Array {
     func all(cond: (Element)->Bool) -> Bool {
         for e in self {
@@ -295,5 +281,87 @@ extension Sequence where Iterator.Element == Int {
             ret *= e
         }
         return ret
+    }
+}
+
+// MARK: - Pointer combination
+// MARK: NDArray
+@inline(__always)
+func withUnsafePointers<R>(_ array0: NDArray,
+                           _ array1: NDArray,
+                           _ body: (UnsafePointer<Float>, UnsafePointer<Float>) throws -> R) rethrows -> R {
+    return try array0.withUnsafePointer { p0 in
+        try array1.withUnsafePointer { p1 in
+            try body(p0, p1)
+        }
+    }
+}
+
+// MARK: NDArrayData
+func withUnsafePointers<T, R>(_ list: [NDArrayData<T>], _ body: @escaping ([UnsafePointer<T>]) throws -> R) rethrows -> R {
+    
+    func process(_ list: [NDArrayData<T>], _ ptrs: [UnsafePointer<T>]) throws -> R {
+        if list.isEmpty {
+            return try body(ptrs)
+        } else {
+            return try list.first!.withUnsafePointer { p in
+                try process(Array(list.dropFirst()), ptrs + [p])
+            }
+        }
+    }
+    
+    return try process(list, [])
+}
+
+@inline(__always)
+func withUnsafePointers<T0, T1, R>(_ data0: NDArrayData<T0>,
+                                   _ data1: NDArrayData<T1>,
+                                   _ body: (UnsafePointer<T0>, UnsafePointer<T1>) throws -> R) rethrows -> R {
+    return try data0.withUnsafePointer { p0 in
+        try data1.withUnsafePointer { p1 in
+            try body(p0, p1)
+        }
+    }
+}
+
+@inline(__always)
+func withUnsafeMutablePointers<T0, T1, R>(_ data0: inout NDArrayData<T0>,
+                                          _ data1: inout NDArrayData<T1>,
+                                          _ body: (UnsafeMutablePointer<T0>, UnsafeMutablePointer<T1>) throws -> R) rethrows -> R {
+    return try data0.withUnsafeMutablePointer { p0 in
+        try data1.withUnsafeMutablePointer { p1 in
+            try body(p0, p1)
+        }
+    }
+}
+
+@inline(__always)
+func withUnsafeMutablePointers<T0, T1, T2, R>(_ data0: inout NDArrayData<T0>,
+                                              _ data1: inout NDArrayData<T1>,
+                                              _ data2: inout NDArrayData<T2>,
+                                              _ body: (UnsafeMutablePointer<T0>, UnsafeMutablePointer<T1>, UnsafeMutablePointer<T2>) throws -> R) rethrows -> R {
+    return try data0.withUnsafeMutablePointer { p0 in
+        try data1.withUnsafeMutablePointer { p1 in
+            try data2.withUnsafeMutablePointer { p2 in
+                try body(p0, p1, p2)
+            }
+        }
+    }
+}
+
+@inline(__always)
+func withUnsafeMutablePointers<T0, T1, T2, T3, R>(_ data0: inout NDArrayData<T0>,
+                                                  _ data1: inout NDArrayData<T1>,
+                                                  _ data2: inout NDArrayData<T2>,
+                                                  _ data3: inout NDArrayData<T3>,
+                                                  _ body: (UnsafeMutablePointer<T0>, UnsafeMutablePointer<T1>, UnsafeMutablePointer<T2>, UnsafeMutablePointer<T3>) throws -> R) rethrows -> R {
+    return try data0.withUnsafeMutablePointer { p0 in
+        try data1.withUnsafeMutablePointer { p1 in
+            try data2.withUnsafeMutablePointer { p2 in
+                try data3.withUnsafeMutablePointer { p3 in
+                    try body(p0, p1, p2, p3)
+                }
+            }
+        }
     }
 }

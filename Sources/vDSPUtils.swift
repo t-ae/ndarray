@@ -114,16 +114,14 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_vv_func) -> NDArray 
     
     let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: lMajorStrides, rStrides: rMajorStrides)
     
-    lhs.withUnsafePointer { lp in
-        rhs.withUnsafePointer { rp in
-            dst.withUnsafeMutablePointer { dst in
-                var dst = dst
-                for (lo, ro) in offsets {
-                    vDSPfunc(lp + lo, lStride,
-                             rp + ro, rStride,
-                             dst, 1, _blockSize)
-                    dst += blockSize
-                }
+    withUnsafePointers(lhs, rhs) { lp, rp in
+        dst.withUnsafeMutablePointer { dst in
+            var dst = dst
+            for (lo, ro) in offsets {
+                vDSPfunc(lp + lo, lStride,
+                         rp + ro, rStride,
+                         dst, 1, _blockSize)
+                dst += blockSize
             }
         }
     }

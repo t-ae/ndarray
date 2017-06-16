@@ -30,20 +30,18 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let offsets = BinaryOffsetSequence(shape: majorShape,
                                        lStrides: [Int](lhs.strides.dropLast(2)),
                                        rStrides: [Int](rhs.strides.dropLast(2)))
-    
-    lhs.withUnsafePointer { lp in
-        rhs.withUnsafePointer { rp in
-            dst.withUnsafeMutablePointer {
-                var dstPtr = $0
-                for (lo, ro) in offsets {
-                    cblas_sgemm(CblasRowMajor,
-                                CblasNoTrans, CblasNoTrans,
-                                M, N, K,
-                                1, lp + lo, lda,
-                                rp + ro, ldb,
-                                0, dstPtr, N)
-                    dstPtr += matrixSize
-                }
+
+    withUnsafePointers(lhs, rhs) { lp, rp in
+        dst.withUnsafeMutablePointer {
+            var dstPtr = $0
+            for (lo, ro) in offsets {
+                cblas_sgemm(CblasRowMajor,
+                            CblasNoTrans, CblasNoTrans,
+                            M, N, K,
+                            1, lp + lo, lda,
+                            rp + ro, ldb,
+                            0, dstPtr, N)
+                dstPtr += matrixSize
             }
         }
     }

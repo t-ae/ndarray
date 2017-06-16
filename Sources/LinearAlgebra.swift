@@ -57,33 +57,31 @@ public func determinant(_ arg: NDArray) throws -> NDArray {
     
     var out = NDArrayData<Float>(size: numMatrices)
     
-    try elements.withUnsafeMutablePointer { ptr in
-        try out.withUnsafeMutablePointer { dst in
-            var ptr = ptr
-            var dst = dst
-            for _ in 0..<numMatrices {
-                // LU decomposition
-                sgetrf_(_n, _n, ptr, _n, pivots, &info)
-                if info < 0 {
-                    throw LinearAlgebraError.IrregalValue(func: "sgetrf_", nth: -Int(info))
-                } else if info > 0 {
-                    throw LinearAlgebraError.SingularMatrix
-                }
-                
-                // prod
-                var magnitude: Float = 1
-                var sign: Float = 1
-                let p = pivots
-                for i in 0..<size {
-                    magnitude *= ptr.advanced(by: i*(size+1)).pointee
-                    if (p+i).pointee != __CLPK_integer(i+1) {
-                        sign *= -1
-                    }
-                }
-                dst.pointee = sign * magnitude
-                ptr += size*size
-                dst += 1
+    try withUnsafeMutablePointers(&elements, &out) { ptr, dst in
+        var ptr = ptr
+        var dst = dst
+        for _ in 0..<numMatrices {
+            // LU decomposition
+            sgetrf_(_n, _n, ptr, _n, pivots, &info)
+            if info < 0 {
+                throw LinearAlgebraError.IrregalValue(func: "sgetrf_", nth: -Int(info))
+            } else if info > 0 {
+                throw LinearAlgebraError.SingularMatrix
             }
+            
+            // prod
+            var magnitude: Float = 1
+            var sign: Float = 1
+            let p = pivots
+            for i in 0..<size {
+                magnitude *= ptr.advanced(by: i*(size+1)).pointee
+                if (p+i).pointee != __CLPK_integer(i+1) {
+                    sign *= -1
+                }
+            }
+            dst.pointee = sign * magnitude
+            ptr += size*size
+            dst += 1
         }
     }
     
@@ -193,36 +191,30 @@ public func svd(_ arg: NDArray, fullMatrices: Bool = true) throws -> (U: NDArray
         ldvt = __CLPK_integer(minMN)
     }
     
-    try elements.withUnsafeMutablePointer { ep in
-        try u.withUnsafeMutablePointer { u in
-            try s.withUnsafeMutablePointer { s in
-                try vt.withUnsafeMutablePointer { vt in
-                    var ep = ep
-                    var u = u
-                    var s = s
-                    var vt = vt
-                    
-                    for _ in 0..<outerVolume {
-                        sgesdd_(&jobz, &_m, &_n,
-                                ep, &lda,
-                                s,
-                                u, &ldu,
-                                vt, &ldvt,
-                                work, &_lwork, iwork, &info)
-                        
-                        if info < 0 {
-                            throw LinearAlgebraError.IrregalValue(func: "sgesdd_", nth: -Int(info))
-                        } else if info > 0 {
-                            throw LinearAlgebraError.NotConverged
-                        }
-                        
-                        ep += m*n
-                        u += m*ucols
-                        s += minMN
-                        vt += vtrows*n
-                    }
-                }
+    try withUnsafeMutablePointers(&elements, &u, &s, &vt)  { ep, u, s, vt in
+        var ep = ep
+        var u = u
+        var s = s
+        var vt = vt
+        
+        for _ in 0..<outerVolume {
+            sgesdd_(&jobz, &_m, &_n,
+                    ep, &lda,
+                    s,
+                    u, &ldu,
+                    vt, &ldvt,
+                    work, &_lwork, iwork, &info)
+            
+            if info < 0 {
+                throw LinearAlgebraError.IrregalValue(func: "sgesdd_", nth: -Int(info))
+            } else if info > 0 {
+                throw LinearAlgebraError.NotConverged
             }
+            
+            ep += m*n
+            u += m*ucols
+            s += minMN
+            vt += vtrows*n
         }
     }
     
@@ -285,16 +277,15 @@ public func matrixRank(_ arg: NDArray, tol: Float? = nil) -> Int {
         iwork.deallocate(capacity: 8*min(m, n))
     }
     
-    a.withUnsafeMutablePointer { a in
-        s.withUnsafeMutablePointer { s -> Void in
-            sgesdd_(&jobz, &_n, &_m,
-                    a, &lda,
-                    s,
-                    _dummy, _lddummy,
-                    _dummy, _lddummy,
-                    work,  &_lwork, iwork, &info)
-        }
+    withUnsafeMutablePointers(&a, &s) { a, s -> Void in
+        sgesdd_(&jobz, &_n, &_m,
+                a, &lda,
+                s,
+                _dummy, _lddummy,
+                _dummy, _lddummy,
+                work,  &_lwork, iwork, &info)
     }
+    
     assert(info == 0)
     let maxS = s[0]
     

@@ -82,14 +82,12 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         
         var dst = NDArrayData<Float>(size: volume)
         
-        lhs.withUnsafePointer { lp in
-            rhs.withUnsafePointer { rp in
-                dst.withUnsafeMutablePointer { dst in
-                    var dst = dst
-                    for (lo, ro) in offsets {
-                        vvfunc(dst, lp + lo, rp + ro, &_blockSize)
-                        dst += blockSize
-                    }
+        withUnsafePointers(lhs, rhs) { lp, rp in
+            dst.withUnsafeMutablePointer { dst in
+                var dst = dst
+                for (lo, ro) in offsets {
+                    vvfunc(dst, lp + lo, rp + ro, &_blockSize)
+                    dst += blockSize
                 }
             }
         }
