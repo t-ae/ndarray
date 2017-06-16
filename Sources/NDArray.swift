@@ -20,9 +20,6 @@ public struct NDArray {
     }
     
     init(shape: [Int], elements: NDArrayData<Float>) {
-        assert(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
-        assert(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
-        
         self.init(shape: shape,
                   strides: getContiguousStrides(shape: shape),
                   baseOffset: 0,
