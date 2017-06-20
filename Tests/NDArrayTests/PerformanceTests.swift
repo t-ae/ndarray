@@ -292,4 +292,42 @@ extension PerformanceTests {
         }
     }
 }
+    
+extension PerformanceTests {
+    
+    func testOffsetSequence() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let strides = getContiguousStrides(shape: shape)
+        let offsets = OffsetSequence(shape: shape, strides: strides)
+        measure {
+            for _ in offsets {
+                // some operation
+            }
+        }
+    }
+    
+    func testOffsetSequenceRaw() {
+        let shape = [10, 10, 10, 10, 10, 10]
+        let strides = getContiguousStrides(shape: shape)
+        measure {
+            var index = [Int](repeating: 0, count: shape.count)
+            var offset = 0
+            while index[0] < shape[0] {
+                offset += strides.last!
+                index[shape.count-1] += 1
+                
+                for i in (1..<shape.count).reversed() {
+                    guard index[i] >= shape[i]  else {
+                        break
+                    }
+                    index[i] = 0
+                    index[i-1] += 1
+                    offset += strides[i-1] - shape[i]*strides[i]
+                }
+                
+                // some operation
+            }
+        }
+    }
+}
 #endif
