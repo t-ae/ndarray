@@ -60,7 +60,7 @@ public struct NDArray {
     }
     
     public func asContiguousArray() -> NDArray {
-        return NDArray(shape: shape, elements: elements())
+        return NDArray(shape: shape, elements: gatherElements(self))
     }
 }
 
