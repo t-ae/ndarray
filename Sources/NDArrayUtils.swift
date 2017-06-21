@@ -13,7 +13,7 @@ func isContiguous(shape: [Int], strides: [Int]) -> Bool {
 func isDense(shape: [Int], strides: [Int]) -> Bool {
     assert(shape.count == strides.count)
     
-    if shape.count == 0 {
+    guard !shape.isEmpty else {
         return true
     }
     

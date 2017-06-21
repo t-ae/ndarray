@@ -6,8 +6,7 @@ typealias vvUnaryFunc = (UnsafeMutablePointer<Float>, UnsafePointer<Float>, Unsa
 func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
     
     if isDense(shape: arg.shape, strides: arg.strides) {
-        let count = zip(arg.shape, arg.strides).flatMap { $1 != 0 ? $0 : nil }.prod()
-        
+        let count = zip(arg.shape, arg.strides).reduce(1) { acc, v in v.1 == 0 ? acc : acc*v.0 }
         var dst = NDArrayData<Float>(size: count)
         
         var _count = Int32(count)
