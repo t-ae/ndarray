@@ -5,6 +5,7 @@ import Accelerate
 #if !SWIFT_PACKAGE
 class AcceleratePerformanceTests: XCTestCase {
     
+    // MARK: - Add
     func testAdd_BLAS() {
         let count = 10_000_000
         let a = [Float](repeating: 1, count: count)
@@ -28,6 +29,28 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
+    // MARK: scalar add
+    func testAddA() {
+        let count = 10_000_000
+        let a = [Float](repeating: 0, count: count)
+        let b: [Float] = [1]
+        var ans = [Float](repeating: 0, count: count)
+        measure {
+            vDSP_vadd(a, 1, b, 0, &ans, 1, vDSP_Length(count))
+        }
+    }
+    
+    func testAddB() {
+        let count = 10_000_000
+        let a = [Float](repeating: 0, count: count)
+        let b: [Float] = [1]
+        var ans = [Float](repeating: 0, count: count)
+        measure {
+            vDSP_vsadd(a, 1, b, &ans, 1, vDSP_Length(count))
+        }
+    }
+    
+    // MARK: - Matmul
     func testMatmul_BLAS() {
         let M: Int32 = 1000
         let N: Int32 = 1000
@@ -54,6 +77,7 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
+    // MARK: - Copy
     func testCopy() {
         let stride = 2
         let c = 100_000_000
@@ -104,6 +128,7 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
+    // MARK: Minus stride
     func testCopyMinus_BLAS() {
         let stride = -4
         let c = 100_000_000
@@ -126,6 +151,7 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
+    // MARK: Matrix
     func testCopyMatrix_BLAS() {
         let m = 100000
         let n = 1000
@@ -155,26 +181,60 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
-    func testAddA() {
-        let count = 10_000_000
-        let a = [Float](repeating: 0, count: count)
-        let b: [Float] = [1]
-        var ans = [Float](repeating: 0, count: count)
+    // MARK: - Transpose
+    func testTranspose_Pointer() {
+        let m = 1000
+        let n = 1000
+        let a = [Float](repeating: 0, count: m*n)
+        var b = [Float](repeating: 0, count: m*n)
         measure {
-            vDSP_vadd(a, 1, b, 0, &ans, 1, vDSP_Length(count))
+            a.withUnsafeBufferPointer { ap in
+                b.withUnsafeMutableBufferPointer { bp in
+                    var ap = ap.baseAddress!
+                    for i in 0..<m {
+                        var bp = bp.baseAddress! + i
+                        for _ in 0..<n {
+                            bp.pointee = ap.pointee
+                            ap += 1
+                            bp += m
+                        }
+                    }
+                }
+            }
         }
     }
     
-    func testAddB() {
-        let count = 10_000_000
-        let a = [Float](repeating: 0, count: count)
-        let b: [Float] = [1]
-        var ans = [Float](repeating: 0, count: count)
+    func testTranspose_BLAS() {
+        let m = 1000
+        let n = 1000
+        let a = [Float](repeating: 0, count: m*n)
+        var b = [Float](repeating: 0, count: m*n)
         measure {
-            vDSP_vsadd(a, 1, b, &ans, 1, vDSP_Length(count))
+            a.withUnsafeBufferPointer { ap in
+                b.withUnsafeMutableBufferPointer { bp in
+                    var ap = ap.baseAddress!
+                    var bp = bp.baseAddress!
+                    for _ in 0..<m {
+                        cblas_scopy(Int32(n), a, 1, bp, Int32(m))
+                        ap += n
+                        bp += 1
+                    }
+                }
+            }
         }
     }
     
+    func testTranspose_vDSP() {
+        let m = 1000
+        let n = 1000
+        let a = [Float](repeating: 0, count: m*n)
+        var b = [Float](repeating: 0, count: m*n)
+        measure {
+            vDSP_mtrans(a, 1, &b, 1, vDSP_Length(m), vDSP_Length(n))
+        }
+    }
+    
+    // MARK: - Parallel
     func testParallel1() {
         let count = 1000000
         let a = [Float](repeating: 0, count: count*8)
