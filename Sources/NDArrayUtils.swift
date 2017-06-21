@@ -170,7 +170,6 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
     }
 }
 
-@inline(__always)
 func copyElements(src: UnsafePointer<Float>,
                   srcStride: Int,
                   dst: UnsafeMutablePointer<Float>,
@@ -285,7 +284,6 @@ extension Sequence where Iterator.Element == Int {
 
 // MARK: - Pointer combination
 // MARK: NDArray
-@inline(__always)
 func withUnsafePointers<R>(_ array0: NDArray,
                            _ array1: NDArray,
                            _ body: (UnsafePointer<Float>, UnsafePointer<Float>) throws -> R) rethrows -> R {
@@ -313,7 +311,6 @@ func withUnsafePointers<T, R>(_ list: [NDArrayData<T>],
     return try process(list, [])
 }
 
-@inline(__always)
 func withUnsafePointers<T0, T1, R>(_ data0: NDArrayData<T0>,
                                    _ data1: NDArrayData<T1>,
                                    _ body: (UnsafePointer<T0>, UnsafePointer<T1>) throws -> R) rethrows -> R {
@@ -324,7 +321,6 @@ func withUnsafePointers<T0, T1, R>(_ data0: NDArrayData<T0>,
     }
 }
 
-@inline(__always)
 func withUnsafeMutablePointers<T0, T1, R>(_ data0: inout NDArrayData<T0>,
                                           _ data1: inout NDArrayData<T1>,
                                           _ body: (UnsafeMutablePointer<T0>, UnsafeMutablePointer<T1>) throws -> R) rethrows -> R {
@@ -335,7 +331,6 @@ func withUnsafeMutablePointers<T0, T1, R>(_ data0: inout NDArrayData<T0>,
     }
 }
 
-@inline(__always)
 func withUnsafeMutablePointers<T0, T1, T2, R>(_ data0: inout NDArrayData<T0>,
                                               _ data1: inout NDArrayData<T1>,
                                               _ data2: inout NDArrayData<T2>,
@@ -349,7 +344,6 @@ func withUnsafeMutablePointers<T0, T1, T2, R>(_ data0: inout NDArrayData<T0>,
     }
 }
 
-@inline(__always)
 func withUnsafeMutablePointers<T0, T1, T2, T3, R>(_ data0: inout NDArrayData<T0>,
                                                   _ data1: inout NDArrayData<T1>,
                                                   _ data2: inout NDArrayData<T2>,
