@@ -231,7 +231,6 @@ extension NDArray {
     func withUnsafePointer<R>(_ body: (UnsafePointer<Float>) throws -> R) rethrows -> R{
         return try data.withUnsafePointer {
             try body($0 + baseOffset)
-            
         }
     }
 }
@@ -298,7 +297,8 @@ func withUnsafePointers<R>(_ array0: NDArray,
 }
 
 // MARK: NDArrayData
-func withUnsafePointers<T, R>(_ list: [NDArrayData<T>], _ body: @escaping ([UnsafePointer<T>]) throws -> R) rethrows -> R {
+func withUnsafePointers<T, R>(_ list: [NDArrayData<T>],
+                              _ body: @escaping ([UnsafePointer<T>]) throws -> R) rethrows -> R {
     
     func process(_ list: [NDArrayData<T>], _ ptrs: [UnsafePointer<T>]) throws -> R {
         if list.isEmpty {
