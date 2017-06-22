@@ -205,8 +205,8 @@ class AcceleratePerformanceTests: XCTestCase {
     }
     
     func testTranspose_BLAS() {
-        let m = 1000
-        let n = 1000
+        let m = 3000
+        let n = 3000
         let a = [Float](repeating: 0, count: m*n)
         var b = [Float](repeating: 0, count: m*n)
         measure {
@@ -224,9 +224,29 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
+    func testTranspose_BLAS2() {
+        let m = 3000
+        let n = 3000
+        let a = [Float](repeating: 0, count: m*n)
+        var b = [Float](repeating: 0, count: m*n)
+        measure {
+            a.withUnsafeBufferPointer { ap in
+                b.withUnsafeMutableBufferPointer { bp in
+                    var ap = ap.baseAddress!
+                    var bp = bp.baseAddress!
+                    for _ in 0..<n {
+                        cblas_scopy(Int32(m), a, Int32(n), bp, 1)
+                        ap += 1
+                        bp += m
+                    }
+                }
+            }
+        }
+    }
+    
     func testTranspose_vDSP() {
-        let m = 1000
-        let n = 1000
+        let m = 3000
+        let n = 3000
         let a = [Float](repeating: 0, count: m*n)
         var b = [Float](repeating: 0, count: m*n)
         measure {
@@ -235,6 +255,24 @@ class AcceleratePerformanceTests: XCTestCase {
     }
     
     // MARK: - Parallel
+    func testParallel0() {
+        let count = 1000000
+        let a = [Float](repeating: 0, count: count*8)
+        let b = [Float](repeating: 0, count: count*8)
+        let ans = [Float](repeating: 0, count: count*8)
+        measure {
+            var ap = UnsafePointer(a)
+            var bp = UnsafePointer(b)
+            var ansp = UnsafeMutablePointer(mutating: ans)
+            for _ in 0..<count {
+                vDSP_vadd(ap, 1, bp, 1, ansp, 1, vDSP_Length(8))
+                ap += 8
+                bp += 8
+                ansp += 8
+            }
+        }
+    }
+    
     func testParallel1() {
         let count = 1000000
         let a = [Float](repeating: 0, count: count*8)
@@ -257,11 +295,12 @@ class AcceleratePerformanceTests: XCTestCase {
         let b = [Float](repeating: 0, count: count*8)
         let ans = [Float](repeating: 0, count: count*8)
         measure {
-            DispatchQueue.concurrentPerform(iterations: 10) { i in
-                var ap = UnsafePointer(a).advanced(by: 8*i*count/10)
-                var bp = UnsafePointer(b).advanced(by: 8*i*count/10)
-                var ansp = UnsafeMutablePointer(mutating: ans).advanced(by: 8*i*count/10)
-                for _ in 0..<count/10 {
+            let divide = 2
+            DispatchQueue.concurrentPerform(iterations: divide) { i in
+                var ap = UnsafePointer(a).advanced(by: 8*i*count/divide)
+                var bp = UnsafePointer(b).advanced(by: 8*i*count/divide)
+                var ansp = UnsafeMutablePointer(mutating: ans).advanced(by: 8*i*count/divide)
+                for _ in 0..<count/divide {
                     vDSP_vadd(ap, 1, bp, 1, ansp, 1, 8)
                     ap += 8
                     bp += 8
