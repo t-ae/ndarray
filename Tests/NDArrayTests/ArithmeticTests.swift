@@ -144,6 +144,14 @@ class ArithmeticTests: XCTestCase {
     func testMultiply() {
         do {
             let a = NDArray([[0, 1], [2, 3]])
+            let b: Float = 2
+            XCTAssertEqual(a*b, NDArray([[0, 2],
+                                         [4, 6]]))
+            XCTAssertEqual(b*a, NDArray([[0, 2],
+                                         [4, 6]]))
+        }
+        do {
+            let a = NDArray([[0, 1], [2, 3]])
             let b = NDArray([1, 4])
             
             XCTAssertEqual(a*b, NDArray([[0, 4],
@@ -169,6 +177,7 @@ class ArithmeticTests: XCTestCase {
             
             let c: [[Float]] = [[0, 1.0/4],
                                 [2, 3.0/4]]
+            
             XCTAssertEqualWithAccuracy(a/b, NDArray(c), accuracy: 1e-5)
         }
     }
