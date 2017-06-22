@@ -12,7 +12,7 @@ public func matrixNorm(_ arg: NDArray, axes: (Int, Int) = (-1, -2), keepDims: Bo
     let ax0 = normalizeAxis(axis: axes.0, ndim: arg.ndim)
     let ax1 = normalizeAxis(axis: axes.1, ndim: arg.ndim)
     
-    precondition(ax0 != ax1, "Duplicate axes given")
+    precondition(ax0 != ax1, "Duplicate axes given.")
     
     let greaterAxis = max(ax0, ax1)
     let lesserAxis = min(ax0, ax1)
@@ -242,7 +242,7 @@ public func pinv(_ arg: NDArray, rcond: Float = 1e-5) throws -> NDArray {
     return vt.swapAxes(-1, -2) |*| (s.expandDims(-1) * u.swapAxes(-1, -2))
 }
 
-// Compute the rank of matrix
+/// Compute the rank of matrix
 public func matrixRank(_ arg: NDArray, tol: Float? = nil) -> Int {
     precondition(arg.ndim == 2, "NDArray must be a matrix.")
     let m = arg.shape[arg.ndim-2]

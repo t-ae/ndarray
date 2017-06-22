@@ -112,10 +112,12 @@ private func needsGather(shape: [Int], strides: [Int]) -> Bool {
     assert(shape.count > 1)
     let ndim = shape.count
     
+    // check each rows are contiguous
     guard shape[ndim-1] == 1 || strides[ndim-1] == 1 else {
         return true
     }
     
+    // check leading dimension >= number of columns
     guard shape[ndim-2] == 1 || strides[ndim-2] >= shape[ndim-1] else {
         return true
     }

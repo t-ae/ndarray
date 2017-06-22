@@ -41,6 +41,7 @@ class IrisClassificationTests: XCTestCase {
         let alpha: Float = 1e-3
         
         for i in 0...30000 {
+            
             let h1_1 = x |*| W1     // [90, 5]
             let h1_2 = h1_1 + b1    // [90, 5]
             let h1 = relu(h1_2)     // [90, 5]
