@@ -156,15 +156,13 @@ func toOneHot(_ y: NDArray) -> NDArray {
     
     let size = Int(max(y).asScalar()) + 1
     
-    var ret: [NDArray] = []
+    var ret = NDArray.zeros([y.shape[0], size])
     
-    for i in y.elements() {
-        var vector = NDArray.zeros([size])
-        vector[Int(i)] = NDArray(scalar: 1)
-        ret.append(vector)
+    for (i, e) in y.elements().enumerated() {
+        ret[i, Int(e)] = NDArray(scalar: 1)
     }
     
-    return NDArray.stack(ret)
+    return ret
 }
 
 #endif

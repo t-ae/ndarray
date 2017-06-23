@@ -7,46 +7,84 @@ class AcceleratePerformanceTests: XCTestCase {
     
     // MARK: - Add
     func testAdd_BLAS() {
-        let count = 10_000_000
+        let count = 1_000_000
         let a = [Float](repeating: 1, count: count)
         let b = [Float](repeating: 1, count: count)
         
         measure {
-            var ans = b
-            ans.withUnsafeMutableBufferPointer { p in
-                cblas_saxpy(Int32(count), 1, a, 1, p.baseAddress!, 1)
+            for _ in 0..<100 {
+                var ans = b
+                ans.withUnsafeMutableBufferPointer { p in
+                    cblas_saxpy(Int32(count), 1, a, 1, p.baseAddress!, 1)
+                }
+            }
+        }
+    }
+    
+    func testAdd_ATLAS() {
+        let count = 1_000_000
+        let a = [Float](repeating: 1, count: count)
+        let b = [Float](repeating: 1, count: count)
+        
+        measure {
+            for _ in 0..<100 {
+                var ans = b
+                ans.withUnsafeMutableBufferPointer { p in
+                    catlas_saxpby(Int32(count), 1, a, 1, 1, p.baseAddress!, 1)
+                }
             }
         }
     }
 
     func testAdd_vDSP() {
-        let count = 10_000_000
+        let count = 1_000_000
         let a = [Float](repeating: 1, count: count)
         let b = [Float](repeating: 1, count: count)
         measure {
-            var ans = [Float](repeating: 1, count: count)
-            vDSP_vadd(a, 1, b, 1, &ans, 1, vDSP_Length(count))
+            for _ in 0..<100 {
+                var ans = [Float](repeating: 1, count: count)
+                vDSP_vadd(a, 1, b, 1, &ans, 1, vDSP_Length(count))
+            }
         }
     }
     
     // MARK: scalar add
-    func testAddA() {
-        let count = 10_000_000
+    func testAddScalar_BLAS() {
+        let count = 1_000_000
         let a = [Float](repeating: 0, count: count)
         let b: [Float] = [1]
-        var ans = [Float](repeating: 0, count: count)
         measure {
-            vDSP_vadd(a, 1, b, 0, &ans, 1, vDSP_Length(count))
+            for _ in 0..<100 {
+                var ans = a
+                ans.withUnsafeMutableBufferPointer { p in
+                    cblas_saxpy(Int32(count), 1, b, 0, p.baseAddress!, 1)
+                }
+            }
         }
     }
     
-    func testAddB() {
-        let count = 10_000_000
+    func testAddScalar_vDSP1() {
+        let count = 1_000_000
         let a = [Float](repeating: 0, count: count)
         let b: [Float] = [1]
-        var ans = [Float](repeating: 0, count: count)
         measure {
-            vDSP_vsadd(a, 1, b, &ans, 1, vDSP_Length(count))
+            for _ in 0..<100 {
+                var ans = [Float](repeating: 0, count: count)
+                vDSP_vadd(a, 1, b, 0, &ans, 1, vDSP_Length(count))
+            }
+        }
+    }
+    
+    func testAddScalar_vDSP2() {
+        let count = 1_000_000
+        let a = [Float](repeating: 0, count: count)
+        let b: [Float] = [1]
+        
+        measure {
+            for _ in 0..<100 {
+                var ans = [Float](repeating: 0, count: count)
+                vDSP_vsadd(a, 1, b, &ans, 1, vDSP_Length(count))
+            }
         }
     }
     
@@ -54,26 +92,32 @@ class AcceleratePerformanceTests: XCTestCase {
     func testMatmul_BLAS() {
         let M: Int32 = 1000
         let N: Int32 = 1000
-        let K: Int32 = 1000
+        let K: Int32 = 300
         let a = [Float](repeating: 1, count: Int(M*K))
         let b = [Float](repeating: 1, count: Int(K*N))
         var c = [Float](repeating: 0, count: Int(M*N))
 
         measure {
-            cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1, a, M, b, K, 0, &c, M)
+            for _ in 0..<100 {
+                cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                            M, N, K,
+                            1, a, K, b, N, 0, &c, N)
+            }
         }
     }
 
     func testMatmul_vDSP() {
         let M: vDSP_Length = 1000
         let N: vDSP_Length = 1000
-        let K: vDSP_Length = 1000
+        let K: vDSP_Length = 300
         let a = [Float](repeating: 1, count: Int(M*K))
         let b = [Float](repeating: 1, count: Int(K*N))
         var c = [Float](repeating: 0, count: Int(M*N))
         
         measure {
-            vDSP_mmul(a, 1, b, 1, &c, 1, M, N, K)
+            for _ in 0..<100 {
+                vDSP_mmul(a, 1, b, 1, &c, 1, M, N, K)
+            }
         }
     }
     
