@@ -5,6 +5,31 @@ import Accelerate
 #if !SWIFT_PACKAGE
 class AcceleratePerformanceTests: XCTestCase {
     
+    // MARK: - Negate
+    func testNegate_BLAS() {
+        let count = 1_000_000
+        let a = [Float](repeating: 1, count: count)
+        measure {
+            for _ in 0..<100 {
+                var ans = [Float](repeating: 0, count: count)
+                ans.withUnsafeMutableBufferPointer { p in
+                    cblas_saxpy(Int32(count), -1, a, 1, p.baseAddress!, 1)
+                }
+            }
+        }
+    }
+    
+    func testNegate_vDSP() {
+        let count = 1_000_000
+        let a = [Float](repeating: 1, count: count)
+        measure {
+            for _ in 0..<100 {
+                var ans = [Float](repeating: 0, count: count)
+                vDSP_vneg(a, 1, &ans, 1, vDSP_Length(count))
+            }
+        }
+    }
+    
     // MARK: - Add
     func testAdd_BLAS() {
         let count = 1_000_000
