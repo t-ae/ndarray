@@ -54,16 +54,14 @@ extension CountableRange: NDArrayIndexElementProtocol { }
 
 func toNDArrayIndexElement(_ arg: NDArrayIndexElementProtocol) -> NDArrayIndexElement {
     switch arg {
-    case is Int:
-        return NDArrayIndexElement(single: arg as! Int)
-    case is CountableRange<Int>:
-        let arg = arg as! CountableRange<Int>
-        return NDArrayIndexElement(start: arg.startIndex, end: arg.endIndex)
-    case is OneSidedRange:
-        let arg = arg as! OneSidedRange
-        return NDArrayIndexElement(start: arg.start, end: arg.end)
-    case is NDArrayIndexElement:
-        return arg as! NDArrayIndexElement
+    case let x as Int:
+        return NDArrayIndexElement(single: x)
+    case let x as CountableRange<Int>:
+        return NDArrayIndexElement(start: x.startIndex, end: x.endIndex)
+    case let x as OneSidedRange:
+        return NDArrayIndexElement(start: x.start, end: x.end)
+    case let x as NDArrayIndexElement:
+        return x
     default:
         preconditionFailure("\(arg.self) can't convert to NDArrayIndexElement.")
     }
