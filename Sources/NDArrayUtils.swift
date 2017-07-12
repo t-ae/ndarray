@@ -277,6 +277,17 @@ extension Array {
     }
 }
 
+extension ArraySlice {
+    func all(cond: (Element)->Bool) -> Bool {
+        for e in self {
+            if !cond(e) {
+                return false
+            }
+        }
+        return true
+    }
+}
+
 extension Sequence where Iterator.Element == Int {
     func sum() -> Int {
         var ret = 0

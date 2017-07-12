@@ -118,10 +118,10 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     let strDims = min(getStridedDims(shape: dstShape, strides: dstStrides),
                       getStridedDims(shape: newValue.shape, strides: newValue.strides))
     
-    let majorShape = [Int](dstShape.dropLast(strDims))
+    let majorShape = dstShape.dropLast(strDims)
     
-    let srcMajorStrides = [Int](newValue.strides.dropLast(strDims))
-    let dstMajorStrides = [Int](dstStrides.dropLast(strDims))
+    let srcMajorStrides = newValue.strides.dropLast(strDims)
+    let dstMajorStrides = dstStrides.dropLast(strDims)
     
     newValue.withUnsafePointer { src in
         array.data.withUnsafeMutablePointer {

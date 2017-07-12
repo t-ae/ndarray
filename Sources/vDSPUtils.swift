@@ -104,9 +104,9 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_vv_func) -> NDArray 
     let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),
                       getStridedDims(shape: rhs.shape, strides: rhs.strides))
     
-    let majorShape = [Int](lhs.shape.dropLast(strDims))
-    let lMajorStrides = [Int](lhs.strides.dropLast(strDims))
-    let rMajorStrides = [Int](rhs.strides.dropLast(strDims))
+    let majorShape = lhs.shape.dropLast(strDims)
+    let lMajorStrides = lhs.strides.dropLast(strDims)
+    let rMajorStrides = rhs.strides.dropLast(strDims)
     
     let lStride = vDSP_Stride(lhs.strides.last ?? 0)
     let rStride = vDSP_Stride(rhs.strides.last ?? 0)
@@ -152,11 +152,12 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> ND
     precondition(arg.shape[axis] > 0, "Can't reduce along zero-size axis.")
     
     let newShape = arg.shape.removing(at: axis)
+    let newStrides = arg.strides.removing(at: axis)
     let volume = newShape.prod()
     
     var dst = NDArrayData<Float>(size: volume)
     
-    let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
+    let offsets = OffsetSequence(shape: newShape, strides: newStrides)
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
@@ -171,7 +172,7 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> ND
         }
     }
     
-    return NDArray(shape: newShape, elements: dst)
+    return NDArray(shape: [Int](newShape), elements: dst)
 }
 
 typealias vDSP_index_reduce_func = (UnsafePointer<Float>, vDSP_Stride, UnsafeMutablePointer<Float>, UnsafeMutablePointer<vDSP_Length>, vDSP_Length) -> Void
@@ -182,12 +183,13 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
     precondition(arg.shape[axis] > 0, "Can't reduce along zero-size axis.")
     
     let newShape = arg.shape.removing(at: axis)
+    let newStrides = arg.strides.removing(at: axis)
     let volume = newShape.prod()
     
     var dst = NDArrayData<vDSP_Length>(size: volume)
     var e: Float = 0
     
-    let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
+    let offsets = OffsetSequence(shape: newShape, strides: newStrides)
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
@@ -213,5 +215,5 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
         }
     }
     
-    return NDArray(shape: newShape, elements: elements)
+    return NDArray(shape: [Int](newShape), elements: elements)
 }

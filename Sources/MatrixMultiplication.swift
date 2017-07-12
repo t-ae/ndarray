@@ -17,7 +17,7 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     precondition(rhs.shape[rhs.ndim-2] == Int(K), "Incompatible shapes: \(lhs.shape) and \(rhs.shape)")
     
     let (lhs, rhs) = matmulBroadcast(lhs, rhs)
-    let majorShape = [Int](lhs.shape.dropLast(2))
+    let majorShape = lhs.shape.dropLast(2)
     
     let matrixSize = Int(M*N)
     let majorSize = majorShape.prod()
@@ -28,8 +28,8 @@ public func matmul(_ lhs: NDArray, _ rhs: NDArray) -> NDArray {
     let ldb = Int32(rhs.strides[rhs.ndim-2])
     
     let offsets = BinaryOffsetSequence(shape: majorShape,
-                                       lStrides: [Int](lhs.strides.dropLast(2)),
-                                       rStrides: [Int](rhs.strides.dropLast(2)))
+                                       lStrides: lhs.strides.dropLast(2),
+                                       rStrides: rhs.strides.dropLast(2))
 
     withUnsafePointers(lhs, rhs) { lp, rp in
         dst.withUnsafeMutablePointer {

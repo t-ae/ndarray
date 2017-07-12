@@ -115,12 +115,13 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
     precondition(arg.shape[axis] > 0, "Can't reduce along zero-size axis.")
     
     let newShape = arg.shape.removing(at: axis)
+    let newStrides = arg.strides.removing(at: axis)
     let volume = newShape.prod()
     
     var dstMean = NDArrayData<Float>(size: volume)
     var dstVar = NDArrayData<Float>(size: volume)
     
-    let offsets = OffsetSequence(shape: newShape, strides: arg.strides.removing(at: axis))
+    let offsets = OffsetSequence(shape: newShape, strides: newStrides)
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
@@ -144,6 +145,6 @@ private func _moments(_ arg: NDArray, along axis: Int) -> (mean: NDArray, varian
         }
     }
     
-    return (mean: NDArray(shape: newShape, elements: dstMean),
-            variance: NDArray(shape: newShape, elements: dstVar))
+    return (mean: NDArray(shape: [Int](newShape), elements: dstMean),
+            variance: NDArray(shape: [Int](newShape), elements: dstVar))
 }

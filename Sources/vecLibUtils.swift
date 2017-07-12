@@ -24,8 +24,8 @@ func apply(_ arg: NDArray, _ vvfunc: vvUnaryFunc) -> NDArray {
         let volume = arg.volume
         let strDims = getStridedDims(shape: arg.shape, strides: arg.strides)
         
-        let majorShape = [Int](arg.shape.dropLast(strDims))
-        let majorStrides = [Int](arg.strides.dropLast(strDims))
+        let majorShape = arg.shape.dropLast(strDims)
+        let majorStrides = arg.strides.dropLast(strDims)
         let blockSize = arg.shape.suffix(strDims).prod()
         
         var dst = NDArrayData<Float>(size: volume)
@@ -71,9 +71,9 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vvfunc: vvBinaryFunc) -> NDArray {
         let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),
                           getStridedDims(shape: rhs.shape, strides: rhs.strides))
         
-        let majorShape = [Int](lhs.shape.dropLast(strDims))
-        let lMajorStrides = [Int](lhs.strides.dropLast(strDims))
-        let rMajorStrides = [Int](rhs.strides.dropLast(strDims))
+        let majorShape = lhs.shape.dropLast(strDims)
+        let lMajorStrides = lhs.strides.dropLast(strDims)
+        let rMajorStrides = rhs.strides.dropLast(strDims)
         let blockSize = lhs.shape.suffix(strDims).prod()
         
         let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: lMajorStrides, rStrides: rMajorStrides)

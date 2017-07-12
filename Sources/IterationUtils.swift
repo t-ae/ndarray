@@ -1,16 +1,21 @@
 
-// MARK: - Offset
+// MARK: - Unary
 struct OffsetSequence: Sequence {
     typealias Iterator = OffsetIterator
     
-    let shape: [Int]
-    let strides: [Int]
+    let shape: ArraySlice<Int>
+    let strides: ArraySlice<Int>
     
-    init(shape: [Int], strides: [Int]) {
+    init(shape: ArraySlice<Int>, strides: ArraySlice<Int>) {
         assert(shape.all { $0 >= 0 })
         assert(shape.count == strides.count)
         self.shape = shape
         self.strides = strides
+    }
+    
+    init(shape: [Int], strides: [Int]) {
+        self.init(shape: shape[0..<shape.count],
+                  strides: strides[0..<strides.count])
     }
     
     func makeIterator() -> OffsetIterator {
@@ -21,12 +26,12 @@ struct OffsetSequence: Sequence {
 struct OffsetIterator: IteratorProtocol {
     typealias Element = Int
     
-    let shape: [Int]
-    let strides: [Int]
+    let shape: ArraySlice<Int>
+    let strides: ArraySlice<Int>
     var index: [Int]
     var offset: Int?
     
-    init(shape: [Int], strides: [Int]) {
+    init(shape: ArraySlice<Int>, strides: ArraySlice<Int>) {
         assert(shape.all { $0 >= 0 })
         assert(shape.count == strides.count)
         self.shape = shape
@@ -69,16 +74,23 @@ struct OffsetIterator: IteratorProtocol {
 struct BinaryOffsetSequence: Sequence {
     typealias Iterator = BinaryOffsetIterator
     
-    let shape: [Int]
-    let lStrides: [Int]
-    let rStrides: [Int]
+    let shape: ArraySlice<Int>
+    let lStrides: ArraySlice<Int>
+    let rStrides: ArraySlice<Int>
     
-    init(shape: [Int], lStrides: [Int], rStrides: [Int]) {
+    init(shape: ArraySlice<Int>, lStrides: ArraySlice<Int>, rStrides: ArraySlice<Int>) {
         assert(shape.all { $0 >= 0 })
         assert(shape.count == lStrides.count && shape.count == rStrides.count)
         self.shape = shape
         self.lStrides = lStrides
         self.rStrides = rStrides
+    }
+    
+    init(shape: [Int], lStrides: [Int], rStrides: [Int]) {
+        self.init(shape: shape[0..<shape.count],
+                  lStrides: lStrides[0..<lStrides.count],
+                  rStrides: rStrides[0..<rStrides.count])
+        
     }
     
     func makeIterator() -> BinaryOffsetIterator {
@@ -90,13 +102,13 @@ struct BinaryOffsetSequence: Sequence {
 struct BinaryOffsetIterator: IteratorProtocol {
     typealias Element = (l: Int, r: Int)
     
-    let shape: [Int]
-    let lStrides: [Int]
-    let rStrides: [Int]
+    let shape: ArraySlice<Int>
+    let lStrides: ArraySlice<Int>
+    let rStrides: ArraySlice<Int>
     var index: [Int]
     var offset: (l: Int, r: Int)?
     
-    init(shape: [Int], lStrides: [Int], rStrides: [Int]) {
+    init(shape: ArraySlice<Int>, lStrides: ArraySlice<Int>, rStrides: ArraySlice<Int>) {
         assert(shape.all { $0 >= 0 })
         assert(shape.count == lStrides.count && shape.count == rStrides.count)
         self.shape = shape
