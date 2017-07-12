@@ -113,6 +113,29 @@ class AcceleratePerformanceTests: XCTestCase {
         }
     }
     
+    // Scalar multiply scalar add
+    func testSMSA_BLAS() {
+        let count = 5_000_000
+        let a = [Float](repeating: 1, count: count)
+        
+        measure {
+            var y = [Float](repeating: 1, count: count)
+            cblas_saxpy(Int32(count), 1, a, 1, &y, 1)
+        }
+    }
+    
+    func testSMSA_vDSP() {
+        let count = 5_000_000
+        let a = [Float](repeating: 1, count: count)
+        
+        measure {
+            var mul: Float = 1
+            var add: Float = 1
+            var y = [Float](repeating: 0, count: count)
+            vDSP_vsmsa(a, 1, &mul, &add, &y, 1, vDSP_Length(count))
+        }
+    }
+    
     // MARK: - Matmul
     func testMatmul_BLAS() {
         let M: Int32 = 1000
