@@ -63,7 +63,7 @@ func toNDArrayIndexElement(_ arg: NDArrayIndexElementProtocol) -> NDArrayIndexEl
     case let x as NDArrayIndexElement:
         return x
     default:
-        preconditionFailure("\(arg.self) can't convert to NDArrayIndexElement.")
+        preconditionFailure("\(type(of: arg)) can't convert to NDArrayIndexElement.")
     }
 }
 
