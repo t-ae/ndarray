@@ -51,9 +51,11 @@ func getContiguousStrides(shape: [Int]) -> [Int] {
     guard !shape.isEmpty else {
         return []
     }
-    var strides = [1]
-    for s in shape.dropFirst().reversed() {
-        strides.insert(strides[0]*s, at: 0)
+    var stride = 1
+    var strides = [Int](repeating: 1, count: shape.count)
+    for (i, s) in shape.dropFirst().reversed().enumerated() {
+        stride *= s
+        strides[shape.count-i-2] = stride
     }
     return strides
 }
