@@ -6,9 +6,10 @@ import Accelerate
 typealias vDSP_unary_func = (UnsafePointer<Float>, vDSP_Stride,
     UnsafeMutablePointer<Float>, vDSP_Stride, vDSP_Length) -> Void
 
+
 func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
-        let count = zip(arg.shape, arg.strides).reduce(1) { acc, v in v.1 == 0 ? acc : acc*v.0 }
+        let count = denseDataCount(shape: arg.shape, strides: arg.strides)
         var dst = NDArrayData<Float>(size: count)
         
         arg.withUnsafePointer { src in

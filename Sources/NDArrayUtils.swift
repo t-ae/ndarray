@@ -34,6 +34,17 @@ func isDense(shape: [Int], strides: [Int]) -> Bool {
     }
 }
 
+func denseDataCount(shape: [Int], strides: [Int]) -> Int {
+    assert(isDense(shape: shape, strides: strides))
+    var ret = 1
+    for (sh, st) in zip(shape, strides) {
+        if st != 0 {
+            ret *= sh
+        }
+    }
+    return ret
+}
+
 /// Get contiguous strides.
 func getContiguousStrides(shape: [Int]) -> [Int] {
     assert(shape.all { $0 >= 0 })
