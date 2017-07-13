@@ -68,12 +68,14 @@ struct NDArrayData<T>: Collection {
         return new
     }
     
+    @inline(__always)
     func withUnsafePointer<R>(_ body: (UnsafePointer<T>) throws -> R) rethrows -> R {
         return try buffer.withUnsafeMutablePointerToElements {
             try body(UnsafePointer($0))
         }
     }
     
+    @inline(__always)
     mutating func withUnsafeMutablePointer<R>(_ body: (UnsafeMutablePointer<T>) throws -> R) rethrows -> R {
         ensureUniquelyReferenced()
         return try buffer.withUnsafeMutablePointerToElements(body)
