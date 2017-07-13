@@ -139,4 +139,37 @@ class UtilsTests: XCTestCase {
         XCTAssertEqual(lhs.strides, [3, 1, 0])
         XCTAssertEqual(rhs.strides, [0, 0, 1])
     }
+    
+    func testCreateBinaryOffsetSequences() {
+        let shape = [2, 3, 4]
+        let strides = [12, 4, 1]
+        do {
+            let offsets = createBinaryOffsetSequence(shape: shape,
+                                                     lStrides: strides, rStrides: strides,
+                                                     axis: 0, dims: 1)
+            let result = offsets.map { $0.l }
+            XCTAssertEqual(result, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+        }
+        do {
+            let offsets = createBinaryOffsetSequence(shape: shape,
+                                                     lStrides: strides, rStrides: strides,
+                                                     axis: 1, dims: 1)
+            let result = offsets.map { $0.l }
+            XCTAssertEqual(result, [0, 1, 2, 3, 12, 13, 14, 15])
+        }
+        do {
+            let offsets = createBinaryOffsetSequence(shape: shape,
+                                                     lStrides: strides, rStrides: strides,
+                                                     axis: 2, dims: 1)
+            let result = offsets.map { $0.l }
+            XCTAssertEqual(result, [0, 4, 8, 12, 16, 20])
+        }
+        do {
+            let offsets = createBinaryOffsetSequence(shape: shape,
+                                                     lStrides: strides, rStrides: strides,
+                                                     axis: 2, dims: 2)
+            let result = offsets.map { $0.l }
+            XCTAssertEqual(result, [0, 12])
+        }
+    }
 }

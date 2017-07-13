@@ -23,26 +23,23 @@ func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
                        baseOffset: 0,
                        data: dst)
     } else {
-        let ndim = arg.ndim
         let volume = arg.volume
         
         let axis = getLeastStrideAxis(arg.strides)
         let srcStride = arg.strides[axis]
         let dims = getStridedDims(shape: arg.shape, strides: arg.strides, from: axis)
         
-        let outerShape = [Int](arg.shape[0..<axis-dims+1] + arg.shape[axis+1..<ndim])
-        let outerStrides = [Int](arg.strides[0..<axis-dims+1] + arg.strides[axis+1..<ndim])
-        let blockSize = arg.shape[axis-dims+1...axis].prod()
-        
         let dstStrides = getContiguousStrides(shape: arg.shape)
-        let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
-        
         let dstStride = dstStrides[axis]
         
-        var dst = NDArrayData<Float>(size: volume)
+        let offsets = createBinaryOffsetSequence(shape: arg.shape,
+                                                 lStrides: arg.strides, rStrides: dstStrides,
+                                                 axis: axis, dims: dims)
         
-        let offsets = BinaryOffsetSequence(shape: outerShape, lStrides: outerStrides, rStrides: dstOuterStrides)
+        let blockSize = arg.shape[axis-dims+1...axis].prod()
         let _blockSize = vDSP_Length(blockSize)
+        
+        var dst = NDArrayData<Float>(size: volume)
         
         arg.withUnsafePointer { src in
             dst.withUnsafeMutablePointer { dstHead in

@@ -143,7 +143,6 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
     
     let arg = arg.squeezed()
     let volume = arg.volume
-    let ndim = arg.ndim
     
     if isContiguous(shape: arg.shape, strides: arg.strides) {
         if volume == arg.data.count {
@@ -157,12 +156,12 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
 
         let axis = getLeastStrideAxis(arg.strides)
         let dims = getStridedDims(shape: arg.shape, strides: arg.strides, from: axis)
-    
-        let outerShape = [Int](arg.shape[0..<axis-dims+1] + arg.shape[axis+1..<ndim])
-        let outerStrides = [Int](arg.strides[0..<axis-dims+1] + arg.strides[axis+1..<ndim])
         
         let dstStrides = getContiguousStrides(shape: arg.shape)
-        let dstOuterStrides = [Int](dstStrides[0..<axis-dims+1] + dstStrides[axis+1..<ndim])
+        
+        let offsets = createBinaryOffsetSequence(shape: arg.shape,
+                                                 lStrides: arg.strides, rStrides: dstStrides,
+                                                 axis: axis, dims: dims)
         
         var dst = NDArrayData<Float>(size: volume)
         
@@ -173,9 +172,7 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
                              dst: $0,
                              dstStride: dstStrides[axis],
                              blockSize: arg.shape[axis-dims+1...axis].prod(),
-                             offsets: BinaryOffsetSequence(shape: outerShape,
-                                                           lStrides: outerStrides,
-                                                           rStrides: dstOuterStrides))
+                             offsets: offsets)
             }
         }
         
@@ -206,6 +203,39 @@ func copyElements(src: UnsafePointer<Float>,
                     _srcStride,
                     dst + od,
                     _dstStride)
+    }
+}
+
+func createBinaryOffsetSequence(shape: [Int],
+                                lStrides: [Int],
+                                rStrides: [Int],
+                                axis: Int,
+                                dims: Int) -> BinaryOffsetSequence {
+    
+    assert(lStrides.count == rStrides.count)
+    assert(0 <= axis && axis < lStrides.count)
+    assert(0 <= axis - dims + 1)
+    
+    let ndim = lStrides.count
+    
+    if axis == ndim-1 {
+        let outerShape = shape[0..<axis-dims+1]
+        let outerLStrides = lStrides[0..<axis-dims+1]
+        let outerRStrides = rStrides[0..<axis-dims+1]
+        
+        return BinaryOffsetSequence(shape: outerShape, lStrides: outerLStrides, rStrides: outerRStrides)
+    } else if axis - dims + 1 == 0 {
+        let outerShape = shape[axis+1..<ndim]
+        let outerLStrides = lStrides[axis+1..<ndim]
+        let outerRStrides = rStrides[axis+1..<ndim]
+        
+        return BinaryOffsetSequence(shape: outerShape, lStrides: outerLStrides, rStrides: outerRStrides)
+    } else {
+        let outerShape = [Int](shape[0..<axis-dims+1] + shape[axis+1..<ndim])
+        let outerLStrides = [Int](lStrides[0..<axis-dims+1] + lStrides[axis+1..<ndim])
+        let outerRStrides = [Int](rStrides[0..<axis-dims+1] + rStrides[axis+1..<ndim])
+        
+        return BinaryOffsetSequence(shape: outerShape, lStrides: outerLStrides, rStrides: outerRStrides)
     }
 }
 
