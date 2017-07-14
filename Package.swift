@@ -3,5 +3,8 @@
 import PackageDescription
 
 let package = Package(
-    name: "NDArray"
+    name: "NDArray",
+    dependencies: [
+        .Package(url: "https://github.com/t-ae/xorswift.git", majorVersion: 0)
+    ]
 )
