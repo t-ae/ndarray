@@ -1,40 +1,37 @@
 
 import Foundation
-import Accelerate
+import Xorswift
 
 extension NDArray {
     /// Create randomly initialized NDArray.
     ///
     /// All values are sampled from the interval [`low`, `high`).
     public static func uniform(low: Float = 0, high: Float = 1, shape: [Int]) -> NDArray {
-        precondition(shape.all { $0 >= 0 })
-        let size = shape.prod()
-        var dst1 = NDArrayData<UInt32>(size: size)
-        var dst2 = NDArrayData<Float>(size: size)
+        precondition(shape.all { $0 >= 0 }, "Invalid shape: \(shape)")
+        precondition(low < high, "low(\(low) is not less than high(\(high)))")
         
-        withUnsafeMutablePointers(&dst1, &dst2) { p0, p1 in
-            arc4random_buf(p0, MemoryLayout<UInt32>.size * size)
-            
-            vDSP_vfltu32(p0, 1, p1, 1, vDSP_Length(size))
-            
-            var factor = (high - low) / Float(UInt32.max)
-            var low = low
-            vDSP_vsmsa(p1, 1, &factor, &low, p1, 1, vDSP_Length(size))
+        let size = shape.prod()
+        var buf = NDArrayData<Float>(size: size)
+        buf.withUnsafeMutablePointer {
+            xorshift_uniform(start: $0, count: size, low: low, high: high)
         }
         
-        return NDArray(shape: shape, elements: dst2)
+        return NDArray(shape: shape, elements: buf)
     }
     
     /// Create randomly initialized NDArray.
     ///
     /// All elements are sampled from N(mu, sigma).
     public static func normal(mu: Float = 0, sigma: Float = 1, shape: [Int]) -> NDArray {
-        // Box-Muller's method
-        let u1 = uniform(low: Float.leastNonzeroMagnitude, high: 1, shape: shape)
-        let u2 = uniform(low: Float.leastNonzeroMagnitude, high: 1, shape: shape)
+        precondition(shape.all { $0 >= 0 }, "Invalid shape: \(shape)")
+        precondition(sigma >= 0, "sigma < 0")
         
-        let stdNormal =  sqrt(-2*log(u1)) * cos(2*Float.pi*u2)
+        let size = shape.prod()
+        var buf = NDArrayData<Float>(size: size)
+        buf.withUnsafeMutablePointer {
+            xorshift_normal(start: $0, count: size, mu: mu, sigma: sigma)
+        }
         
-        return stdNormal*sigma + mu
+        return NDArray(shape: shape, elements: buf)
     }
 }
