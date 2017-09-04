@@ -33,7 +33,7 @@ class SubscriptTests: XCTestCase {
             XCTAssertEqual(a[1..<2][nil, 1..<3], NDArray([[[12, 13, 14],
                                                            [15, 16, 17]]]))
             
-            XCTAssertEqual(a[0..<0], NDArray.empty([0, 3, 3]))
+            XCTAssertEqual(a[0..<0], NDArray.zeros([0, 3, 3]))
         }
         do {
             // uncontiguous

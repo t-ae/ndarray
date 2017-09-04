@@ -2,14 +2,14 @@ public struct NDArray {
     /// Shape of NDArray.
     public internal(set) var shape: [Int]
     /// Source of elements.
-    var data: NDArrayData<Float>
+    var data: [Float]
     
     /// Strides for each dimensions.
     public internal(set) var strides: [Int]
     /// Base offset of data.
     public internal(set) var baseOffset: Int
     
-    init(shape:[Int], strides: [Int], baseOffset: Int, data: NDArrayData<Float>) {
+    init(shape:[Int], strides: [Int], baseOffset: Int, data: [Float]) {
         assert(shape.count == strides.count)
         assert(shape.all { $0 >= 0 })
         assert(0 <= baseOffset && (baseOffset < data.count || data.isEmpty))
@@ -19,25 +19,19 @@ public struct NDArray {
         self.baseOffset = baseOffset
     }
     
-    init(shape: [Int], elements: NDArrayData<Float>) {
+    /// Create contiguous NDArray.
+    public init(shape: [Int], elements: [Float]) {
+        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
+        precondition(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
         self.init(shape: shape,
                   strides: getContiguousStrides(shape: shape),
                   baseOffset: 0,
                   data: elements)
     }
     
-    /// Init with contiguous strides.
-    public init(shape: [Int], elements: [Float]) {
-        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
-        precondition(shape.prod() == elements.count, "Elements count must correspond to product of shape.")
-        
-        self.init(shape: shape,
-                  elements: NDArrayData(elements))
-    }
-    
     /// Get all elements.
     public func elements() -> [Float] {
-        return gatherElements(self).asArray()
+        return gatherElements(self)
     }
     
     /// Get single element.
@@ -72,11 +66,11 @@ extension NDArray: Equatable {
         let lhs = gatherElements(lhs)
         let rhs = gatherElements(rhs)
         
-        return lhs.withUnsafePointer { lp in
-            rhs.withUnsafePointer { rp in
-                var lp = lp
-                var rp = rp
-                for _ in 0..<lhs.count {
+        return lhs.withUnsafeBufferPointer {
+            var lp = $0.baseAddress!
+            return rhs.withUnsafeBufferPointer {
+                var rp = $0.baseAddress!
+                for _ in 0..<$0.count {
                     guard lp.pointee == rp.pointee else {
                         return false
                     }

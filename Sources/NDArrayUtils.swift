@@ -139,7 +139,7 @@ func getStridedDims(shape: [Int], strides: [Int], from axis: Int) -> Int {
 }
 
 /// Gather elements.
-func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
+func gatherElements(_ arg: NDArray) -> [Float] {
     
     let arg = arg.squeezed()
     let volume = arg.volume
@@ -150,7 +150,7 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
         } else {
             let start = arg.baseOffset
             let end = start + volume
-            return arg.data[start..<end]
+            return [Float](arg.data[start..<end])
         }
     } else {
 
@@ -163,13 +163,13 @@ func gatherElements(_ arg: NDArray) -> NDArrayData<Float> {
                                                  lStrides: arg.strides, rStrides: dstStrides,
                                                  axis: axis, dims: dims)
         
-        var dst = NDArrayData<Float>(size: volume)
+        var dst = [Float](repeating: 0, count: volume)
         
         arg.withUnsafePointer { p in
-            dst.withUnsafeMutablePointer {
+            dst.withUnsafeMutableBufferPointer {
                 copyElements(src: p,
                              srcStride: arg.strides[axis],
-                             dst: $0,
+                             dst: $0.baseAddress!,
                              dstStride: dstStrides[axis],
                              blockSize: arg.shape[axis-dims+1...axis].prod(),
                              offsets: offsets)
@@ -271,9 +271,9 @@ func normalizeAxis(axis: Int, ndim: Int) -> Int {
 
 extension NDArray {
     @inline(__always)
-    func withUnsafePointer<R>(_ body: (UnsafePointer<Float>) throws -> R) rethrows -> R{
-        return try data.withUnsafePointer {
-            try body($0 + baseOffset)
+    func withUnsafePointer<R>(_ body: (UnsafePointer<Float>) throws -> R) rethrows -> R {
+        return try data.withUnsafeBufferPointer {
+            try body($0.baseAddress! + baseOffset)
         }
     }
 }
@@ -334,89 +334,5 @@ extension Sequence where Iterator.Element == Int {
             ret *= e
         }
         return ret
-    }
-}
-
-// MARK: - Pointer combination
-// MARK: NDArray
-@inline(__always)
-func withUnsafePointers<R>(_ array0: NDArray,
-                           _ array1: NDArray,
-                           _ body: (UnsafePointer<Float>, UnsafePointer<Float>) throws -> R) rethrows -> R {
-    return try array0.withUnsafePointer { p0 in
-        try array1.withUnsafePointer { p1 in
-            try body(p0, p1)
-        }
-    }
-}
-
-// MARK: NDArrayData
-@inline(__always)
-func withUnsafePointers<T, R>(_ list: [NDArrayData<T>],
-                              _ body: @escaping ([UnsafePointer<T>]) throws -> R) rethrows -> R {
-    
-    func process(_ list: [NDArrayData<T>], _ ptrs: [UnsafePointer<T>]) throws -> R {
-        if list.isEmpty {
-            return try body(ptrs)
-        } else {
-            return try list.first!.withUnsafePointer { p in
-                try process(Array(list.dropFirst()), ptrs + [p])
-            }
-        }
-    }
-    
-    return try process(list, [])
-}
-
-@inline(__always)
-func withUnsafePointers<T0, T1, R>(_ data0: NDArrayData<T0>,
-                                   _ data1: NDArrayData<T1>,
-                                   _ body: (UnsafePointer<T0>, UnsafePointer<T1>) throws -> R) rethrows -> R {
-    return try data0.withUnsafePointer { p0 in
-        try data1.withUnsafePointer { p1 in
-            try body(p0, p1)
-        }
-    }
-}
-
-@inline(__always)
-func withUnsafeMutablePointers<T0, T1, R>(_ data0: inout NDArrayData<T0>,
-                                          _ data1: inout NDArrayData<T1>,
-                                          _ body: (UnsafeMutablePointer<T0>, UnsafeMutablePointer<T1>) throws -> R) rethrows -> R {
-    return try data0.withUnsafeMutablePointer { p0 in
-        try data1.withUnsafeMutablePointer { p1 in
-            try body(p0, p1)
-        }
-    }
-}
-
-@inline(__always)
-func withUnsafeMutablePointers<T0, T1, T2, R>(_ data0: inout NDArrayData<T0>,
-                                              _ data1: inout NDArrayData<T1>,
-                                              _ data2: inout NDArrayData<T2>,
-                                              _ body: (UnsafeMutablePointer<T0>, UnsafeMutablePointer<T1>, UnsafeMutablePointer<T2>) throws -> R) rethrows -> R {
-    return try data0.withUnsafeMutablePointer { p0 in
-        try data1.withUnsafeMutablePointer { p1 in
-            try data2.withUnsafeMutablePointer { p2 in
-                try body(p0, p1, p2)
-            }
-        }
-    }
-}
-
-@inline(__always)
-func withUnsafeMutablePointers<T0, T1, T2, T3, R>(_ data0: inout NDArrayData<T0>,
-                                                  _ data1: inout NDArrayData<T1>,
-                                                  _ data2: inout NDArrayData<T2>,
-                                                  _ data3: inout NDArrayData<T3>,
-                                                  _ body: (UnsafeMutablePointer<T0>, UnsafeMutablePointer<T1>, UnsafeMutablePointer<T2>, UnsafeMutablePointer<T3>) throws -> R) rethrows -> R {
-    return try data0.withUnsafeMutablePointer { p0 in
-        try data1.withUnsafeMutablePointer { p1 in
-            try data2.withUnsafeMutablePointer { p2 in
-                try data3.withUnsafeMutablePointer { p3 in
-                    try body(p0, p1, p2, p3)
-                }
-            }
-        }
     }
 }

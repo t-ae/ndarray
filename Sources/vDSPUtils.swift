@@ -10,11 +10,12 @@ typealias vDSP_unary_func = (UnsafePointer<Float>, vDSP_Stride,
 func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
     if isDense(shape: arg.shape, strides: arg.strides) {
         let count = denseDataCount(shape: arg.shape, strides: arg.strides)
-        var dst = NDArrayData<Float>(size: count)
+        var dst = [Float](repeating: 0, count: count)
         
-        arg.withUnsafePointer { src in
-            dst.withUnsafeMutablePointer {
-                vDSPfunc(src, 1, $0, 1, vDSP_Length(count))
+        arg.withUnsafePointer { src in 
+            dst.withUnsafeMutableBufferPointer {
+                let dst = $0.baseAddress!
+                vDSPfunc(src, 1, dst, 1, vDSP_Length(count))
             }
         }
         
@@ -39,10 +40,11 @@ func apply(_ arg: NDArray, _ vDSPfunc: vDSP_unary_func) -> NDArray {
         let blockSize = arg.shape[axis-dims+1...axis].prod()
         let _blockSize = vDSP_Length(blockSize)
         
-        var dst = NDArrayData<Float>(size: volume)
+        var dst = [Float](repeating: 0, count: volume)
         
         arg.withUnsafePointer { src in
-            dst.withUnsafeMutablePointer { dstHead in
+            dst.withUnsafeMutableBufferPointer {
+                let dstHead = $0.baseAddress!
                 for (os, od) in offsets {
                     let src = src + os
                     let dst = dstHead + od
@@ -96,7 +98,7 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_vv_func) -> NDArray 
     let (lhs, rhs) = broadcast(lhs, rhs)
     
     let volume = lhs.volume
-    var dst = NDArrayData<Float>(size: volume)
+    var dst = [Float](repeating: 0, count: volume)
     
     let strDims = min(getStridedDims(shape: lhs.shape, strides: lhs.strides),
                       getStridedDims(shape: rhs.shape, strides: rhs.strides))
@@ -112,14 +114,16 @@ func apply(_ lhs: NDArray, _ rhs: NDArray, _ vDSPfunc: vDSP_vv_func) -> NDArray 
     
     let offsets = BinaryOffsetSequence(shape: majorShape, lStrides: lMajorStrides, rStrides: rMajorStrides)
     
-    withUnsafePointers(lhs, rhs) { lp, rp in
-        dst.withUnsafeMutablePointer { dst in
-            var dst = dst
-            for (lo, ro) in offsets {
-                vDSPfunc(lp + lo, lStride,
-                         rp + ro, rStride,
-                         dst, 1, _blockSize)
-                dst += blockSize
+    lhs.withUnsafePointer { lp in
+        rhs.withUnsafePointer { rp in
+            dst.withUnsafeMutableBufferPointer {
+                var dst = $0.baseAddress!
+                for (lo, ro) in offsets {
+                    vDSPfunc(lp + lo, lStride,
+                             rp + ro, rStride,
+                             dst, 1, _blockSize)
+                    dst += blockSize
+                }
             }
         }
     }
@@ -136,8 +140,8 @@ func reduce(_ arg: NDArray, _ vDSPfunc: vDSP_reduce_func) -> NDArray {
     precondition(arg.shape.all { $0 > 0 }, "Can't reduce zero-size array.")
     let elements = gatherElements(arg)
     var result: Float = 0
-    elements.withUnsafePointer {
-        vDSPfunc($0, 1, &result, vDSP_Length(elements.count))
+    elements.withUnsafeBufferPointer {
+        vDSPfunc($0.baseAddress!, 1, &result, vDSP_Length(elements.count))
     }
     return NDArray(scalar: result)
 }
@@ -152,15 +156,15 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_reduce_func) -> ND
     let newStrides = arg.strides.removing(at: axis)
     let volume = newShape.prod()
     
-    var dst = NDArrayData<Float>(size: volume)
+    var dst = [Float](repeating:0, count: volume)
     
     let offsets = OffsetSequence(shape: newShape, strides: newStrides)
     let count = vDSP_Length(arg.shape[axis])
     let stride = arg.strides[axis]
     
     arg.withUnsafePointer { src in
-        dst.withUnsafeMutablePointer { dst in
-            var dst = dst
+        dst.withUnsafeMutableBufferPointer {
+            var dst = $0.baseAddress!
             for offset in offsets {
                 let src = src + offset
                 vDSPfunc(src, stride, dst, count)
@@ -183,7 +187,7 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
     let newStrides = arg.strides.removing(at: axis)
     let volume = newShape.prod()
     
-    var dst = NDArrayData<vDSP_Length>(size: volume)
+    var dst = [vDSP_Length](repeating: 0, count: volume)
     var e: Float = 0
     
     let offsets = OffsetSequence(shape: newShape, strides: newStrides)
@@ -191,8 +195,8 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
     let stride = arg.strides[axis]
     
     arg.withUnsafePointer { src in
-        dst.withUnsafeMutablePointer {
-            var dstPtr = $0
+        dst.withUnsafeMutableBufferPointer {
+            var dstPtr = $0.baseAddress!
             for offset in offsets {
                 let src = src + offset
                 vDSPfunc(src, stride, &e, dstPtr, count)
@@ -201,9 +205,9 @@ func reduce(_ arg: NDArray, along axis: Int, _ vDSPfunc: vDSP_index_reduce_func)
         }
     }
     
-    var elements = NDArrayData<Float>(size: volume)
-    elements.withUnsafeMutablePointer { p in
-        var p = p
+    var elements = [Float](repeating: 0, count: volume)
+    elements.withUnsafeMutableBufferPointer {
+        var p = $0.baseAddress!
         let stride = UInt(stride)
         for i in dst {
             // all indices are multiplied with stride.

@@ -9,17 +9,6 @@ class CreationTests: XCTestCase {
         XCTAssertEqual(a, NDArray([[[0, 0], [0, 0]], [[0, 0], [0, 0]]]))
     }
     
-    func testEmpty() {
-        do {
-            let a = NDArray.empty([2, 2, 2])
-            XCTAssertEqual(a.shape, [2, 2, 2])
-            print(a.elements())
-        }
-        do {
-            let a = NDArray.empty([0, 2, 2])
-            XCTAssertEqual(a, NDArray(shape: [0, 2, 2], elements: []))
-        }
-    }
     
     func testEye() {
         do {

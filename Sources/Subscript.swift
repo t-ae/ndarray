@@ -124,10 +124,10 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     let dstMajorStrides = dstStrides.dropLast(strDims)
     
     newValue.withUnsafePointer { src in
-        array.data.withUnsafeMutablePointer {
+        array.data.withUnsafeMutableBufferPointer {
             copyElements(src: src,
                          srcStride: newValue.strides.last ?? 1,
-                         dst: $0.advanced(by: array.baseOffset + dstOffset),
+                         dst: $0.baseAddress!.advanced(by: array.baseOffset + dstOffset),
                          dstStride: dstStrides.last ?? 1,
                          blockSize: dstShape.suffix(strDims).prod(),
                          offsets: BinaryOffsetSequence(shape: majorShape,

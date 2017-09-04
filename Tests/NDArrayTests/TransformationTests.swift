@@ -95,7 +95,7 @@ class TransformationTests: XCTestCase {
             let a = NDArray(shape: [3, 3],
                             strides: [3, 0],
                             baseOffset: 1,
-                            data: NDArrayData([0, 1, 2, 3, 4, 5, 6, 7, 8]))
+                            data: [0, 1, 2, 3, 4, 5, 6, 7, 8])
             XCTAssertEqual(a.flipped(0),
                            NDArray([[7, 7, 7],
                                     [4, 4, 4],
@@ -113,7 +113,7 @@ class TransformationTests: XCTestCase {
             let a = NDArray(shape: [3, 3],
                             strides: [0, 1],
                             baseOffset: 3,
-                            data: NDArrayData([0, 1, 2, 3, 4, 5, 6, 7, 8]))
+                            data: [0, 1, 2, 3, 4, 5, 6, 7, 8])
             XCTAssertEqual(a.flipped(0),
                            NDArray([[3, 4, 5],
                                     [3, 4, 5],

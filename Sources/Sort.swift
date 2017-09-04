@@ -12,9 +12,9 @@ public func sort(_ arg: NDArray, along axis: Int = -1, ascending: Bool = true) -
     
     var data = gatherElements(transposed)
     
-    data.withUnsafeMutablePointer { p in
-        var p = p
-        for _ in 0..<data.count/size {
+    data.withUnsafeMutableBufferPointer {
+        var p = $0.baseAddress!
+        for _ in 0..<$0.count/size {
             vDSP_vsort(p, vDSP_Length(size), ascending ? 1 : -1)
             p += size
         }

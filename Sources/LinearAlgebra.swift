@@ -47,41 +47,42 @@ public func determinant(_ arg: NDArray) throws -> NDArray {
     
     let numMatrices = arg.volume / (size*size)
     
-    var pivots = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: size)
-    defer { pivots.deallocate(capacity: size) }
+    var pivots = [__CLPK_integer](repeating: 0, count: size)
     
     var n = __CLPK_integer(size)
     let _n = UnsafeMutablePointer(&n)
     
     var info: __CLPK_integer = 0
     
-    var out = NDArrayData<Float>(size: numMatrices)
+    var out = [Float](repeating: 0, count: numMatrices)
     
-    try withUnsafeMutablePointers(&elements, &out) { ptr, dst in
-        var ptr = ptr
-        var dst = dst
-        for _ in 0..<numMatrices {
-            // LU decomposition
-            sgetrf_(_n, _n, ptr, _n, pivots, &info)
-            if info < 0 {
-                throw LinearAlgebraError.IrregalValue(func: "sgetrf_", nth: -Int(info))
-            } else if info > 0 {
-                throw LinearAlgebraError.SingularMatrix
-            }
-            
-            // prod
-            var magnitude: Float = 1
-            var sign: Float = 1
-            let p = pivots
-            for i in 0..<size {
-                magnitude *= ptr.advanced(by: i*(size+1)).pointee
-                if (p+i).pointee != __CLPK_integer(i+1) {
-                    sign *= -1
+    try elements.withUnsafeMutableBufferPointer {
+        var ptr = $0.baseAddress!
+        try out.withUnsafeMutableBufferPointer {
+            var dst = $0.baseAddress!
+            for _ in 0..<numMatrices {
+                // LU decomposition
+                sgetrf_(_n, _n, ptr, _n, &pivots, &info)
+                if info < 0 {
+                    throw LinearAlgebraError.IrregalValue(func: "sgetrf_", nth: -Int(info))
+                } else if info > 0 {
+                    throw LinearAlgebraError.SingularMatrix
                 }
+                
+                // prod
+                var magnitude: Float = 1
+                var sign: Float = 1
+                let p = pivots
+                for i in 0..<size {
+                    magnitude *= ptr.advanced(by: i*(size+1)).pointee
+                    if p[i] != __CLPK_integer(i+1) {
+                        sign *= -1
+                    }
+                }
+                dst.pointee = sign * magnitude
+                ptr += size*size
+                dst += 1
             }
-            dst.pointee = sign * magnitude
-            ptr += size*size
-            dst += 1
         }
     }
     
@@ -104,27 +105,22 @@ public func inv(_ arg: NDArray) throws -> NDArray {
     
     var n = __CLPK_integer(size)
     let _n = UnsafeMutablePointer(&n)
-    var pivots = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: size)
-    var workspace = UnsafeMutablePointer<__CLPK_real>.allocate(capacity: size)
+    var pivots = [__CLPK_integer](repeating: 0, count: size)
+    var workspace = [__CLPK_real](repeating: 0, count: size)
     var info: __CLPK_integer = 0
     
-    defer {
-        pivots.deallocate(capacity: size)
-        workspace.deallocate(capacity: size)
-    }
-    
-    try elements.withUnsafeMutablePointer { ptr in
-        var ptr = ptr
+    try elements.withUnsafeMutableBufferPointer {
+        var ptr = $0.baseAddress!
         for _ in 0..<numMatrices {
             
-            sgetrf_(_n, _n, ptr, _n, pivots, &info)
+            sgetrf_(_n, _n, ptr, _n, &pivots, &info)
             if info < 0 {
                 throw LinearAlgebraError.IrregalValue(func: "sgetrf_", nth: -Int(info))
             } else if info > 0 {
                 throw LinearAlgebraError.SingularMatrix
             }
             
-            sgetri_(_n, ptr, _n, pivots, workspace, _n, &info)
+            sgetri_(_n, ptr, _n, &pivots, &workspace, _n, &info)
             if info < 0 {
                 throw LinearAlgebraError.IrregalValue(func: "sgetri_", nth: -Int(info))
             } else if info > 0 {
@@ -157,64 +153,65 @@ public func svd(_ arg: NDArray, fullMatrices: Bool = true) throws -> (U: NDArray
     var ldu = _m
     let minMN = min(m, n)
     let lwork = 3*minMN*minMN + max(max(m, n), 4*minMN*minMN + 4*minMN)
-    let work = UnsafeMutablePointer<Float>.allocate(capacity: lwork)
+    var work = [Float](repeating: 0, count: lwork)
     var _lwork = __CLPK_integer(lwork)
-    let iwork = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: 8*minMN)
+    var iwork = [__CLPK_integer](repeating: 0, count: 8*minMN)
     var info: __CLPK_integer = 0
-    defer {
-        work.deallocate(capacity: lwork)
-        iwork.deallocate(capacity: 8*minMN)
-    }
     
     var jobz: Int8
-    var u: NDArrayData<Float>
-    var s = NDArrayData<Float>(size: outerVolume * minMN)
-    var vt: NDArrayData<Float>
+    var u: [Float]
+    var s = [Float](repeating: 0, count: outerVolume * minMN)
+    var vt: [Float]
     let ucols: Int
     let vtrows: Int
     var ldvt: __CLPK_integer
     
     if fullMatrices {
         jobz = Int8(UnicodeScalar("A")!.value)
-        u = NDArrayData<Float>(size: outerVolume * m * m)
-        vt = NDArrayData<Float>(size: outerVolume * n * n)
+        u = [Float](repeating: 0, count: outerVolume * m * m)
+        vt = [Float](repeating: 0, count: outerVolume * n * n)
         ucols = m
         vtrows = n
         ldvt = __CLPK_integer(n)
     } else {
         jobz = Int8(UnicodeScalar("S")!.value)
-        u = NDArrayData<Float>(size: outerVolume * minMN * m)
-        vt = NDArrayData<Float>(size: outerVolume * minMN * n)
-         vt = NDArrayData<Float>(value: 0, count: outerVolume * minMN * n)
+        u = [Float](repeating: 0, count: outerVolume * minMN * m)
+        vt = [Float](repeating: 0, count: outerVolume * minMN * n)
         ucols = minMN
         vtrows = minMN
         ldvt = __CLPK_integer(minMN)
     }
     
-    try withUnsafeMutablePointers(&elements, &u, &s, &vt)  { ep, u, s, vt in
-        var ep = ep
-        var u = u
-        var s = s
-        var vt = vt
-        
-        for _ in 0..<outerVolume {
-            sgesdd_(&jobz, &_m, &_n,
-                    ep, &lda,
-                    s,
-                    u, &ldu,
-                    vt, &ldvt,
-                    work, &_lwork, iwork, &info)
-            
-            if info < 0 {
-                throw LinearAlgebraError.IrregalValue(func: "sgesdd_", nth: -Int(info))
-            } else if info > 0 {
-                throw LinearAlgebraError.NotConverged
+    try elements.withUnsafeMutableBufferPointer {
+        var ep = $0.baseAddress!
+        try u.withUnsafeMutableBufferPointer {
+            var u = $0.baseAddress!
+            try s.withUnsafeMutableBufferPointer {
+                var s = $0.baseAddress!
+                try vt.withUnsafeMutableBufferPointer {
+                    var vt = $0.baseAddress!
+                    
+                    for _ in 0..<outerVolume {
+                        sgesdd_(&jobz, &_m, &_n,
+                                ep, &lda,
+                                s,
+                                u, &ldu,
+                                vt, &ldvt,
+                                &work, &_lwork, &iwork, &info)
+                        
+                        if info < 0 {
+                            throw LinearAlgebraError.IrregalValue(func: "sgesdd_", nth: -Int(info))
+                        } else if info > 0 {
+                            throw LinearAlgebraError.NotConverged
+                        }
+                        
+                        ep += m*n
+                        u += m*ucols
+                        s += minMN
+                        vt += vtrows*n
+                    }
+                }
             }
-            
-            ep += m*n
-            u += m*ucols
-            s += minMN
-            vt += vtrows*n
         }
     }
     
@@ -266,24 +263,23 @@ public func matrixRank(_ arg: NDArray, tol: Float? = nil) -> Int {
     let _lddummy = UnsafeMutablePointer(&lddummy)
     
     let lwork = 3*min(m, n) + 2*max(max(m, n), 6*min(m, n)) // not optimal size
-    let work = UnsafeMutablePointer<Float>.allocate(capacity: lwork)
+    var work = [Float](repeating: 0, count: lwork)
     var _lwork = __CLPK_integer(lwork)
-    let iwork = UnsafeMutablePointer<__CLPK_integer>.allocate(capacity: 8*min(m, n))
+    var iwork = [__CLPK_integer](repeating: 0, count: 8*min(m, n))
     var info: __CLPK_integer = 0
-    var s = NDArrayData<Float>(size: min(m, n))
+    var s = [Float](repeating: 0, count: min(m, n))
     
-    defer {
-        work.deallocate(capacity: lwork)
-        iwork.deallocate(capacity: 8*min(m, n))
-    }
-    
-    withUnsafeMutablePointers(&a, &s) { a, s -> Void in
-        sgesdd_(&jobz, &_n, &_m,
-                a, &lda,
-                s,
-                _dummy, _lddummy,
-                _dummy, _lddummy,
-                work,  &_lwork, iwork, &info)
+    a.withUnsafeMutableBufferPointer {
+        let a = $0.baseAddress!
+        s.withUnsafeMutableBufferPointer {
+            let s = $0.baseAddress!
+            sgesdd_(&jobz, &_n, &_m,
+                    a, &lda,
+                    s,
+                    _dummy, _lddummy,
+                    _dummy, _lddummy,
+                    &work,  &_lwork, &iwork, &info)
+        }
     }
     
     assert(info == 0)

@@ -34,20 +34,13 @@ extension NDArray {
         let newShape = shape.inserting(sizes.sum(), at: axis)
         let volume = newShape.prod()
         
-        var dst = NDArrayData<Float>(size: volume)
+        var dst = [Float](repeating: 0, count: volume)
         
-        withUnsafePointers(elementsList) { srcs in
-            dst.withUnsafeMutablePointer {
-                var srcs = srcs
-                var dstPtr = $0
-                for _ in 0..<majorShape.prod() {
-                    for i in 0..<srcs.count {
-                        let size = blockSize*sizes[i]
-                        cblas_scopy(Int32(size), srcs[i], 1, dstPtr, 1)
-                        srcs[i] += size
-                        dstPtr += size
-                    }
-                }
+        var start = 0
+        for m in 0..<majorShape.prod() {
+            for (e, size) in zip(elementsList, sizes) {
+                dst.replaceSubrange(start..<start+size*blockSize, with: e[m*size*blockSize..<(m+1)*size*blockSize])
+                start += size*blockSize
             }
         }
         

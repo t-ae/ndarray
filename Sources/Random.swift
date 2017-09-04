@@ -11,9 +11,9 @@ extension NDArray {
         precondition(low < high, "low(\(low) is not less than high(\(high)))")
         
         let size = shape.prod()
-        var buf = NDArrayData<Float>(size: size)
-        buf.withUnsafeMutablePointer {
-            xorshift_uniform(start: $0, count: size, low: low, high: high)
+        var buf = [Float](repeating: 0, count: size)
+        buf.withUnsafeMutableBufferPointer {
+            xorshift_uniform(start: $0.baseAddress!, count: size, low: low, high: high)
         }
         
         return NDArray(shape: shape, elements: buf)
@@ -27,9 +27,9 @@ extension NDArray {
         precondition(sigma >= 0, "sigma < 0")
         
         let size = shape.prod()
-        var buf = NDArrayData<Float>(size: size)
-        buf.withUnsafeMutablePointer {
-            xorshift_normal(start: $0, count: size, mu: mu, sigma: sigma)
+        var buf = [Float](repeating: 0, count: size)
+        buf.withUnsafeMutableBufferPointer {
+            xorshift_normal(start: $0.baseAddress!, count: size, mu: mu, sigma: sigma)
         }
         
         return NDArray(shape: shape, elements: buf)

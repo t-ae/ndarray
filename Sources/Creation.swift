@@ -5,7 +5,7 @@ extension NDArray {
     /// Create NDArray filled with specified values.
     public static func filled(_ value: Float, shape: [Int]) -> NDArray {
         precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
-        return NDArray(shape: shape, elements: NDArrayData(value: value, count: shape.prod()))
+        return NDArray(shape: shape, elements: [Float](repeating: value, count: shape.prod()))
     }
     
     /// Create NDArray filled with 0s.
@@ -18,19 +18,12 @@ extension NDArray {
         return filled(1, shape: shape)
     }
     
-    /// Create uninitialized NDArray
-    public static func empty(_ shape: [Int]) -> NDArray {
-        precondition(shape.all { $0 >= 0 }, "Shape(\(shape)) contains minus value.")
-        
-        return NDArray(shape: shape, elements: NDArrayData(size: shape.prod()))
-    }
-    
     /// Create identity matrix.
     public static func eye(_ size: Int) -> NDArray {
         precondition(size >= 0, "Size(\(size)) must >= 0.")
-        var data = NDArrayData<Float>(value: 0, count: size*size)
-        data.withUnsafeMutablePointer { p in
-            var p = p
+        var data = [Float](repeating: 0, count: size*size)
+        data.withUnsafeMutableBufferPointer {
+            var p = $0.baseAddress!
             for _ in 0..<size {
                 p.pointee = 1
                 p += size + 1
@@ -63,9 +56,9 @@ extension NDArray {
     
     /// Create contiguous NDArray.
     public static func range(_ range: CountableRange<Int>) -> NDArray {
-        var elements = NDArrayData<Float>(size: range.count)
-        elements.withUnsafeMutablePointer { p in
-            var p = p
+        var elements = [Float](repeating: 0, count: range.count)
+        elements.withUnsafeMutableBufferPointer {
+            var p = $0.baseAddress!
             for e in range {
                 p.pointee = Float(e)
                 p += 1
@@ -84,9 +77,9 @@ extension NDArray {
     ///
     /// `count` elements are in the interval [low, high].
     public static func linspace(low: Float, high: Float, count: Int) -> NDArray {
-        var elements = NDArrayData<Float>(size: count)
-        elements.withUnsafeMutablePointer { p in
-            var p = p
+        var elements = [Float](repeating: 0, count: count)
+        elements.withUnsafeMutableBufferPointer {
+            var p = $0.baseAddress!
             for v in 0..<count {
                 p.pointee = low + (high-low)*Float(v)/Float(count-1)
                 p += 1
