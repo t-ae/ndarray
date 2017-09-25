@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Xorswift",
+        "repositoryURL": "https://github.com/t-ae/xorswift.git",
+        "state": {
+          "branch": null,
+          "revision": "f4852d9f5996a51f19acf79ef352771cd810a07d",
+          "version": "0.0.8"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

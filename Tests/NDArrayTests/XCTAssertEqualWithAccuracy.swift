@@ -2,7 +2,7 @@
 import XCTest
 @testable import NDArray
 
-func XCTAssertEqualWithAccuracy(_ expression1: NDArray,
+func XCTAssertEqual(_ expression1: NDArray,
                                 _ expression2: NDArray,
                                 accuracy: Float,
                                 file: StaticString = #file,
@@ -13,6 +13,6 @@ func XCTAssertEqualWithAccuracy(_ expression1: NDArray,
     let elements2 = gatherElements(expression2)
     
     for (e1, e2) in zip(elements1, elements2) {
-        XCTAssertEqualWithAccuracy(e1, e2, accuracy: accuracy, file: file, line: line)
+        XCTAssertEqual(e1, e2, accuracy: accuracy, file: file, line: line)
     }
 }

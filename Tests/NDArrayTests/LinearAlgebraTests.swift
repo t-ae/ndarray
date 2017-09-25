@@ -88,7 +88,7 @@ class LinearAlgebraTests: XCTestCase {
             let a = NDArray([[1, 2, 3],
                              [1, 3, 5],
                              [2, 4, 5]])
-            XCTAssertEqualWithAccuracy(try! inv(a),
+            XCTAssertEqual(try! inv(a),
                                        NDArray([[ 5, -2, -1],
                                                 [-5,  1,  2],
                                                 [ 2,  0, -1]]),
@@ -96,7 +96,7 @@ class LinearAlgebraTests: XCTestCase {
         }
         do {
             let a = NDArray.range(8).reshaped([2, 2, 2])
-            XCTAssertEqualWithAccuracy(try! inv(a),
+            XCTAssertEqual(try! inv(a),
                                        NDArray([[[-1.5,  0.5],
                                                  [ 1 ,  0 ]],
                                                 [[-3.5,  2.5],
@@ -112,7 +112,7 @@ class LinearAlgebraTests: XCTestCase {
             var S = NDArray.zeros([4, 2])
             S[0..<2, 0..<2] = NDArray.diagonal(s)
             let ans = u |*| S |*| vt
-            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+            XCTAssertEqual(ans, a, accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(12).reshaped([4, 3])
@@ -120,7 +120,7 @@ class LinearAlgebraTests: XCTestCase {
             var S = NDArray.zeros([4, 3])
             S[0..<3, 0..<3] = NDArray.diagonal(s)
             let ans = u |*| S |*| vt
-            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+            XCTAssertEqual(ans, a, accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(3*4*5).reshaped([3, 4, 5])
@@ -128,25 +128,25 @@ class LinearAlgebraTests: XCTestCase {
             var S = NDArray.zeros([3, 4, 5])
             S[nil, 0..<4, 0..<4] = NDArray.diagonal(s)
             let ans = u |*| S |*| vt
-            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-3)
+            XCTAssertEqual(ans, a, accuracy: 1e-3)
         }
         do {
             let a = NDArray.range(1..<9).reshaped([4, 2])
             let (u, s, vt) = try! svd(a, fullMatrices: false)
             let ans = u |*| (s.expandDims(-1) * vt)
-            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+            XCTAssertEqual(ans, a, accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(1..<9).reshaped([2, 4])
             let (u, s, vt) = try! svd(a, fullMatrices: false)
             let ans = u |*| (s.expandDims(-1) * vt)
-            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+            XCTAssertEqual(ans, a, accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(12).reshaped([3, 4])
             let (u, s, vt) = try! svd(a, fullMatrices: false)
             let ans = u |*| (s.expandDims(-1) * vt)
-            XCTAssertEqualWithAccuracy(ans, a, accuracy: 1e-5)
+            XCTAssertEqual(ans, a, accuracy: 1e-5)
         }
     }
     
@@ -154,13 +154,13 @@ class LinearAlgebraTests: XCTestCase {
         do {
             let a = NDArray([[1, 0],
                              [0, 1]])
-            XCTAssertEqualWithAccuracy(try! pinv(a), a, accuracy: 1e-3)
+            XCTAssertEqual(try! pinv(a), a, accuracy: 1e-3)
         }
         do {
             let a = NDArray([[1, 2, 3],
                              [1, 3, 5],
                              [2, 4, 5]])
-            XCTAssertEqualWithAccuracy(try! pinv(a),
+            XCTAssertEqual(try! pinv(a),
                                        NDArray([[ 5, -2, -1],
                                                 [-5,  1,  2],
                                                 [ 2,  0, -1]]),
@@ -169,21 +169,21 @@ class LinearAlgebraTests: XCTestCase {
         do {
             let a = NDArray.range(3*4).reshaped([3, 4])
             let apinv = try! pinv(a)
-            XCTAssertEqualWithAccuracy(a,
+            XCTAssertEqual(a,
                                        a |*| apinv |*| a,
                                        accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(3*4).reshaped([4, 3])
             let apinv = try! pinv(a)
-            XCTAssertEqualWithAccuracy(a,
+            XCTAssertEqual(a,
                                        a |*| apinv |*| a,
                                        accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(10*20).reshaped([10, 20])
             let apinv = try! pinv(a)
-            XCTAssertEqualWithAccuracy(a,
+            XCTAssertEqual(a,
                                        a |*| apinv |*| a,
                                        accuracy: 1e-3)
         }

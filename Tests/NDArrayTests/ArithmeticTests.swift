@@ -166,7 +166,7 @@ class ArithmeticTests: XCTestCase {
             let b: Float = 4
             XCTAssertEqual(a / b, NDArray([[0.25, 0.5],
                                            [1,    2]]))
-            XCTAssertEqualWithAccuracy(b / a,
+            XCTAssertEqual(b / a,
                                        NDArray([[4, 2],
                                                 [1, 0.5]]),
                                        accuracy: 1e-5)
@@ -178,7 +178,7 @@ class ArithmeticTests: XCTestCase {
             let c: [[Float]] = [[0, 1.0/4],
                                 [2, 3.0/4]]
             
-            XCTAssertEqualWithAccuracy(a/b, NDArray(c), accuracy: 1e-5)
+            XCTAssertEqual(a/b, NDArray(c), accuracy: 1e-5)
         }
     }
 }
