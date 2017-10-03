@@ -66,20 +66,7 @@ extension NDArray: Equatable {
         let lhs = gatherElements(lhs)
         let rhs = gatherElements(rhs)
         
-        return lhs.withUnsafeBufferPointer {
-            var lp = $0.baseAddress!
-            return rhs.withUnsafeBufferPointer {
-                var rp = $0.baseAddress!
-                for _ in 0..<$0.count {
-                    guard lp.pointee == rp.pointee else {
-                        return false
-                    }
-                    lp += 1
-                    rp += 1
-                }
-                return true
-            }
-        }
+        return lhs == rhs
     }
 }
 
