@@ -2,21 +2,21 @@
 import XCTest
 import NDArray
 
-class HamiltonianMonteCarloTests: XCTestCase {
+class HamiltonianMonteCarloExample: XCTestCase {
 
     static let mu = NDArray([[5], [0]])
     static let sigma = NDArray([[1, 0.5],
-                         [0.5, 1]])
+                                [0.5, 1]])
     static var sigma_inv = try! inv(sigma)
     
     var mu: NDArray {
-        return HamiltonianMonteCarloTests.mu
+        return HamiltonianMonteCarloExample.mu
     }
     var sigma: NDArray {
-        return HamiltonianMonteCarloTests.sigma
+        return HamiltonianMonteCarloExample.sigma
     }
     var sigma_inv: NDArray {
-        return HamiltonianMonteCarloTests.sigma_inv
+        return HamiltonianMonteCarloExample.sigma_inv
     }
     
     func log_normal(x: NDArray) -> NDArray {

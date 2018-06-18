@@ -3,7 +3,7 @@ import XCTest
 import NDArray
 
 #if !SWIFT_PACKAGE
-class IrisClassificationTests: XCTestCase {
+class IrisClassificationExample: XCTestCase {
 
     func testLogisticRegression() {
         

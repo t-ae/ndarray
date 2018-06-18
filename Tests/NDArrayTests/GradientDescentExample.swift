@@ -3,7 +3,7 @@ import XCTest
 import NDArray
 
 #if !SWIFT_PACKAGE
-class GradientDescentTests: XCTestCase {
+class GradientDescentExample: XCTestCase {
 
     func testGradientDescent() {
         // y = 0.3*x^2 + 0.2*x + 0.1
