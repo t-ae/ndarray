@@ -47,7 +47,7 @@ extension NDArray {
     public func squeezed() -> NDArray {
         var x = self
         x.shape = shape.filter { $0 != 1 }
-        x.strides = zip(strides, shape).flatMap { stride, size in
+        x.strides = zip(strides, shape).compactMap { stride, size in
             size == 1 ? nil : stride
         }
         return x

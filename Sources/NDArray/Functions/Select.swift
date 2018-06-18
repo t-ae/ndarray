@@ -20,7 +20,7 @@ extension NDArray {
     
     /// Create new NDArray which contains only rows fufill `predicate` with index.
     public func select(where predicate: (Int, NDArray)->Bool) -> NDArray {
-        let filtered = enumerated().flatMap { predicate($0, $1) ? $1 : nil }
+        let filtered = enumerated().compactMap { predicate($0, $1) ? $1 : nil }
         guard !filtered.isEmpty else {
             return NDArray.zeros(shape.removing(at: 0).inserting(0, at: 0))
         }
@@ -33,12 +33,12 @@ extension NDArray {
         guard mask.contains(true) else {
             return NDArray.zeros(shape.removing(at: 0).inserting(0, at: 0))
         }
-        return NDArray.stack(zip(self, mask).flatMap { $1 ? $0 : nil })
+        return NDArray.stack(zip(self, mask).compactMap { $1 ? $0 : nil })
     }
     
     /// Get row indices which fulfill `predicate`.
     public func indices(where predicate: (NDArray)->Bool) -> [Int] {
-        return enumerated().flatMap { i, array in
+        return enumerated().compactMap { i, array in
             predicate(array) ? i : nil
         }
     }
