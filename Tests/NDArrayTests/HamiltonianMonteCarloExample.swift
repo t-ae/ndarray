@@ -51,6 +51,9 @@ class HamiltonianMonteCarloExample: XCTestCase {
     }
     
     func testHamiltonianMonteCarlo() {
+        
+        let sampleNum = 10000
+        
         let epsilon: Float = 0.1
         let steps = 30
         
@@ -58,7 +61,7 @@ class HamiltonianMonteCarloExample: XCTestCase {
         
         var samples: [NDArray] = []
         
-        for _ in 0..<10000 {
+        for _ in 0..<sampleNum {
             state = sample(state: state, epsilon: epsilon, steps: steps)
             samples.append(state)
         }
@@ -66,10 +69,9 @@ class HamiltonianMonteCarloExample: XCTestCase {
         let cat = NDArray.concat(samples, along: 1)
         
         XCTAssertEqual(mean(cat, along: 1), mu.squeezed(), accuracy: 0.1)
-        let c = cov(cat)
-        print(c)
-        print(variance(cat, along: 1))
         XCTAssertEqual(cov(cat), sigma, accuracy: 0.1)
+        
+        print("Accepted: \(samples.count)/\(sampleNum)")
         
         // csv output
 //        for row in cat.transposed(){
