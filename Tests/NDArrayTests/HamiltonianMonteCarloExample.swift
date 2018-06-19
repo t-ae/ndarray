@@ -3,7 +3,7 @@ import NDArray
 
 class HamiltonianMonteCarloExample: XCTestCase {
 
-    static let mu = NDArray([[5], [0]])
+    static let mu = NDArray([[30], [0]])
     static let sigma = NDArray([[1, 0.5],
                                 [0.5, 1]])
     static var sigma_inv = try! inv(sigma)
@@ -60,6 +60,11 @@ class HamiltonianMonteCarloExample: XCTestCase {
         var state = NDArray([[0], [0]])
         
         var samples: [NDArray] = []
+        
+        // burn in
+        for _ in 0..<sampleNum/10 {
+            state = sample(state: state, epsilon: epsilon, steps: steps)
+        }
         
         for _ in 0..<sampleNum {
             state = sample(state: state, epsilon: epsilon, steps: steps)
