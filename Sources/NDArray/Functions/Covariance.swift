@@ -1,6 +1,7 @@
 import Foundation
 
 /// Calculate covariance matrix.
+/// Each row of `arg` represents a variable, and each column a single observation of all those variables.
 public func cov(_ arg: NDArray) -> NDArray {
     var arg = arg
     switch arg.ndim {
