@@ -55,4 +55,9 @@ func testGradientDescent() {
 > answer  
 > theta: NDArray(shape: [3], data: [0.300824702, 0.199845955, 0.102966547], strides: [1], baseOffset: 0)  
 > loss: 0.00041115  
-> elapsed time: 0.166108965873718sec  s
+>elapsed time: 0.166108965873718sec  s
+
+## Examples
+- [Linear Regression with Gradient Decsent (& Normal Equasion)](https://github.com/t-ae/ndarray/blob/master/Tests/NDArrayTests/GradientDescentExample.swift)
+- [Classification of iris dataset with Neural Network](https://github.com/t-ae/ndarray/blob/master/Tests/NDArrayTests/IrisClassificationExample.swift)
+- [Sampling from 2D normal distributon with Hamiltonian Monte Carlo](https://github.com/t-ae/ndarray/blob/master/Tests/NDArrayTests/HamiltonianMonteCarloExample.swift)
