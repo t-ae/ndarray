@@ -1,4 +1,3 @@
-
 extension NDArray {
     
     /// Create new NDArray which contains only specified rows.

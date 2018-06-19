@@ -1,4 +1,3 @@
-
 import XCTest
 import NDArray
 
@@ -37,5 +36,4 @@ class CompoundAssignmentTests: XCTestCase {
                                        [3, 6]]))
         }
     }
-
 }

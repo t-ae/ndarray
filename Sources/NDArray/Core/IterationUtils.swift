@@ -1,4 +1,3 @@
-
 // MARK: - Unary
 struct OffsetSequence: Sequence {
     typealias Iterator = OffsetIterator

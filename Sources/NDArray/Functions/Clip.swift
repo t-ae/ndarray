@@ -1,4 +1,3 @@
-
 import Accelerate
 
 /// Get minimums for each pair elements

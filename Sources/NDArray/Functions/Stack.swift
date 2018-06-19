@@ -1,4 +1,3 @@
-
 import Accelerate
 
 extension NDArray {

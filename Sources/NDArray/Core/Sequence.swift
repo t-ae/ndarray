@@ -1,4 +1,3 @@
-
 extension NDArray: Sequence {
     
     public typealias Iterator = NDArrayIterator

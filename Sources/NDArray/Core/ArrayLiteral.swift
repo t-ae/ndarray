@@ -1,4 +1,3 @@
-
 extension NDArray {
     /// Create 1-D array.
     public init(_ array: [Float]) {

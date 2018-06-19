@@ -1,4 +1,3 @@
-
 import Accelerate
 
 /// Change the sign of `magnitude` to that of `sign`, element-wise.

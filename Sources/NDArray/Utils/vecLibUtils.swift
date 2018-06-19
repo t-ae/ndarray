@@ -1,4 +1,3 @@
-
 import Accelerate
 
 typealias vvUnaryFunc = (UnsafeMutablePointer<Float>, UnsafePointer<Float>, UnsafePointer<Int32>) -> Void

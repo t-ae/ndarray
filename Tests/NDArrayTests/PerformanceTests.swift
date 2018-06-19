@@ -1,4 +1,3 @@
-
 import XCTest
 import Accelerate
 @testable import NDArray

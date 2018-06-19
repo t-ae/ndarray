@@ -1,4 +1,3 @@
-
 import Accelerate
 
 /// Get minimum element.

@@ -1,4 +1,3 @@
-
 import Accelerate
 
 /// Check if elements are aligned contiguously.

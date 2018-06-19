@@ -1,4 +1,3 @@
-
 extension NDArray {
     /// Create scalar NDArray.
     public init(scalar: Float) {

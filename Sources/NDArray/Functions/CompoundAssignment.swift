@@ -1,4 +1,3 @@
-
 // MARK: - Scalar
 public func +=(lhs: inout NDArray, rhs: Float) {
     lhs = lhs + rhs

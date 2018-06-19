@@ -1,4 +1,3 @@
-
 import Accelerate
 
 // MARK: - Unary
