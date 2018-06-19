@@ -273,6 +273,20 @@ extension PerformanceTests {
         }
     }
 }
+
+extension PerformanceTests {
+    func testUnifrom() {
+        measure {
+            _ = NDArray.uniform(low: 0, high: 1, shape: [10000, 10000])
+        }
+    }
+    
+    func testNormal() {
+        measure {
+            _ = NDArray.normal(mu: 0, sigma: 1, shape: [1000, 1000])
+        }
+    }
+}
     
 extension PerformanceTests {
     func testMapElements() {
