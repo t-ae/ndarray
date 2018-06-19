@@ -30,8 +30,8 @@ class HamiltonianMonteCarloExample: XCTestCase {
         return (velocity.transposed() |*| velocity)/2 - log_normal(x: state)
     }
     
-    func sample(state: NDArray, epsilon: Float, tau: Float, steps: Int) -> NDArray {
-        let velocity = NDArray.normal(mu: 0, sigma: tau, shape: [2, 1])
+    func sample(state: NDArray, epsilon: Float, steps: Int) -> NDArray {
+        let velocity = NDArray.normal(mu: 0, sigma: 1, shape: [2, 1])
         
         var new_state = state
         var new_velocity = velocity
@@ -53,22 +53,29 @@ class HamiltonianMonteCarloExample: XCTestCase {
     
     func testHamiltonianMonteCarlo() {
         let epsilon: Float = 0.1
-        let tau: Float = 2.0
         let steps = 30
         
         var state = NDArray([[0], [0]])
         
         var samples: [NDArray] = []
         
-        for _ in 0..<1000 {
-            state = sample(state: state, epsilon: epsilon, tau: tau, steps: steps)
+        for _ in 0..<10000 {
+            state = sample(state: state, epsilon: epsilon, steps: steps)
             samples.append(state)
         }
         
         let cat = NDArray.concat(samples, along: 1)
-        for row in cat.transposed(){
-            //print("\(row[0].asScalar()), \(row[1].asScalar())")
-        }
+        
+        XCTAssertEqual(mean(cat, along: 1), mu.squeezed(), accuracy: 0.1)
+        let c = cov(cat)
+        print(c)
+        print(variance(cat, along: 1))
+        XCTAssertEqual(cov(cat), sigma, accuracy: 0.1)
+        
+        // csv output
+//        for row in cat.transposed(){
+//            print("\(row[0].asScalar()), \(row[1].asScalar())")
+//        }
     }
 
 }

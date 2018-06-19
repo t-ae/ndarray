@@ -32,7 +32,7 @@ class ReduceTests: XCTestCase {
     func testStd() {
         let a = NDArray.range(9).reshaped([3, 3])
         XCTAssertEqual(stddev(a, along: 0),
-                                   NDArray([ 2.44948974,  2.44948974,  2.44948974]),
-                                   accuracy: 1e-5)
+                       NDArray([ 2.44948974,  2.44948974,  2.44948974]),
+                       accuracy: 1e-5)
     }
 }
