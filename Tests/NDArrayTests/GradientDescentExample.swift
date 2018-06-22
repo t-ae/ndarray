@@ -54,7 +54,7 @@ class GradientDescentExample: XCTestCase {
         print("")
     }
     
-    func testNormalEquasion() {
+    func testNormalEquation() {
         // y = 0.3*x^2 + 0.2*x + 0.1
         let start = Date()
         
