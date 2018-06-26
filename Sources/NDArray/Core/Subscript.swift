@@ -22,7 +22,7 @@ extension NDArray {
 func getSubarray(array: NDArray, indices: [NDArrayIndexElementProtocol?]) -> NDArray {
     precondition(indices.count <= array.ndim, "Too many indices for NDArray.")
     
-    let indices = indices.map { $0.map(toNDArrayIndexElement) }
+    let indices = indices.map { $0.map { $0.getNDArrayIndexElement() } }
     
     var x = array
     
@@ -69,7 +69,7 @@ func setSubarray(array: inout NDArray, indices: [NDArrayIndexElementProtocol?], 
     
     precondition(indices.count <= array.ndim, "Too many indices for NDArray.")
     
-    let indices = indices.map { $0.map(toNDArrayIndexElement) }
+    let indices = indices.map { $0.map { $0.getNDArrayIndexElement() } }
     
     // Make array contiguous
     array.data = gatherElements(array)

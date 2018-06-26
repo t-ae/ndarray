@@ -160,31 +160,31 @@ class LinearAlgebraTests: XCTestCase {
                              [1, 3, 5],
                              [2, 4, 5]])
             XCTAssertEqual(try! pinv(a),
-                                       NDArray([[ 5, -2, -1],
-                                                [-5,  1,  2],
-                                                [ 2,  0, -1]]),
-                                       accuracy: 1e-5)
+                           NDArray([[ 5, -2, -1],
+                                    [-5,  1,  2],
+                                    [ 2,  0, -1]]),
+                           accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(3*4).reshaped([3, 4])
             let apinv = try! pinv(a)
             XCTAssertEqual(a,
-                                       a |*| apinv |*| a,
-                                       accuracy: 1e-5)
+                           a |*| apinv |*| a,
+                           accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(3*4).reshaped([4, 3])
             let apinv = try! pinv(a)
             XCTAssertEqual(a,
-                                       a |*| apinv |*| a,
-                                       accuracy: 1e-5)
+                           a |*| apinv |*| a,
+                           accuracy: 1e-5)
         }
         do {
             let a = NDArray.range(10*20).reshaped([10, 20])
             let apinv = try! pinv(a)
             XCTAssertEqual(a,
-                                       a |*| apinv |*| a,
-                                       accuracy: 1e-3)
+                           a |*| apinv |*| a,
+                           accuracy: 1e-3)
         }
     }
     

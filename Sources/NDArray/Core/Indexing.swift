@@ -1,4 +1,6 @@
-public protocol NDArrayIndexElementProtocol { }
+public protocol NDArrayIndexElementProtocol {
+    func getNDArrayIndexElement() -> NDArrayIndexElement
+}
 
 public struct NDArrayIndexElement: NDArrayIndexElementProtocol {
     var start: Int?
@@ -22,6 +24,10 @@ public struct NDArrayIndexElement: NDArrayIndexElementProtocol {
         self.end = nil
         self.stride = nil
     }
+    
+    public func getNDArrayIndexElement() -> NDArrayIndexElement {
+        return self
+    }
 }
 
 public struct OneSidedRange: NDArrayIndexElementProtocol {
@@ -31,6 +37,10 @@ public struct OneSidedRange: NDArrayIndexElementProtocol {
     init(start: Int?, end: Int?) {
         self.start = start
         self.end = end
+    }
+    
+    public func getNDArrayIndexElement() -> NDArrayIndexElement {
+        return NDArrayIndexElement(start: start, end: end)
     }
 }
 
@@ -49,21 +59,14 @@ public postfix func ...(lhs: Int) -> OneSidedRange {
     return OneSidedRange(start: lhs, end: nil)
 }
 
-extension Int: NDArrayIndexElementProtocol { }
-extension CountableRange: NDArrayIndexElementProtocol { }
-
-func toNDArrayIndexElement(_ arg: NDArrayIndexElementProtocol) -> NDArrayIndexElement {
-    switch arg {
-    case let x as Int:
-        return NDArrayIndexElement(single: x)
-    case let x as CountableRange<Int>:
-        return NDArrayIndexElement(start: x.startIndex, end: x.endIndex)
-    case let x as OneSidedRange:
-        return NDArrayIndexElement(start: x.start, end: x.end)
-    case let x as NDArrayIndexElement:
-        return x
-    default:
-        preconditionFailure("\(type(of: arg)) can't convert to NDArrayIndexElement.")
+extension Int: NDArrayIndexElementProtocol {
+    public func getNDArrayIndexElement() -> NDArrayIndexElement {
+        return NDArrayIndexElement(single: self)
+    }
+}
+extension CountableRange: NDArrayIndexElementProtocol where Element == Int {
+    public func getNDArrayIndexElement() -> NDArrayIndexElement {
+        return NDArrayIndexElement(start: startIndex, end: endIndex)
     }
 }
 
