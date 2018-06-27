@@ -274,7 +274,7 @@ extension PerformanceTests {
 }
 
 extension PerformanceTests {
-    func testUnifrom() {
+    func testUniform() {
         measure {
             _ = NDArray.uniform(low: 0, high: 1, shape: [10000, 10000])
         }

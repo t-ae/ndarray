@@ -6,7 +6,7 @@ public func cov(_ arg: NDArray) -> NDArray {
     var arg = arg
     switch arg.ndim {
     case 1:
-        arg = arg.reshaped(arg.shape.inserting(1, at: 0))
+        arg = arg.expandDims(0)
     case 2:
         break
     default:
