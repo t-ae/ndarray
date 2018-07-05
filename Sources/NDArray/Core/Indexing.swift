@@ -30,41 +30,33 @@ public struct NDArrayIndexElement: NDArrayIndexElementProtocol {
     }
 }
 
-public struct OneSidedRange: NDArrayIndexElementProtocol {
-    var start: Int?
-    var end: Int?
-    
-    init(start: Int?, end: Int?) {
-        self.start = start
-        self.end = end
-    }
-    
-    public func getNDArrayIndexElement() -> NDArrayIndexElement {
-        return NDArrayIndexElement(start: start, end: end)
-    }
-}
-
-prefix operator ..<
-public prefix func ..<(rhs: Int) -> OneSidedRange {
-    return OneSidedRange(start: nil, end: rhs)
-}
-
-prefix operator ..<-
-public prefix func ..<-(rhs: Int) -> OneSidedRange {
-    return OneSidedRange(start: nil, end: -rhs)
-}
-
-postfix operator ...
-public postfix func ...(lhs: Int) -> OneSidedRange {
-    return OneSidedRange(start: lhs, end: nil)
-}
-
 extension Int: NDArrayIndexElementProtocol {
     public func getNDArrayIndexElement() -> NDArrayIndexElement {
         return NDArrayIndexElement(single: self)
     }
 }
-extension CountableRange: NDArrayIndexElementProtocol where Element == Int {
+
+public protocol RangeIndexElement: NDArrayIndexElementProtocol {}
+
+extension PartialRangeFrom: NDArrayIndexElementProtocol, RangeIndexElement where Bound == Int {
+    public func getNDArrayIndexElement() -> NDArrayIndexElement {
+        return NDArrayIndexElement(start: self.lowerBound, end: nil)
+    }
+}
+
+extension PartialRangeUpTo: NDArrayIndexElementProtocol, RangeIndexElement where Bound == Int {
+    public func getNDArrayIndexElement() -> NDArrayIndexElement {
+        return NDArrayIndexElement(start: nil, end: upperBound)
+    }
+}
+
+extension PartialRangeThrough: NDArrayIndexElementProtocol, RangeIndexElement where Bound == Int {
+    public func getNDArrayIndexElement() -> NDArrayIndexElement {
+        return NDArrayIndexElement(start: nil, end: upperBound+1)
+    }
+}
+
+extension Range: NDArrayIndexElementProtocol, RangeIndexElement where Bound == Int {
     public func getNDArrayIndexElement() -> NDArrayIndexElement {
         return NDArrayIndexElement(start: startIndex, end: endIndex)
     }
@@ -80,24 +72,18 @@ prefix operator ~>
 infix operator ~>- : StridePrecedence
 prefix operator ~>-
 
-public func ~>(range: CountableRange<Int>, stride: Int) -> NDArrayIndexElement {
-    return NDArrayIndexElement(start: range.startIndex, end: range.endIndex, stride: stride)
+public func ~><I: RangeIndexElement>(range: I, stride: Int) -> NDArrayIndexElement {
+    var index = range.getNDArrayIndexElement()
+    index.stride = stride
+    return index
 }
 
-public func ~>(range: OneSidedRange, stride: Int) -> NDArrayIndexElement {
-    return NDArrayIndexElement(start: range.start, end: range.end, stride: stride)
+public func ~>-<I: RangeIndexElement>(range: I, stride: Int) -> NDArrayIndexElement {
+    return range ~> (-stride)
 }
 
 public prefix func ~>(stride: Int) -> NDArrayIndexElement {
     return NDArrayIndexElement(start: nil, end: nil, stride: stride)
-}
-
-public func ~>-(range: CountableRange<Int>, stride: Int) -> NDArrayIndexElement {
-    return range ~> (-stride)
-}
-
-public func ~>-(range: OneSidedRange, stride: Int) -> NDArrayIndexElement {
-    return range ~> (-stride)
 }
 
 public prefix func ~>-(stride: Int) -> NDArrayIndexElement {
