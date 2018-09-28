@@ -11,8 +11,10 @@ extension NDArray {
         
         let size = shape.prod()
         var buf = [Float](repeating: 0, count: size)
+        
         buf.withUnsafeMutableBufferPointer {
-            xorshift_uniform($0, low: low, high: high)
+            var gen = XorshiftGenerator()
+            gen.fillUniform($0, with: low..<high)
         }
         
         return NDArray(shape: shape, elements: buf)
@@ -28,7 +30,8 @@ extension NDArray {
         let size = shape.prod()
         var buf = [Float](repeating: 0, count: size)
         buf.withUnsafeMutableBufferPointer {
-            xorshift_normal($0, mu: mu, sigma: sigma)
+            var gen = XorshiftGenerator()
+            gen.fillNormal($0, mu: mu, sigma: sigma)
         }
         
         return NDArray(shape: shape, elements: buf)
