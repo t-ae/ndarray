@@ -1,7 +1,7 @@
 import XCTest
 @testable import NDArray
 
-func XCTAssertEqual(_ expression1: NDArray,
+public func XCTAssertEqual(_ expression1: NDArray,
                     _ expression2: NDArray,
                     accuracy: Float,
                     file: StaticString = #file,

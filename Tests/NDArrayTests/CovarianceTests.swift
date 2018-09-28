@@ -1,5 +1,6 @@
 import XCTest
 @testable import NDArray
+import TestHelper
 
 class CovarianceTests: XCTestCase {
 

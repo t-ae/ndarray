@@ -1,7 +1,8 @@
 import XCTest
 import NDArray
+import TestHelper
 
-#if !SWIFT_PACKAGE
+#if !DEBUG
 class IrisClassificationExample: XCTestCase {
 
     func testLogisticRegression() {

@@ -21,10 +21,16 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "NDArray",
-            dependencies: ["Xorswift"],
-            path: "Sources"),
+            dependencies: ["Xorswift"]),
+        .target(
+            name: "TestHelper",
+            dependencies: ["NDArray"],
+            path: "Tests/TestHelper"),
         .testTarget(
             name: "NDArrayTests",
-            dependencies: ["NDArray"]),
+            dependencies: ["NDArray", "TestHelper"]),
+        .testTarget(
+            name: "PerformanceTests",
+            dependencies: ["NDArray", "TestHelper"]),
     ]
 )

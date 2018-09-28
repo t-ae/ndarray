@@ -1,5 +1,6 @@
 import XCTest
 import NDArray
+import TestHelper
 
 class LinearAlgebraTests: XCTestCase {
 

@@ -1,6 +1,8 @@
 import XCTest
 import NDArray
+import TestHelper
 
+#if !DEBUG
 class HamiltonianMonteCarloExample: XCTestCase {
     func testHamiltonianMonteCarlo() {
         
@@ -35,8 +37,8 @@ class HamiltonianMonteCarloExample: XCTestCase {
 //            print("\(row[0].asScalar()), \(row[1].asScalar())")
 //        }
     }
-
 }
+#endif
 
 private let mu = NDArray([[30], [0]])
 private let sigma = NDArray([[1, 0.5],

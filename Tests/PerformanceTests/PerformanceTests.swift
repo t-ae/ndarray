@@ -2,7 +2,7 @@ import XCTest
 import Accelerate
 @testable import NDArray
 
-#if !SWIFT_PACKAGE
+#if !DEBUG
 class PerformanceTests: XCTestCase {
     
     func testAsContiguousArray() {
