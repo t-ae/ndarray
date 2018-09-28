@@ -58,6 +58,6 @@ func testGradientDescent() {
 >elapsed time: 0.166108965873718sec  s
 
 ## Examples
-- [Linear Regression with Gradient Decsent (& Normal Equation)](https://github.com/t-ae/ndarray/blob/master/Tests/NDArrayTests/GradientDescentExample.swift)
-- [Classification of iris dataset with Neural Network](https://github.com/t-ae/ndarray/blob/master/Tests/NDArrayTests/IrisClassificationExample.swift)
-- [Sampling from 2D normal distributon with Hamiltonian Monte Carlo](https://github.com/t-ae/ndarray/blob/master/Tests/NDArrayTests/HamiltonianMonteCarloExample.swift)
+- [Linear Regression with Gradient Decsent (& Normal Equation)](https://github.com/t-ae/ndarray/blob/master/Tests/PerformanceTests/GradientDescentExample.swift)
+- [Classification of iris dataset with Neural Network](https://github.com/t-ae/ndarray/blob/master/Tests/PerformanceTests/IrisClassificationExample.swift)
+- [Sampling from 2D normal distributon with Hamiltonian Monte Carlo](https://github.com/t-ae/ndarray/blob/master/Tests/PerformanceTests/HamiltonianMonteCarloExample.swift)
