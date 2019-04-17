@@ -29,6 +29,9 @@ func broadcast(_ lhs: NDArray, _ rhs: NDArray) -> (NDArray, NDArray) {
         }
     }
     
+    // FIXME: [SR-10230](https://bugs.swift.org/browse/SR-10230)
+    precondition(rhs.strides.count >= 0 && rhs.shape.count >= 0)
+    
     return (lhs, rhs)
 }
 
